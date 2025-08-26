@@ -74,6 +74,7 @@ const LaboratoryRoomPage = () => {
         currentPage: 1,
         perPage: 9999,
         searchTerm: '',
+        filter_study_program:0,
         setTotalPages() {},
         setTotalItems() {},
         role: 'Laboran',

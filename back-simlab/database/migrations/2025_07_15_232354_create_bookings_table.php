@@ -15,15 +15,20 @@ return new class extends Migration
             $table->id();
             $table->foreignId('academic_year_id')->constrained('tahun_akademiks')->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('laboran_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->foreignId('ruangan_laboratorium_id')->nullable()->constrained()->onDelete('cascade');
             $table->char('phone_number', 14);
             $table->string('purpose');
-            $table->string('supporting_file');
-            $table->string('supervisor');
-            $table->string('supervisor_email');
+            $table->string('supporting_file')->nullable();
+            $table->string('activity_name');
+            $table->string('supervisor')->nullable();
+            $table->string('supervisor_email')->nullable();
             $table->dateTime('start_time');
             $table->dateTime('end_time');
             $table->enum('status', ['draft', 'pending', 'approved', 'rejected']);
             $table->enum('booking_type', ['room', 'room_n_equipment', 'equipment']);
+            $table->integer('total_participant');
+            $table->text('participant_list')->nullable();
             $table->timestamps();
         });
     }

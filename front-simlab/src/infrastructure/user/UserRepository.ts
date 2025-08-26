@@ -14,7 +14,7 @@ export class UserRepository implements IUserRepository {
             }, {} as Record<string, string>)
         ).toString();
 
-        const response = await fetchApi(`/user?${queryString}`, { method: 'GET' });
+        const response = await fetchApi(`/users?${queryString}`, { method: 'GET' });
         const json = await response.json();
 
         if (response.ok) {
@@ -29,7 +29,7 @@ export class UserRepository implements IUserRepository {
     }
 
     async createData(data: UserInputDTO): Promise<ApiResponse> {
-        const response = await fetchApi('/user', {
+        const response = await fetchApi('/users', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -42,7 +42,7 @@ export class UserRepository implements IUserRepository {
     }
 
     async updateData(id: number, data: UserInputDTO): Promise<ApiResponse> {
-        const response = await fetchApi(`/user/${id}`, {
+        const response = await fetchApi(`/users/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
@@ -55,7 +55,7 @@ export class UserRepository implements IUserRepository {
         throw json
     }
     async deleteData(id: number): Promise<ApiResponse> {
-        const response = await fetchApi(`/user/${id}`, {
+        const response = await fetchApi(`/users/${id}`, {
             method: 'DELETE',
         });
 
@@ -68,7 +68,7 @@ export class UserRepository implements IUserRepository {
     }
 
     async restoreToDosen(id: number): Promise<ApiResponse> {
-        const response = await fetchApi(`/user/${id}/restore-dosen`, {
+        const response = await fetchApi(`/users/${id}/restore-dosen`, {
             method: 'PUT',
         });
 

@@ -158,7 +158,7 @@ const TestingTypePage = () => {
                 data={testingType}
                 dataId={id}
                 handleSave={handleSave}
-                title={type == 'Add' ? 'Tambah tahun akademik' : 'Edit tahun akademik'}
+                title={type == 'Add' ? 'Tambah jenis pengujian' : 'Edit jenis pengujian'}
             />
         </>
     )

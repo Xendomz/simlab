@@ -41,7 +41,7 @@ export function NavMain({
         {items.map((item) => {
           const hasSubItems = item.items && item.items.length > 0
           const isOpen = item.items?.some((sub) => pathname.startsWith(sub.url)) ?? false
-          const isItemActive = pathname === item.url
+          const isItemActive = item.is_end ? pathname === item.url : pathname.startsWith(item.url)
 
           if (hasSubItems) {
             return (
@@ -53,7 +53,7 @@ export function NavMain({
               >
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={item.title}>
+                    <SidebarMenuButton tooltip={item.title} className="h-fit">
                       {item.icon && <item.icon />}
                       <span>{item.title}</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />

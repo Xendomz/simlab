@@ -162,7 +162,7 @@ const LaboratoryEquipmentPage = () => {
             <div className="flex flex-1 w-full flex-col gap-4 p-4 pt-0" ref={sectionRef}>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Menu Ruangan Laboratorium</CardTitle>
+                        <CardTitle>Menu Alat Laboratorium</CardTitle>
                         <CardAction>
                             <Button variant={"default"} onClick={() => openModal('Add')}>
                                 Tambah

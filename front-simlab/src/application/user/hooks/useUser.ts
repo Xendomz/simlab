@@ -40,10 +40,10 @@ export const useUser = ({
         setIsLoading(false)
     }, [currentPage, perPage, searchTerm, filter_study_program, role])
 
-    const create = (dto: UserInputDTO) => service.createData(dto)
-    const update = (id: number, dto: UserInputDTO) => service.updateData(id, dto)
-    const remove = (id: number) => service.deleteData(id)
-    const restoreToDosen = (id: number) => service.restoreToDosen(id)
+    const create = async (dto: UserInputDTO) => await service.createData(dto)
+    const update = async (id: number, dto: UserInputDTO) => await service.updateData(id, dto)
+    const remove = async (id: number) => await service.deleteData(id)
+    const restoreToDosen = async (id: number) => await service.restoreToDosen(id)
 
     return {
         user,

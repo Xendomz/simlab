@@ -48,7 +48,7 @@ const Table = <T,>({
                 key="first"
                 onClick={() => handlePageChange(1)}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 mx-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-white text-blue-600 hover:bg-blue-50'}`}
+                className={`px-3 py-1 mx-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-white text-primary hover:bg-primary/50 hover:text-white'}`}
             >
                 1
             </button>
@@ -69,7 +69,7 @@ const Table = <T,>({
                 <button
                     key={i}
                     onClick={() => handlePageChange(i)}
-                    className={`px-3 py-1 mx-1 rounded ${currentPage === i ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'}`}
+                    className={`px-3 py-1 mx-1 rounded ${currentPage === i ? 'bg-primary text-white' : 'bg-white text-primary hover:bg-primary/50 hover:text-white'}`}
                 >
                     {i}
                 </button>
@@ -88,7 +88,7 @@ const Table = <T,>({
                     key="last"
                     onClick={() => handlePageChange(totalPages)}
                     disabled={currentPage === totalPages}
-                    className={`px-3 py-1 mx-1 rounded ${currentPage === totalPages ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-50'}`}
+                    className={`px-3 py-1 mx-1 rounded ${currentPage === totalPages ? 'bg-primary text-white' : 'bg-white text-primary hover:bg-primary/50 hover:text-white'}`}
                 >
                     {totalPages}
                 </button>

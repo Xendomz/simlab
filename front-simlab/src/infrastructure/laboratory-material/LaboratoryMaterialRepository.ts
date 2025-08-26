@@ -14,7 +14,7 @@ export class LaboratoryMaterialRepository implements ILaboratoryMaterialReposito
             }, {} as Record<string, string>)
         ).toString();
 
-        const response = await fetchApi(`/laboratory-material?${queryString}`, { method: 'GET' });
+        const response = await fetchApi(`/laboratory-materials?${queryString}`, { method: 'GET' });
         const json = await response.json();
 
         if (response.ok) {
@@ -28,7 +28,7 @@ export class LaboratoryMaterialRepository implements ILaboratoryMaterialReposito
     }
 
     async createData(data: LaboratoryMaterialInputDTO): Promise<ApiResponse> {
-        const response = await fetchApi('/laboratory-material', {
+        const response = await fetchApi('/laboratory-materials', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -41,7 +41,7 @@ export class LaboratoryMaterialRepository implements ILaboratoryMaterialReposito
     }
 
     async updateData(id: number, data: LaboratoryMaterialInputDTO): Promise<ApiResponse> {
-        const response = await fetchApi(`/laboratory-material/${id}`, {
+        const response = await fetchApi(`/laboratory-materials/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
@@ -54,7 +54,7 @@ export class LaboratoryMaterialRepository implements ILaboratoryMaterialReposito
         throw json
     }
     async deleteData(id: number): Promise<ApiResponse> {
-        const response = await fetchApi(`/laboratory-material/${id}`, {
+        const response = await fetchApi(`/laboratory-materials/${id}`, {
             method: 'DELETE',
         });
 

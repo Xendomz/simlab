@@ -1,7 +1,7 @@
 import { MajorRepository } from "@/infrastructure/major/MajorReposistory";
-import { MajorInputDTO, MajorTableParam } from "../dto/MajorDTO";
 import { MajorView } from "./MajorView";
 import { PaginatedResponse } from "@/shared/Types";
+import { MajorInputDTO, MajorTableParam } from "./dto/MajorDTO";
 
 export class MajorService {
     private readonly majorRepository = new MajorRepository()

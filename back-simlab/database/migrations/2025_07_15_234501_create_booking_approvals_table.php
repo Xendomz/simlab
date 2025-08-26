@@ -14,9 +14,11 @@ return new class extends Migration
         Schema::create('booking_approvals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('booking_id')->constrained()->onDelete('cascade');
-            $table->enum('role', ['Kepala Lab Terpadu', 'Laboran', 'Mahasiswa', 'Pihak Luar']);
+            $table->enum('role', ['Peminjam', 'Kepala Lab Terpadu', 'Laboran']);
             $table->foreignId('approver_id')->constrained('users')->onDelete('cascade');
             $table->boolean('approved');
+            $table->string('information')->nullable();
+            $table->boolean('is_allowed_offsite')->default(0);
             $table->timestamps();
         });
     }

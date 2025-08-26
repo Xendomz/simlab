@@ -15,7 +15,24 @@ class AlatLaboratoriumController extends BaseController
     public function index(Request $request)
     {
         try {
-            $query = AlatLaboratorium::query()->with('ruanganLaboratorium');
+            // If the authenticated user is NOT an admin, limit the columns returned
+            // Adjust the comparison as needed if you use a role/permission package (e.g. hasRole('Admin'))
+            $user = auth()->user();
+            $rolesToRestrict = ['mahasiswa', 'dosen', 'pihak_luar'];
+            if (in_array($user->role, $rolesToRestrict)) {
+                $query = AlatLaboratorium::query()->with('ruanganLaboratorium');
+
+                $publicColumns = [
+                    'id',
+                    'ruangan_laboratorium_id',
+                    'equipment_name',
+                    'quantity',
+                    'unit',
+                ];
+                $query->select($publicColumns);
+            } else {
+                $query = AlatLaboratorium::query()->with(['ruanganLaboratorium:id,name']);
+            }
 
             if ($request->filter_laboratory_room) {
                 $query->where('ruangan_laboratorium_id', $request->filter_laboratory_room);
@@ -54,7 +71,7 @@ class AlatLaboratoriumController extends BaseController
             $data = $request->all();
 
             // Pass existing path to delete and replace if new file uploaded
-            $data['photo'] = $this->storePhoto($request, 'alat-laboratorium');
+            $data['photo'] = $this->storeFile($request, 'photo', 'alat-laboratorium');
 
             $laboratory_equipment = AlatLaboratorium::create($data);
 
@@ -71,7 +88,7 @@ class AlatLaboratoriumController extends BaseController
             $data = $request->all();
 
             // Pass existing path to delete and replace if new file uploaded
-            $data['photo'] = $this->storePhoto($request, 'alat-laboratorium', $laboratory_equipment->photo);
+            $data['photo'] = $this->storeFile($request, 'photo',  'alat-laboratorium', $laboratory_equipment->photo);
 
             $laboratory_equipment->update($data);
 

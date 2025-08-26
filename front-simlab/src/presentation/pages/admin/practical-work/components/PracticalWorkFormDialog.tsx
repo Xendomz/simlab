@@ -3,6 +3,7 @@ import { PracticalWorkView } from '@/application/practical-work/PracticalWorkVie
 import { StudyProgramView } from '@/application/study-program/StudyProgramView'
 import { Button } from '@/presentation/components/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select'
 import { useValidationErrors } from '@/presentation/hooks/useValidationError'
 import { ApiResponse } from '@/shared/Types'
 import React, { useEffect, useState } from 'react'
@@ -40,10 +41,8 @@ const PracticalWorkFormDialog: React.FC<PracticalWorkFormDialogProps> = ({
 
     useEffect(() => {
         if (dataId) {
-
             const selectedData = data.find((data: PracticalWorkView) => data.id == dataId)
-            console.log(selectedData);
-            
+
             setFormData({
                 name: selectedData.name,
                 prodi_id: selectedData.studyProgramId,
@@ -112,22 +111,25 @@ const PracticalWorkFormDialog: React.FC<PracticalWorkFormDialogProps> = ({
                         <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor='prodi_id'>
                             Nama Prodi <span className="text-red-500">*</span>
                         </label>
-                        <select
-                            id='prodi_id'
-                            name='prodi_id'
-                            value={formData['prodi_id'] || ''}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 leading-tight text-gray-700 border border-gray-300 rounded shadow appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">
-                                -- Pilih Prodi --
-                            </option>
-                            {studyProgram?.map((option) => (
-                                <option key={option.id} value={option.id}>
-                                    {option.name}
-                                </option>
-                            ))}
-                        </select>
+                        <Select name='prodi_id' value={formData['prodi_id'] ? String(formData['prodi_id']) : ''} onValueChange={(value) =>
+                            handleChange({
+                                target: {
+                                    name: 'prodi_id',
+                                    value: value
+                                }
+                            } as React.ChangeEvent<HTMLSelectElement>)}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Pilih Prodi" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Prodi</SelectLabel>
+                                    {studyProgram?.map((option) => (
+                                        <SelectItem key={option.id} value={option.id.toString()}>{option.name}</SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                         {errors['prodi_id'] && (
                             <p className="mt-1 text-xs italic text-red-500">{errors['prodi_id']}</p>
                         )}

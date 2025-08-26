@@ -19,7 +19,7 @@ class LaboratoryMaterialRequest extends ApiRequest
      */
     public function rules(): array
     {
-        $id = $this->route('id'); // useful for update
+        $id = $this->route('laboratory_material'); // useful for update
         $rules = [
             'code' => "required|string|max:50|unique:bahan_laboratoria,code," . ($id ?? 'NULL') . ",id",
             'ruangan_laboratorium_id' => 'required',

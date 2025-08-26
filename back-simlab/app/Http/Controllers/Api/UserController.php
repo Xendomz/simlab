@@ -58,6 +58,14 @@ class UserController extends BaseController
     public function store(UserRequest $request)
     {
         try {
+            // Prevent duplicate Kepala Laboratorium Terpadu
+            if ($request->role === 'Kepala Lab Terpadu') {
+                $existing = User::where('role', 'Kepala Lab Terpadu')->first();
+                if ($existing) {
+                    return $this->sendError('Sudah ada user dengan role Kepala Laboratorium Terpadu.', [], 422);
+                }
+            }
+
             if ($this->checkIsSingleRoleExist($request->role, $request->prodi_id)) {
                 return $this->sendError('Sudah ada user dengan prodi ini di role tersebut.', [], 400);
             }
@@ -79,6 +87,14 @@ class UserController extends BaseController
 
             if (!$request->password) {
                 unset($data['password']);
+            }
+
+            // Prevent duplicate Kepala Laboratorium Terpadu
+            if ($request->role === 'Kepala Lab Terpadu') {
+                $existing = User::where('role', 'Kepala Lab Terpadu')->where('id', '!=', $user->id)->first();
+                if ($existing) {
+                    return $this->sendError('Sudah ada user dengan role Kepala Laboratorium Terpadu.', [], 422);
+                }
             }
 
             if ($this->checkIsSingleRoleExist($request->role, $request->prodi_id, $user)) {

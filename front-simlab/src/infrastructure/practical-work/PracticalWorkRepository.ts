@@ -14,7 +14,7 @@ export class PracticalWorkRepository implements IPracticalWorkRepository {
             }, {} as Record<string, string>)
         ).toString();
 
-        const response = await fetchApi(`/practical-work?${queryString}`, { method: 'GET' });
+        const response = await fetchApi(`/practical-works?${queryString}`, { method: 'GET' });
         const json = await response.json();
 
         if (response.ok) {
@@ -29,7 +29,7 @@ export class PracticalWorkRepository implements IPracticalWorkRepository {
     }
 
     async createData(data: Record<string, any>): Promise<ApiResponse<PracticalWork>> {
-        const response = await fetchApi('/practical-work', {
+        const response = await fetchApi('/practical-works', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -42,7 +42,7 @@ export class PracticalWorkRepository implements IPracticalWorkRepository {
     }
 
     async updateData(id: number, data: Record<string, any>): Promise<ApiResponse<PracticalWork>> {
-        const response = await fetchApi(`/practical-work/${id}`, {
+        const response = await fetchApi(`/practical-works/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
@@ -56,7 +56,7 @@ export class PracticalWorkRepository implements IPracticalWorkRepository {
     }
 
     async deleteData(id: number): Promise<ApiResponse> {
-        const response = await fetchApi(`/practical-work/${id}`, {
+        const response = await fetchApi(`/practical-works/${id}`, {
             method: 'DELETE',
         });
 

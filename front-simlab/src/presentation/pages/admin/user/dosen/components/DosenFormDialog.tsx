@@ -86,6 +86,7 @@ const DosenFormDialog: React.FC<DosenFormDialogProps> = ({
             const error = e as ApiResponse
             if (error.errors) {
                 processErrors(error.errors);
+                
             }
         } finally {
             setIsSubmitting(false);
@@ -205,8 +206,9 @@ const DosenFormDialog: React.FC<DosenFormDialogProps> = ({
                             <SelectContent>
                                 <SelectGroup>
                                     <SelectLabel>Role</SelectLabel>
-                                    <SelectItem value="Dosen">Dosen</SelectItem>
+                                    <SelectItem value="Kepala Lab Terpadu">Kepala Lab Terpadu</SelectItem>
                                     <SelectItem value="Kepala Lab Unit">Kepala Lab Unit</SelectItem>
+                                    <SelectItem value="Dosen">Dosen</SelectItem>
                                     <SelectItem value="Koorprodi">Koorprodi</SelectItem>
                                 </SelectGroup>
                             </SelectContent>

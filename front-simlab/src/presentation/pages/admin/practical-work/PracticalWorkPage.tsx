@@ -15,6 +15,7 @@ import { PracticalWorkInputDTO } from "@/application/practical-work/dto/Practica
 import { toast } from "sonner";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import PracticalWorkFormDialog from "./components/PracticalWorkFormDialog";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 
 const PracticalWorkPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -67,14 +68,12 @@ const PracticalWorkPage = () => {
 
     const handleFilterStudyProgram = (e: ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
-        console.log(value);
-
         setSelectedStudyProgram(value ? Number(value) : 0);
         setCurrentPage(1);
     }
 
     const {
-        practialWork,
+        practicalWork,
         isLoading,
         getData,
         create,
@@ -166,25 +165,30 @@ const PracticalWorkPage = () => {
                     <CardContent>
                         <div className="w-full mb-3 md:w-1/3">
                             <div className="relative">
-                                <select
-                                    id='prodi_id'
-                                    name='prodi_id'
-                                    onChange={handleFilterStudyProgram}
-                                    className="w-full px-3 py-2 leading-tight text-gray-700 border border-gray-300 rounded shadow appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">
-                                        -- Pilih Prodi --
-                                    </option>
-                                    {studyProgram?.map((option) => (
-                                        <option key={option.id} value={option.id}>
-                                            {option.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                <Select name='prodi_id' onValueChange={(value) =>
+                                    handleFilterStudyProgram({
+                                        target: {
+                                            name: 'prodi_id',
+                                            value: value
+                                        }
+                                    } as React.ChangeEvent<HTMLSelectElement>)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Pilih Prodi" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Prodi</SelectLabel>
+                                            <SelectItem value={"0"}>Semua</SelectItem>
+                                            {studyProgram?.map((option) => (
+                                                <SelectItem key={option.id} value={option.id.toString()}>{option.name}</SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                         <Table
-                            data={practialWork}
+                            data={practicalWork}
                             columns={PracticalWorkColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -202,7 +206,7 @@ const PracticalWorkPage = () => {
             <PracticalWorkFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={practialWork}
+                data={practicalWork}
                 studyProgram={studyProgram}
                 dataId={id}
                 handleSave={handleSave}

@@ -14,7 +14,7 @@ export class LaboratoryEquipmentRepository implements ILaboratoryEquipmentReposi
                 }, {} as Record<string, string>)
             ).toString();
     
-            const response = await fetchApi(`/laboratory-equipment?${queryString}`, { method: 'GET' });
+            const response = await fetchApi(`/laboratory-equipments?${queryString}`, { method: 'GET' });
             const json = await response.json();
     
             if (response.ok) {
@@ -29,7 +29,7 @@ export class LaboratoryEquipmentRepository implements ILaboratoryEquipmentReposi
     
         async createData(data: LaboratoryEquipmentInputDTO): Promise<ApiResponse> {
             const bodyFormData = jsonToFormData(data, 'POST')
-            const response = await fetchApi('/laboratory-equipment', {
+            const response = await fetchApi('/laboratory-equipments', {
                 method: 'POST',
                 body: bodyFormData,
             });
@@ -43,7 +43,7 @@ export class LaboratoryEquipmentRepository implements ILaboratoryEquipmentReposi
     
         async updateData(id: number, data: LaboratoryEquipmentInputDTO): Promise<ApiResponse> {
             const bodyFormData = jsonToFormData(data, 'PUT')
-            const response = await fetchApi(`/laboratory-equipment/${id}`, {
+            const response = await fetchApi(`/laboratory-equipments/${id}`, {
                 method: 'POST',
                 body: bodyFormData,
             });
@@ -57,7 +57,7 @@ export class LaboratoryEquipmentRepository implements ILaboratoryEquipmentReposi
         }
         
         async deleteData(id: number): Promise<ApiResponse> {
-            const response = await fetchApi(`/laboratory-equipment/${id}`, {
+            const response = await fetchApi(`/laboratory-equipments/${id}`, {
                 method: 'DELETE',
             });
     

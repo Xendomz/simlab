@@ -14,7 +14,7 @@ export class TestingTypeRepository implements ITestingTypeRepository {
             }, {} as Record<string, string>)
         ).toString();
 
-        const response = await fetchApi(`/testing-type?${queryString}`, { method: 'GET' });
+        const response = await fetchApi(`/testing-types?${queryString}`, { method: 'GET' });
         const json = await response.json();
 
         if (response.ok) {
@@ -29,7 +29,7 @@ export class TestingTypeRepository implements ITestingTypeRepository {
     }
 
     async createData(data: TestingTypeInputDTO): Promise<ApiResponse> {
-        const response = await fetchApi('/testing-type', {
+        const response = await fetchApi('/testing-types', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -42,7 +42,7 @@ export class TestingTypeRepository implements ITestingTypeRepository {
     }
 
     async updateData(id: number, data: TestingTypeInputDTO): Promise<ApiResponse> {
-        const response = await fetchApi(`/testing-type/${id}`, {
+        const response = await fetchApi(`/testing-types/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
@@ -55,7 +55,7 @@ export class TestingTypeRepository implements ITestingTypeRepository {
         throw json
     }
     async deleteData(id: number): Promise<ApiResponse> {
-        const response = await fetchApi(`/testing-type/${id}`, {
+        const response = await fetchApi(`/testing-types/${id}`, {
             method: 'DELETE',
         });
 

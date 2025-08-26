@@ -115,11 +115,15 @@ const KepalaLabUnitPage = () => {
     }
 
     const handleSave = async (formData: UserInputDTO): Promise<void> => {
-        if (!id) return
-        const res = await update(id, formData)
-        toast.success(res.message)
-        getData()
-        setIsOpen(false)
+        try {
+            if (!id) return
+            const res = await update(id, formData)
+            toast.success(res.message)
+            getData()
+            setIsOpen(false)
+        } catch (error: any) {
+            toast.error(error.message)
+        }
     }
 
     const handleRestoreDosen = async () => {

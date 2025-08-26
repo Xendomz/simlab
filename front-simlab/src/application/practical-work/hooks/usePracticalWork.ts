@@ -18,7 +18,7 @@ export const usePracticalWork = ({
     setTotalPages: (v: number) => void
     setTotalItems: (v: number) => void
 }) => {
-    const [practialWork, setPractialWork] = useState<PracticalWorkView[]>([])
+    const [practicalWork, setPracticalWork] = useState<PracticalWorkView[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const service = new PracticalWorkService()
 
@@ -30,7 +30,7 @@ export const usePracticalWork = ({
             search: searchTerm,
             filter_study_program: filter_study_program
         })
-        setPractialWork(response.data ?? [])
+        setPracticalWork(response.data ?? [])
         setTotalPages(response.last_page ?? 0)
         setTotalItems(response.total ?? 0)
         setIsLoading(false)
@@ -41,7 +41,7 @@ export const usePracticalWork = ({
     const remove = (id: number) => service.deleteData(id)
 
     return {
-        practialWork,
+        practicalWork,
         isLoading,
         getData,
         create,

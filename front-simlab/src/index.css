@@ -187,4 +187,12 @@
   .scrollbar-hidden::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Edge */
   }
+
+  /* Explicit horizontal scrollbar hide helper */
+  .hide-scroll-x {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scroll-x::-webkit-scrollbar { display: none; }
 }

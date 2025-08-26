@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthProvider } from "./application/context/AuthContext";
 import { Login } from "./presentation/pages/LoginPage";
 import AdminLayout from "./presentation/layouts/AdminLayout";
@@ -19,6 +19,20 @@ import LaboratoryMaterialPage from "./presentation/pages/admin/laboratory-materi
 import KoorprodiPage from "./presentation/pages/admin/user/koorprodi/KoorprodiPage";
 import DosenPage from "./presentation/pages/admin/user/dosen/DosenPage";
 import KepalaLabUnitPage from "./presentation/pages/admin/user/kepala-lab-unit/KepalaLabUnitPage";
+import { ProtectedRoute } from "./application/routes/ProtectedRoute";
+import BookingPage from "./presentation/pages/admin/booking/BookingPage";
+import BookingCreatePage from "./presentation/pages/admin/booking/BookingCreatePage";
+import BookingManagePage from "./presentation/pages/admin/booking/BookingManagePage";
+import { BookingDetailPage } from "./presentation/pages/admin/booking/BookingDetailPage";
+import NotFound404Page from "./presentation/pages/errors/NotFound404Page";
+import BookingReportPage from "./presentation/pages/report/booking/BookingReportPage";
+import KepalaLabPage from "./presentation/pages/admin/user/kepala-lab/KepalaLabPage";
+import BookingVerification from "./presentation/pages/admin/booking/BookingVerification";
+import PracticumSchedulingPage from "./presentation/pages/admin/practicum-scheduling/PracticumSchedulingPage";
+import PracticumSchedulingCreatePage from "./presentation/pages/admin/practicum-scheduling/PracticumSchedulingCreatePage";
+import PracticumSchedulingDetailPage from "./presentation/pages/admin/practicum-scheduling/PracticumSchedulingDetailPage";
+import PracticumSchedulingManagePage from "./presentation/pages/admin/practicum-scheduling/PracticumSchedulingManagePage";
+import PracticumSchedulingVerification from "./presentation/pages/admin/practicum-scheduling/PracticumSchedulingVerification";
 
 export const router = createBrowserRouter([
     {
@@ -27,80 +41,277 @@ export const router = createBrowserRouter([
     },
     {
         path: '/login',
-        element: <AuthProvider><Login /></AuthProvider>
+        element: (
+            <AuthProvider>
+                <Login />
+            </AuthProvider>
+        )
     },
     {
         path: '/register',
-        element: <AuthProvider><RegisterPage /></AuthProvider>
+        element: (
+            <AuthProvider>
+                <RegisterPage />
+            </AuthProvider>
+        )
     },
     {
         path: '/panel',
-        element: <AuthProvider><AdminLayout /></AuthProvider>,
+        element: (
+            <AuthProvider>
+                <AdminLayout />
+            </AuthProvider>
+        ),
         children: [
             {
                 path: '',
-                element: <Dashboard />
+                element: (
+                    <Dashboard />
+                )
             },
             {
                 path: 'tahun-akademik',
-                element: <AcademicYearPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <AcademicYearPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'jenis-pengujian',
-                element: <TestingTypePage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <TestingTypePage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'jurusan',
-                element: <MajorPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <MajorPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'prodi',
-                element: <StudyProgramPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <StudyProgramPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'praktikum',
-                element: <PracticalWorkPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <PracticalWorkPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'ruangan-laboratorium',
-                element: <LaboratoryRoomPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin', 'Laboran']}>
+                        <LaboratoryRoomPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'alat-laboratorium',
-                element: <LaboratoryEquipmentPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin', 'Laboran']}>
+                        <LaboratoryEquipmentPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'bahan-laboratorium',
-                element: <LaboratoryMaterialPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin', 'Laboran']}>
+                        <LaboratoryMaterialPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'admin',
-                element: <AdminPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <AdminPage />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: 'kepala-lab-terpadu',
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <KepalaLabPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'koorprodi',
-                element: <KoorprodiPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <KoorprodiPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'kepala-lab-unit',
-                element: <KepalaLabUnitPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <KepalaLabUnitPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'dosen',
-                element: <DosenPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <DosenPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'laboran',
-                element: <LaboranPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <LaboranPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'mahasiswa',
-                element: <MahasiswaPage />
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <MahasiswaPage />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: 'pihak-luar',
-                element: <PihakLuarPage />
-            }
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <PihakLuarPage />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: 'peminjaman',
+                children: [
+                    {
+                        path: '',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Dosen', 'Mahasiswa', 'Kepala Lab Terpadu', 'Koorprodi']}>
+                                <BookingPage />
+                            </ProtectedRoute>
+                        )
+                    },
+                    {
+                        path: 'create',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Dosen', 'Mahasiswa', 'Kepala Lab Terpadu', 'Koorprodi']}>
+                                <BookingCreatePage />
+                            </ProtectedRoute>
+                        )
+                    },
+                    {
+                        path: ':id/manage',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Dosen', 'Mahasiswa', 'Kepala Lab Terpadu', 'Koorprodi']}>
+                                <BookingManagePage />
+                            </ProtectedRoute>
+                        )
+                    },
+                    {
+                        path: ':id/detail',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Admin', 'Dosen', 'Mahasiswa', 'Kepala Lab Terpadu', 'Laboran']}>
+                                <BookingDetailPage />
+                            </ProtectedRoute>
+                        )
+                    },
+                    {
+                        path: 'verif',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Kepala Lab Terpadu', 'Laboran']}>
+                                <BookingVerification />
+                            </ProtectedRoute>
+                        )
+                    },
+                ],
+            },
+            {
+                path: 'penjadwalan-praktikum',
+                children: [
+                    {
+                        path: '',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Dosen', 'Kepala Lab Terpadu']}>
+                                <PracticumSchedulingPage />
+                            </ProtectedRoute>
+                        )
+                    },
+                    {
+                        path: 'create',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Dosen', 'Kepala Lab Terpadu', 'Koorprodi']}>
+                                <PracticumSchedulingCreatePage />
+                            </ProtectedRoute>
+                        )
+                    },
+                    {
+                        path: ':id/manage',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Dosen', 'Mahasiswa', 'Kepala Lab Terpadu', 'Koorprodi']}>
+                                <PracticumSchedulingManagePage />
+                            </ProtectedRoute>
+                        )
+                    },
+                    {
+                        path: ':id/detail',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Dosen', 'Kepala Lab Terpadu', 'Laboran', 'Koorprodi']}>
+                                <PracticumSchedulingDetailPage />
+                            </ProtectedRoute>
+                        )
+                    },
+                    {
+                        path: 'verif',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Kepala Lab Terpadu', 'Laboran', 'Koorprodi']}>
+                                <PracticumSchedulingVerification />
+                            </ProtectedRoute>
+                        )
+                    },
+                ],
+            },
+            {
+                path: 'laporan',
+                children: [
+                    {
+                        path: '',
+                        element: (
+                            <Navigate to={'/404'} replace/>
+                        )
+                    },
+                    {
+                        path: 'peminjaman',
+                        element: (
+                            <ProtectedRoute allowedRoles={['Admin', 'Laboran']}>
+                                <BookingReportPage />
+                            </ProtectedRoute>
+                        )
+                    },
+                ],
+            },
         ]
-    }
+    },
+    {
+        path: '*',
+        element: (
+            <NotFound404Page />
+        )
+    },
 ])

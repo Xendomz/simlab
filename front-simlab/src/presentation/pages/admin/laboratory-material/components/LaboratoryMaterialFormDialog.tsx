@@ -37,7 +37,7 @@ const LaboratoryMaterialFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
 }) => {
     const [formData, setFormData] = useState<LaboratoryMaterialInputDTO>({
         code: '',
-        ruangan_laboratorium_id: 0,
+        ruangan_laboratorium_id: undefined,
         material_name: '',
         brand: '',
         stock: 0,
@@ -74,7 +74,7 @@ const LaboratoryMaterialFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
         } else {
             setFormData({
                 code: '',
-                ruangan_laboratorium_id: 0,
+                ruangan_laboratorium_id: undefined,
                 material_name: '',
                 brand: '',
                 stock: 0,

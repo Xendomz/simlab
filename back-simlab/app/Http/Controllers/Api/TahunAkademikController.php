@@ -60,7 +60,6 @@ class TahunAkademikController extends BaseController
     public function store(AcademicYearRequest $request)
     {
         try {
-            dd();
             $academicYear = TahunAkademik::create($request->validated());
             return $this->sendResponse($academicYear, 'Academic Year Created Successfully', 201);
         } catch (\Exception $e) {

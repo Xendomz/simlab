@@ -19,13 +19,14 @@ class UserRequest extends ApiRequest
      */
     public function rules(): array
     {
-        $id = $this->route('id'); // If null = create, if set = update
+        $id = $this->route('user'); // If null = create, if set = update
 
         $rules = [
             'email' => 'required|email|max:191|unique:users,email,' . ($id ?? 'NULL') . ',id',
             'name' => 'required|max:191',
             'password' => ($id ? 'nullable' : 'required') . '|min:8',
             'role' => 'required',
+            'identity_num' => 'nullable|string|max:191',
         ];
 
         if ($this->input('role') === 'Dosen') {
@@ -52,6 +53,9 @@ class UserRequest extends ApiRequest
             'role.required' => 'Peran tidak boleh kosong!',
 
             'prodi_id.required' => 'Prodi tidak boleh kosong!',
+
+            'identity_num.string' => 'Nomor identitas harus berupa teks!',
+            'identity_num.max' => 'Nomor identitas maksimal 191 karakter!',
         ];
     }
 }

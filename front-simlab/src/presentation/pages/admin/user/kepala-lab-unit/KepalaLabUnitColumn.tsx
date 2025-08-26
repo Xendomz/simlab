@@ -1,5 +1,4 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { StudyProgram } from '../../../../../domain/study-program/StudyProgram';
 import { UserView } from '@/application/user/UserView';
 import { Button } from '@/presentation/components/ui/button';
 

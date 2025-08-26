@@ -95,11 +95,9 @@ const LaboratoryEquipmentFormDialog: React.FC<LaboratoryEquipmentFormDialogProps
         const { name, value } = e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
         if (name === 'photo' && (e.target as HTMLInputElement).files) {
-            
             setFormData((prev) => ({ ...prev, photo: (e.target as HTMLInputElement).files ? (e.target as HTMLInputElement).files![0] : null }));
-            console.log((e.target as HTMLInputElement).files ? (e.target as HTMLInputElement).files![0] : false, formData);
         } else {
-            setFormData((prev) => ({ ...prev, photo: value }));
+            setFormData((prev) => ({ ...prev, [name]: value }));
         }
     };
 

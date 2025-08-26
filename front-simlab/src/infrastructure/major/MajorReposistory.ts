@@ -1,4 +1,4 @@
-import { MajorInputDTO, MajorTableParam } from "../../application/dto/MajorDTO";
+import { MajorInputDTO, MajorTableParam } from "@/application/major/dto/MajorDTO";
 import { IMajorReporsitory } from "../../domain/major/IMajorRepository";
 import { Major } from "../../domain/major/Major";
 import { ApiResponse, PaginatedResponse } from "../../shared/Types";
@@ -14,7 +14,7 @@ export class MajorRepository implements IMajorReporsitory {
             }, {} as Record<string, string>)
         ).toString();
 
-        const response = await fetchApi(`/major?${queryString}`, { method: 'GET' });
+        const response = await fetchApi(`/majors?${queryString}`, { method: 'GET' });
         const json = await response.json();
 
         if (response.ok) {
@@ -28,7 +28,7 @@ export class MajorRepository implements IMajorReporsitory {
     }
 
     async createData(data: MajorInputDTO): Promise<ApiResponse> {
-        const response = await fetchApi('/major', {
+        const response = await fetchApi('/majors', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -41,7 +41,7 @@ export class MajorRepository implements IMajorReporsitory {
     }
 
     async updateData(id: number, data: MajorInputDTO): Promise<ApiResponse> {
-        const response = await fetchApi(`/major/${id}`, {
+        const response = await fetchApi(`/majors/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
@@ -54,7 +54,7 @@ export class MajorRepository implements IMajorReporsitory {
         throw json
     }
     async deleteData(id: number): Promise<ApiResponse> {
-        const response = await fetchApi(`/major/${id}`, {
+        const response = await fetchApi(`/majors/${id}`, {
             method: 'DELETE',
         });
 

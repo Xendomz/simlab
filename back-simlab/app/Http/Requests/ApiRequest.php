@@ -11,7 +11,7 @@ abstract class ApiRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
-            'message' => 'The given data was invalid.',
+            'message' => 'Terjadi kesalahan.',
             'errors' => $validator->errors(),
         ], 422));
     }

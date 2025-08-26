@@ -15,8 +15,6 @@ class AuthController extends BaseController
     public function register(RegisterRequest $request)
     {
         $user = User::create($request->validated());
-        // $success['token'] = $user->createToken('api_token')->plainTextToken;
-        // $success['name'] = $user->name;
 
         return $this->sendResponse([], 'Berhasil mendaftar');
     }
@@ -26,7 +24,7 @@ class AuthController extends BaseController
         $credentials = $request->validated();
 
         if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+            $user = User::with('studyProgram')->find(Auth::id());
             $success['token'] =  $user->createToken('api_token')->plainTextToken;
             $success['user'] =  $user;
 
@@ -38,7 +36,8 @@ class AuthController extends BaseController
 
     public function getCurrentUser()
     {
-        return $this->sendResponse(auth('sanctum')->user(), "User Retreive Successfully");
+        $user = User::with('studyProgram')->find(auth('sanctum')->id());
+        return $this->sendResponse($user, "User Retreive Successfully");
     }
 
     public function logout(Request $request)

@@ -14,7 +14,7 @@ export class LaboratoryRoomRepository implements ILaboratoryRoomRepository {
             }, {} as Record<string, string>)
         ).toString();
 
-        const response = await fetchApi(`/laboratory-room?${queryString}`, { method: 'GET' });
+        const response = await fetchApi(`/laboratory-rooms?${queryString}`, { method: 'GET' });
         const json = await response.json();
 
         if (response.ok) {
@@ -29,7 +29,7 @@ export class LaboratoryRoomRepository implements ILaboratoryRoomRepository {
     }
 
     async createData(data: LaboratoryRoomInputDTO): Promise<ApiResponse<LaboratoryRoom>> {
-        const response = await fetchApi('/laboratory-room', {
+        const response = await fetchApi('/laboratory-rooms', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -42,7 +42,7 @@ export class LaboratoryRoomRepository implements ILaboratoryRoomRepository {
     }
 
     async updateData(id: number, data: LaboratoryRoomInputDTO): Promise<ApiResponse<LaboratoryRoom>> {
-        const response = await fetchApi(`/laboratory-room/${id}`, {
+        const response = await fetchApi(`/laboratory-rooms/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
@@ -55,7 +55,7 @@ export class LaboratoryRoomRepository implements ILaboratoryRoomRepository {
         throw json
     }
     async deleteData(id: number): Promise<ApiResponse> {
-        const response = await fetchApi(`/laboratory-room/${id}`, {
+        const response = await fetchApi(`/laboratory-rooms/${id}`, {
             method: 'DELETE',
         });
 

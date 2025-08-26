@@ -38,8 +38,6 @@ const MajorFormDialog: React.FC<MajorFormDialogProps> = ({
 
     useEffect(() => {
         if (dataId) {
-            console.log(dataId);
-            
             const selectedData = data.find((data: MajorView) => data.id == dataId)
             setFormData({
                 name: selectedData.name,

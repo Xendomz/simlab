@@ -15,6 +15,7 @@ import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDia
 import { toast } from "sonner";
 import { StudyProgramInputDTO } from "@/application/study-program/dto/StudyProgramDTO";
 import StudyProgramFormDialog from "./components/StudyProgramFormDialog";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 
 const StudyProgramPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -67,7 +68,6 @@ const StudyProgramPage = () => {
 
     const handleFilterMajor = (e: ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
-        console.log(value);
 
         setSelectedMajor(value ? Number(value) : 0);
         setCurrentPage(1);
@@ -166,21 +166,26 @@ const StudyProgramPage = () => {
                     <CardContent>
                         <div className="w-full mb-3 md:w-1/3">
                             <div className="relative">
-                                <select
-                                    id='prodi_id'
-                                    name='prodi_id'
-                                    onChange={handleFilterMajor}
-                                    className="w-full px-3 py-2 leading-tight text-gray-700 border border-gray-300 rounded shadow appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                >
-                                    <option value="">
-                                        -- Pilih Jurusan --
-                                    </option>
-                                    {major?.map((option) => (
-                                        <option key={option.id} value={option.id}>
-                                            {option.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                <Select name='jurusan_id' onValueChange={(value) =>
+                                    handleFilterMajor({
+                                        target: {
+                                            name: 'jurusan_id',
+                                            value: value
+                                        }
+                                    } as React.ChangeEvent<HTMLSelectElement>)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Pilih Jurusan" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Jurusan</SelectLabel>
+                                            <SelectItem value={"0"}>Semua</SelectItem>
+                                            {major?.map((option, index) => (
+                                                <SelectItem key={index} value={option.id.toString()}>{option.name}</SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                         <Table

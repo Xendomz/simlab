@@ -23,6 +23,7 @@ abstract class BaseController extends Controller
     public function sendError($error, $errorMessage = [], $code = 404)
     {
         $response = [
+            'code' => $code,
             'success' => false,
             'message' => $error
         ];
@@ -34,20 +35,20 @@ abstract class BaseController extends Controller
         return response()->json($response, $code);
     }
 
-    protected function storePhoto(Request $request, $folder_path, $existing_path = null)
+    protected function storeFile($request, $request_name, $folder_path, $existing_path = null)
     {
-        if ($request->hasFile('photo')) {
+        if ($request->hasFile($request_name)) {
             // Delete old photo if exists
             if ($existing_path ) {
-                $this->deletePhoto($existing_path);
+                $this->deleteFile($existing_path);
             }
 
-            $file = $request->file('photo');
+            $file = $request->file($request_name);
             $extension = $file->getClientOriginalExtension();
 
             // Generate unique file name
-            $equipmentName = preg_replace('/[^a-zA-Z0-9_]/', '_', $request->equipment_name);
-            $filename = $equipmentName . '_' . now()->format('Ymd_His') . '.' . $extension;
+            $name = preg_replace('/[^a-zA-Z0-9_]/', '_', $file->getClientOriginalName());
+            $filename = $name . '_' . now()->format('Ymd_His') . '.' . $extension;
 
             // Store the file
             $path = $file->storeAs("public/{$folder_path}", $filename);
@@ -59,7 +60,7 @@ abstract class BaseController extends Controller
         return $existing_path; // return old path if no new file is uploaded
     }
 
-    protected function deletePhoto($path)
+    protected function deleteFile($path)
     {
         if (Storage::exists(str_replace('storage/', 'public/', $path))) {
             Storage::delete(str_replace('storage/', 'public/', $path));

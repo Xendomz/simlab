@@ -49,12 +49,6 @@ export async function fetchApi(endpoint: string, options: RequestOptions = {}) {
         headers
     });
 
-    if (response.status === 401) {
-        StorageManager.clear();
-        window.location.href = '/login';
-        throw new Error('Session expired');
-    }
-
     return response;
 }
 
@@ -66,5 +60,6 @@ export function jsonToFormData(obj: Record<string, any>, method: 'POST' | 'PUT' 
             formData.append(key, value);
         }
     });
+    
     return formData;
 }

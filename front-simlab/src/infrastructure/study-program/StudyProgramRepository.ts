@@ -16,7 +16,7 @@ export class StudyProgramRepository implements IStudyProgramRepository {
             }, {} as Record<string, string>)
         ).toString();
 
-        const response = await fetchApi(`/study-program?${queryString}`, { method: 'GET' });
+        const response = await fetchApi(`/study-programs?${queryString}`, { method: 'GET' });
         const json = await response.json();
 
         if (response.ok) {
@@ -32,7 +32,7 @@ export class StudyProgramRepository implements IStudyProgramRepository {
     }
 
     async createData(data: StudyProgramInputDTO): Promise<ApiResponse> {
-        const response = await fetchApi('/study-program', {
+        const response = await fetchApi('/study-programs', {
             method: 'POST',
             body: JSON.stringify(data),
         });
@@ -45,7 +45,7 @@ export class StudyProgramRepository implements IStudyProgramRepository {
     }
 
     async updateData(id: number, data: StudyProgramInputDTO): Promise<ApiResponse> {
-        const response = await fetchApi(`/study-program/${id}`, {
+        const response = await fetchApi(`/study-programs/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
@@ -59,7 +59,7 @@ export class StudyProgramRepository implements IStudyProgramRepository {
     }
     
     async deleteData(id: number): Promise<ApiResponse> {
-        const response = await fetchApi(`/study-program/${id}`, {
+        const response = await fetchApi(`/study-programs/${id}`, {
             method: 'DELETE',
         });
 
@@ -72,7 +72,7 @@ export class StudyProgramRepository implements IStudyProgramRepository {
     }
 
     async getPublicData(): Promise<ApiResponse<StudyProgram[]>> {
-        const response = await fetchApi(`/pub/study-program`, { method: 'GET' });
+        const response = await fetchApi(`/pub/study-programs`, { method: 'GET' });
         const json = await response.json() as ApiResponse<StudyProgramAPI[]>;
 
         if (!response.ok) {

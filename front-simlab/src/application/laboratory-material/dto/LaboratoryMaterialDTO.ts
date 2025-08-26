@@ -1,6 +1,6 @@
 export interface LaboratoryMaterialInputDTO {
     code: string;
-    ruangan_laboratorium_id: number;
+    ruangan_laboratorium_id: number | undefined;
     material_name: string;
     brand: string;
     stock: number;

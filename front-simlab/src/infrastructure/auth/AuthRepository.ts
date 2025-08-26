@@ -14,11 +14,15 @@ export class AuthRepository implements IAuthRepository {
           token
         });
 
-        const json = await response.json() as ApiResponse<UserApi>
+        const json = await response.json()
         if (response.ok) {
-            if (json.data) {
-                return toDomain(json.data)
-            }
+            const data = json['data'] as UserApi
+            return toDomain(data)
+        }
+
+        if (response.status == 401) {
+            StorageManager.clear()
+            window.location.href = '/login';
         }
         throw json
     }

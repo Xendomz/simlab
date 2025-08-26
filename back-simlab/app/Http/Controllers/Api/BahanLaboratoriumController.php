@@ -51,7 +51,7 @@ class BahanLaboratoriumController extends BaseController
     public function store(LaboratoryMaterialRequest $request)
     {
         try {
-            $data = $request->all();
+            $data = $request->validated();
             $data['purchase_date'] = $this->convertIsoStringToDate($request->purchase_date);
             $data['refill_date'] = now();
             $data['expiry_date'] = $request->expiry_date != 'null' ? $this->convertIsoStringToDate($request->expiry_date) : null;
@@ -67,7 +67,7 @@ class BahanLaboratoriumController extends BaseController
     {
         try {
             $laboratory_material = BahanLaboratorium::findOrFail($id);
-            $data = $request->all();
+            $data = $request->validated();
             $data['refill_date'] = now();
             $data['expiry_date'] = $request->expiry_date != 'null' ? $request->expiry_date : null;
             $laboratory_material->update($data);

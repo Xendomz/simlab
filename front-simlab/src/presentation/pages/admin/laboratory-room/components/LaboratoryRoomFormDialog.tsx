@@ -3,6 +3,7 @@ import { LaboratoryRoomView } from '@/application/laboratory-room/LaboratoryRoom
 import { UserView } from '@/application/user/UserView';
 import { Button } from '@/presentation/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select';
 import { useValidationErrors } from '@/presentation/hooks/useValidationError';
 import { ApiResponse } from '@/shared/Types';
 import React, { useEffect, useState } from 'react'
@@ -40,9 +41,7 @@ const LaboratoryRoomFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
 
     useEffect(() => {
         if (dataId) {
-
             const selectedData = data.find((data: LaboratoryRoomView) => data.id == dataId)
-            console.log(selectedData);
 
             setFormData({
                 name: selectedData.name,
@@ -114,26 +113,25 @@ const LaboratoryRoomFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
                         <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor='floor'>
                             Ruangan <span className="text-red-500">*</span>
                         </label>
-                        <select
-                            id='floor'
-                            name='floor'
-                            value={formData['floor'] || ''}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 leading-tight text-gray-700 border border-gray-300 rounded shadow appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">
-                                -- Pilih Lantai --
-                            </option>
-                            <option value="Lantai 1">
-                                Lantai 1
-                            </option>
-                            <option value="Lantai 2">
-                                Lantai 2
-                            </option>
-                            <option value="Lantai 3">
-                                Lantai 3
-                            </option>
-                        </select>
+                        <Select name='floor' value={formData['floor']} onValueChange={(value) =>
+                            handleChange({
+                                target: {
+                                    name: 'floor',
+                                    value: value
+                                }
+                            } as React.ChangeEvent<HTMLInputElement>)}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Pilih Lantai" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Lantai</SelectLabel>
+                                    <SelectItem value="Lantai 1">Lantai 1</SelectItem>
+                                    <SelectItem value="Lantai 2">Lantai 2</SelectItem>
+                                    <SelectItem value="Lantai 3">Lantai 3</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                         {errors['floor'] && (
                             <p className="mt-1 text-xs italic text-red-500">{errors['floor']}</p>
                         )}
@@ -143,22 +141,25 @@ const LaboratoryRoomFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
                         <label className="block mb-2 text-sm font-bold text-gray-700" htmlFor='user'>
                             Petugas Laboran <span className="text-red-500">*</span>
                         </label>
-                        <select
-                            id='user_id'
-                            name='user_id'
-                            value={formData['user_id'] || ''}
-                            onChange={handleChange}
-                            className="w-full px-3 py-2 leading-tight text-gray-700 border border-gray-300 rounded shadow appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">
-                                -- Pilih Laboran --
-                            </option>
-                            {laboran?.map((option) => (
-                                <option key={option.id} value={option.id}>
-                                    {option.name}
-                                </option>
-                            ))}
-                        </select>
+                        <Select name='user_id' value={formData['user_id'] !== null ? String(formData['user_id']) : ''} onValueChange={(value) =>
+                            handleChange({
+                                target: {
+                                    name: 'user_id',
+                                    value: value
+                                }
+                            } as React.ChangeEvent<HTMLInputElement>)}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Pilih Laboran" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Laboran</SelectLabel>
+                                    {laboran?.map((option) => (
+                                        <SelectItem key={option.id} value={option.id.toString()}>{ option.name }</SelectItem>
+                                    ))}
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
                         {errors['user_id'] && (
                             <p className="mt-1 text-xs italic text-red-500">{errors['user_id']}</p>
                         )}

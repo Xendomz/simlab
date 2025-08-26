@@ -205,8 +205,9 @@ const KepalaLabUnitFormDialog: React.FC<KepalaLabUnitFormDialogProps> = ({
                             <SelectContent>
                                 <SelectGroup>
                                     <SelectLabel>Role</SelectLabel>
-                                    <SelectItem value="Dosen">Dosen</SelectItem>
+                                    <SelectItem value="Kepala Lab Terpadu">Kepala Lab Terpadu</SelectItem>
                                     <SelectItem value="Kepala Lab Unit">Kepala Lab Unit</SelectItem>
+                                    <SelectItem value="Dosen">Dosen</SelectItem>
                                     <SelectItem value="Koorprodi">Koorprodi</SelectItem>
                                 </SelectGroup>
                             </SelectContent>

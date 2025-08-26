@@ -15,15 +15,15 @@ export class UserService {
         }
     }
 
-    async createData(data: UserInputDTO) {
+    async createData(data: UserInputDTO): Promise<ApiResponse> {
         return await this.userRepository.createData(data)
     }
 
-    async updateData(id: number, data: UserInputDTO) {
+    async updateData(id: number, data: UserInputDTO): Promise<ApiResponse> {
         return await this.userRepository.updateData(id, data)
     }
 
-    async deleteData(id: number) {
+    async deleteData(id: number): Promise<ApiResponse> {
         return await this.userRepository.deleteData(id)
     }
 
