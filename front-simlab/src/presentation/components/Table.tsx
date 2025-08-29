@@ -48,7 +48,7 @@ const Table = <T,>({
                 key="first"
                 onClick={() => handlePageChange(1)}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 mx-1 rounded ${currentPage === 1 ? 'bg-gray-200 text-gray-500' : 'bg-white text-primary hover:bg-primary/50 hover:text-white'}`}
+                className={`px-3 py-1 mx-1 rounded ${currentPage === 1 ? 'bg-primary text-white' : 'bg-white text-primary hover:bg-primary/50 hover:text-white'}`}
             >
                 1
             </button>

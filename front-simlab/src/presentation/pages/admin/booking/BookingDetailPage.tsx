@@ -101,7 +101,7 @@ export const BookingDetailPage: React.FC = () => {
             </NavLink>
           </div>
 
-          {/* <BookingApproval bookingId={bookingId} /> */}
+          <BookingApproval bookingId={bookingId} />
 
           <TabsContent value="general">
             <div className='grid grid-cols-2 gap-5'>
