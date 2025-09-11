@@ -44,7 +44,6 @@ jobs:
             /www/wwwroot/api-simlab.noalive.id/
 
             cd /www/wwwroot/api-simlab.noalive.id/
-            composer clear-cache
             rm -rf vendor
             COMPOSER_ALLOW_SUPERUSER=1 composer install
             
