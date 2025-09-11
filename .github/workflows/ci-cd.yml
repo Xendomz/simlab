@@ -19,12 +19,17 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /www/wwwroot/testingci
+            cd /www/wwwroot/testingci/
             git pull origin ci-cd-testing
-            # cd .\back-simlab\
-            # composer install --no-dev --optimize-autoloader
-            # php artisan migrate --force
-            # php artisan co:ca
+            rsync -a --delete \
+            --exclude-from='/var/www/simlab/.deployignore' \
+            /var/www/simlab/back-simlab/ \
+            /www/wwwroot/api-simlab.noalive.id/
+
+            cd .\back-simlab\
+            composer install --no-dev --optimize-autoloader
+            php artisan migrate --force
+            php artisan co:ca
 
   # deploy-frontend:
   #   runs-on: ubuntu-latest
