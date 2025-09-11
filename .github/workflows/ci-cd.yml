@@ -2,57 +2,48 @@ name: Deploy to aaPanel
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - ci-cd-testing   # atau branch lain untuk auto deploy
 
 jobs:
-  deploy:
+  deploy-backend:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # 🔹 Build React Frontend (front-simlab)
-      - name: Build React Frontend
-        run: |
-          cd front-simlab
-          npm install
-          npm run build
-
-      # 🔹 Upload React build to Server
-      - name: Upload React Build to Server
-        uses: appleboy/scp-action@v0.1.7
+      - name: Deploy Laravel API
+        uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
-          source: "front-simlab/dist/*"
-          target: "/www/wwwroot/simlab.noalive.id/"
-
-      # 🔹 Upload Backend (back-simlab) to Server
-      - name: Upload Backend to Server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
-          source: "back-simlab/*"
-          target: "/www/wwwroot/api-simlab.noalive.id/"
-
-      # 🔹 Run Laravel Scripts on Server
-      - name: Run Laravel Scripts (Composer, Migrate, Cache, Queue)
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /www/wwwroot/api-simlab.noalive.id
+            cd /www/wwwroot/testingci
+            git pull origin ci-cd-testing
+            cd .\back-simlab\
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan queue:restart || true
+            php artisan co:ca
+
+  # deploy-frontend:
+  #   runs-on: ubuntu-latest
+  #   needs: deploy-backend
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: Deploy React Frontend
+  #       uses: appleboy/ssh-action@v1.0.0
+  #       with:
+  #         host: ${{ secrets.SSH_HOST }}
+  #         username: ${{ secrets.SSH_USER }}
+  #         key: ${{ secrets.SSH_KEY }}
+  #         script: |
+  #           cd /www/wwwroot/app.example.com
+  #           git pull origin main
+  #           npm install --legacy-peer-deps
+  #           npm run build
+  #           # Jika pakai Vite/CRA hasil build taruh di folder publik
+  #           rm -rf /www/wwwroot/app.example.com/public/*
+  #           cp -r dist/* /www/wwwroot/app.example.com/public/
