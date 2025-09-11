@@ -39,8 +39,8 @@ jobs:
             cd /www/wwwroot/testingci/
 
             rsync -a --delete \
-            --exclude-from='/var/www/simlab/.deployignore' \
-            /var/www/simlab/back-simlab/ \
+            --exclude-from='/var/www/testingci/.deployignore' \
+            /var/www/testingci/back-simlab/ \
             /www/wwwroot/api-simlab.noalive.id/
 
             cd /www/wwwroot/api-simlab.noalive.id/
