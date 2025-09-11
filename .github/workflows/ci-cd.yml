@@ -26,7 +26,7 @@ jobs:
             /var/www/simlab/back-simlab/ \
             /www/wwwroot/api-simlab.noalive.id/
 
-            cd .\back-simlab\
+            cd /www/wwwroot/api-simlab.noalive.id/
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
             php artisan co:ca
