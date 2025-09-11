@@ -44,7 +44,7 @@ jobs:
             /www/wwwroot/api-simlab.noalive.id/
 
             cd /www/wwwroot/api-simlab.noalive.id/
-            sudo -u xendomz composer install
+            COMPOSER_ALLOW_SUPERUSER=1 composer install
             php artisan migrate --force
             php artisan co:ca
 
