@@ -70,9 +70,6 @@ class BookingController extends BaseController
     {
         try {
             $user = auth()->user();
-            if (!$user || !in_array($user->role, ['Admin', 'Laboran', 'Kepala Lab Terpadu'])) {
-                return $this->sendError('Unauthorized', [], 401);
-            }
 
             $query = Booking::query();
             $query->where('academic_year_id', $this->activeAcademicYear->id);
@@ -123,15 +120,10 @@ class BookingController extends BaseController
         DB::beginTransaction();
         try {
             $user = auth()->user();
-            if (!$user || !in_array($user->role, ['Laboran', 'Kepala Lab Terpadu'])) {
-                DB::rollBack();
-                return $this->sendError('Unauthorized', [], 401);
-            }
-
             $booking = Booking::findOrFail($id);
             if ($booking->status !== 'pending') {
                 DB::rollBack();
-                return $this->sendError('Hanya booking berstatus pending yang dapat diverifikasi', [], 400);
+                return $this->sendError('Peminjaman ini telah dilakukan verifikasi sebelumnya', [], 400);
             }
 
             // validasi role dan status
@@ -141,32 +133,11 @@ class BookingController extends BaseController
                 return $this->sendError($validationError, [], 400);
             }
 
-            $action = $request->action;
-            $isApprove = $action === 'approve';
-            if ($user->role === 'Kepala Lab Terpadu' && $isApprove) {
-                $booking->update(['laboran_id' => $request->laboran_id]);
-            }
+            $isApprove = $request->action === 'approve';
 
-            $isAllowedOffsite = null;
-            // Gabungkan logic equipment approval langsung di sini
-            if ($user->role === 'Laboran' && $isApprove && $booking->booking_type === 'equipment') {
-                $booking->update([
-                    'ruangan_laboratorium_id' => $request->ruangan_laboratorium_id,
-                ]);
-                $isAllowedOffsite = $request->has('is_allowed_offsite') ? $request->is_allowed_offsite : null;
-            }
+            $this->assignBookingDataByRole($booking, $user, $request, $isApprove);
 
-            $approvalData = [
-                'booking_id' => $booking->id,
-                'role' => $user->role,
-                'approver_id' => $user->id,
-                'approved' => $isApprove ? 1 : 0,
-                'information' => $isApprove ? null : $request->information,
-            ];
-            if (!is_null($isAllowedOffsite)) {
-                $approvalData['is_allowed_offsite'] = $isAllowedOffsite;
-            }
-            BookingApproval::create($approvalData);
+            $this->storeApproval($booking, $user, $request, $isApprove);
 
             DB::commit();
             return $this->sendResponse($booking->fresh(), 'Booking ' . ($isApprove ? 'Approved' : 'Rejected') . ' Successfully');
@@ -176,6 +147,48 @@ class BookingController extends BaseController
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->sendError('Failed to verify booking', [$e->getMessage()], 500);
+        }
+    }
+
+
+    private function storeApproval($booking, $user, $request, bool $isApprove)
+    {
+        $approvalData = [
+            'booking_id' => $booking->id,
+            'role' => $user->role,
+            'approver_id' => $user->id,
+            'approved' => $isApprove ? 1 : 0,
+            'information' => $isApprove ? null : $request->information,
+        ];
+
+        if ($user->role === 'Laboran' && $isApprove && $booking->booking_type === 'equipment') {
+            $approvalData['is_allowed_offsite'] = $request->boolean('is_allowed_offsite');
+        }
+
+        BookingApproval::create($approvalData);
+    }
+
+    /**
+     * Tangani perubahan kebutuhan peminjaman berdasarkan role.
+     */
+    private function assignBookingDataByRole($booking, $user, $request, bool $isApprove)
+    {
+        // Menetapkan laboran pada data peminjaman
+        if ($user->role === 'Kepala Lab Terpadu' && $isApprove) {
+            $booking->update(['laboran_id' => $request->laboran_id]);
+        }
+
+        // Gabungkan logic equipment approval langsung di sini
+        if ($user->role === 'Laboran' && $isApprove && $booking->booking_type === 'equipment') {
+            $booking->update([
+                'ruangan_laboratorium_id' => $request->ruangan_laboratorium_id,
+            ]);
+        }
+
+        if (!$isApprove) {
+            $booking->update(['status' => 'rejected']);
+        } elseif ($user->role == 'Laboran' && $isApprove) {
+            $booking->update(['status' => 'approved']);
         }
     }
 
@@ -295,25 +308,23 @@ class BookingController extends BaseController
                 $stepper[] = [
                     'role' => $role,
                     'status' => $status,
-                    'information' => $approval ? $approval->information : null,
-                    'approved_at' => $approval ? $approval->created_at : null,
-                    'approver' => $approval && $approval->approver ? $approval->approver->name : null,
+                    'information' => $approval?->information,
+                    'approved_at' => $approval?->created_at,
+                    'approver' => $approval?->approver?->name,
                 ];
-
                 if ($status !== 'approved') {
                     $allApproved = false;
                 }
             }
 
-            if ($allApproved) {
-                $stepper[] = [
-                    'role' => 'Selesai',
-                    'status' => 'approved',
-                    'information' => null,
-                    'approved_at' => now(),
-                    'approver' => null,
-                ];
-            }
+            $stepper[] = [
+                'role' => 'Selesai',
+                'status' => $allApproved ? 'approved' : 'pending',
+                'information' => null,
+                'approved_at' => null,
+                'approver' => null,
+            ];
+
             return $this->sendResponse($stepper, 'Booking Approvals Retrieved Successfully');
         } catch (ModelNotFoundException $e) {
             return $this->sendError("Booking Not Found", [], 404);
@@ -470,43 +481,5 @@ class BookingController extends BaseController
             return $this->sendError('Unauthorized', [], 404);
         }
         return null;
-    }
-
-    /**
-     * Return stepper info for booking approval process
-     */
-    private function bookingStepper($id)
-    {
-        $booking = Booking::with(['approvals.approver'])->findOrFail($id);
-        $roles = ['Peminjam', 'Kepala Lab Terpadu', 'Laboran'];
-        $stepper = [];
-        $allApproved = true;
-
-        foreach ($roles as $role) {
-            $approval = $booking->approvals->where('role', $role)->sortByDesc('created_at')->first();
-            $status = $approval ? ($approval->approved ? 'approved' : 'rejected') : 'pending';
-            $stepper[] = [
-                'role' => $role,
-                'status' => $status,
-                'information' => $approval ? $approval->information : null,
-                'approved_at' => $approval ? $approval->created_at : null,
-                'approver' => $approval && $approval->approver ? $approval->approver->name : null,
-            ];
-
-            if ($status !== 'approved') {
-                $allApproved = false;
-            }
-        }
-
-        if ($allApproved) {
-            $stepper[] = [
-                'role' => 'Selesai',
-                'status' => 'approved',
-                'information' => null,
-                'approved_at' => now(),
-                'approver' => null,
-            ];
-        }
-        return $stepper;
     }
 }

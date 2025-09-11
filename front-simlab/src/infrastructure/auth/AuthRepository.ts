@@ -24,6 +24,7 @@ export class AuthRepository implements IAuthRepository {
             StorageManager.clear()
             window.location.href = '/login';
         }
+        
         throw json
     }
     async login(credentials: LoginCredentials): Promise<User> {

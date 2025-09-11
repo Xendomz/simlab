@@ -1,6 +1,5 @@
 import { useAuth } from '@/application/hooks/useAuth'
 import Header from '@/presentation/components/Header'
-import React from 'react'
 import KepalaLabBookingApproval from './components/KepalaLabBookingApproval'
 import LaboranBookingApproval from './components/LaboranBookingApproval'
 

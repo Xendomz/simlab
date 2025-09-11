@@ -13,7 +13,7 @@ import { DataTable } from '@/presentation/components/custom/Datatable';
 import { BookingType } from '@/domain/booking/BookingType';
 import { BookingMaterialColumn } from './column/BookingMaterialColumn';
 import { BookingEquipmentColumn } from './column/BookingEquipmentColumn';
-import BookingApproval from './components/BookingApproval';
+import BookingStepper from './components/BookingStepper';
 import { useAuth } from '@/application/hooks/useAuth';
 import { Skeleton } from '@/presentation/components/ui/skeleton';
 
@@ -22,7 +22,7 @@ export const BookingDetailPage: React.FC = () => {
   const { user } = useAuth()
   const { id } = useParams<{ id: string }>();
   const bookingId = Number(id);
-  const { getBookingDetail, getBookingSteps } = useBooking({});
+  const { getBookingDetail } = useBooking({});
 
   // Booking Detail State
   const [booking, setBooking] = useState<BookingView>();
@@ -59,9 +59,9 @@ export const BookingDetailPage: React.FC = () => {
       <div className="flex flex-col gap-4 p-4 pt-0">
         <div className="flex flex-col gap-4 animate-pulse">
           <Skeleton className="h-8 w-1/3 mb-2" />
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-2 gap-4">
             <Skeleton className="h-64 w-full" />
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-4">
               <Skeleton className="h-32 w-full" />
               <Skeleton className="h-32 w-full" />
             </div>
@@ -101,10 +101,10 @@ export const BookingDetailPage: React.FC = () => {
             </NavLink>
           </div>
 
-          <BookingApproval bookingId={bookingId} />
+          <BookingStepper bookingId={bookingId} />
 
           <TabsContent value="general">
-            <div className='grid grid-cols-2 gap-5'>
+            <div className='grid grid-cols-2 gap-4'>
               {/* Informasi Umum */}
               <Card>
                 <CardHeader>
@@ -112,22 +112,49 @@ export const BookingDetailPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-8">
-                    <div className="grid sm:grid-cols-2 text-sm gap-5">
-                      <div className='flex flex-col gap-2'><span className="font-medium">Jenis Peminjaman</span><div>{booking.getFormattedBookingType?.() ?? booking.bookingType}</div></div>
-                      <div className='flex flex-col gap-2'><span className="font-medium">Judul Kegiatan</span><div>{booking.activityName}</div></div>
-                      <div className='flex flex-col gap-2'><span className="font-medium">Keperluan</span><div>{booking.purpose}</div></div>
-                      <div className='flex flex-col gap-2'><span className="font-medium">Waktu Mulai</span><div>{booking.startTime.formatForInformation()}</div></div>
-                      <div className='flex flex-col gap-2'><span className="font-medium">Waktu Selesai</span><div>{booking.endTime.formatForInformation()}</div></div>
-                      <div className='flex flex-col gap-2'><span className="font-medium">Supervisor</span><div>{booking.supervisor || '-'}</div></div>
-                      <div className='flex flex-col gap-2'><span className="font-medium">Email Supervisor</span><div>{booking.supervisorEmail || '-'}</div></div>
-                      <div className='flex flex-col gap-2'><span className="font-medium">Dibuat</span><div>{booking.createdAt.formatForInformation()}</div></div>
-                      <div className='flex flex-col gap-2'><span className="font-medium">Diperbarui</span><div>{booking.updatedAt.formatForInformation()}</div></div>
+                    <div className="grid sm:grid-cols-2 text-sm gap-4">
+                      <div className='flex flex-col'>
+                        <span className="font-semibold">Jenis Peminjaman</span>
+                        <div className='text-muted-foreground'>{booking.getFormattedBookingType?.() ?? booking.bookingType}</div>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className="font-semibold">Judul Kegiatan</span>
+                        <div className='text-muted-foreground'>{booking.activityName}</div>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className="font-semibold">Keperluan</span>
+                        <div className='text-muted-foreground'>{booking.purpose}</div>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className="font-semibold">Waktu Mulai</span>
+                        <div className='text-muted-foreground'>{booking.startTime.formatForInformation()}</div>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className="font-semibold">Waktu Selesai</span>
+                        <div className='text-muted-foreground'>{booking.endTime.formatForInformation()}</div>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className="font-semibold">Supervisor</span>
+                        <div className='text-muted-foreground'>{booking.supervisor || '-'}</div>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className="font-semibold">Email Supervisor</span>
+                        <div className='text-muted-foreground'>{booking.supervisorEmail || '-'}</div>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className="font-semibold">Dibuat</span>
+                        <div className='text-muted-foreground'>{booking.createdAt.formatForInformation()}</div>
+                      </div>
+                      <div className='flex flex-col'>
+                        <span className="font-semibold">Diperbarui</span>
+                        <div className='text-muted-foreground'>{booking.updatedAt.formatForInformation()}</div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <div className='flex flex-col gap-5'>
+              <div className='flex flex-col gap-4'>
 
                 {/* Data Pemohon */}
                 <Card>
@@ -137,10 +164,16 @@ export const BookingDetailPage: React.FC = () => {
                   <CardContent>
                     <div className="space-y-8">
                       {booking.user && (
-                        <div className="flex flex-col gap-5">
+                        <div className="flex flex-col gap-4">
                           <div className="grid gap-3 sm:grid-cols-2 text-sm">
-                            <div className='flex flex-col gap-2'><span className="font-medium">Nama</span><div>{booking.user.name}</div></div>
-                            <div className='flex flex-col gap-2'><span className="font-medium">Email</span><div>{booking.user.email}</div></div>
+                            <div className='flex flex-col'>
+                              <span className="font-semibold">Nama</span>
+                              <div className='text-muted-foreground'>{booking.user.name}</div>
+                            </div>
+                            <div className='flex flex-col'>
+                              <span className="font-semibold">Email</span>
+                              <div className='text-muted-foreground'>{booking.user.email}</div>
+                            </div>
                           </div>
                         </div>
                       )}
@@ -156,10 +189,18 @@ export const BookingDetailPage: React.FC = () => {
                   <CardContent>
                     <div className="space-y-8">
                       {hasRoom ? (
-                        <div className="grid gap-5 sm:grid-cols-2 text-sm">
-                          <div className='flex flex-col gap-2'><span className="font-medium">Ruangan </span><div>{booking.laboratoryRoom?.name}</div></div>
-                          <div className='flex flex-col gap-2'><span className="font-medium">Peserta</span><div>{booking.totalParticipant} Peserta</div></div>
-                          <div className="sm:col-span-2 flex flex-col gap-2"><span className="font-medium">Daftar Peserta</span><div className="whitespace-pre-wrap break-words border rounded p-2 bg-muted/30">{booking.participantList || '-'}</div></div>
+                        <div className="grid gap-4 sm:grid-cols-2 text-sm">
+                          <div className='flex flex-col'>
+                            <span className="font-semibold">Ruangan </span>
+                            <div className='text-muted-foreground'>{booking.laboratoryRoom?.name}</div>
+                          </div>
+                          <div className='flex flex-col'>
+                            <span className="font-semibold">Peserta</span>
+                            <div className='text-muted-foreground'>{booking.totalParticipant} Peserta</div></div>
+                          <div className="sm:col-span-2 flex flex-col">
+                            <span className="font-semibold">Daftar Peserta</span>
+                            <div className="whitespace-pre-wrap break-words border rounded p-2 bg-muted/30">{booking.participantList || '-'}</div>
+                          </div>
                         </div>
                       ) : (
                         <span>Ruangan Belum Ditentukan</span>

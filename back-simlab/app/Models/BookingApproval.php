@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Models;
-
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class BookingApproval extends Model
 {
     use HasFactory;
+
+    // Always return created_at in WITA timezone as ISO 8601 string
+    public function getCreatedAtAttribute($value)
+    {
+        return $this->asDateTime($value)
+            ->setTimezone('Asia/Makassar')
+            ->toIso8601String();
+    }
 
     protected $fillable = ['booking_id', 'role', 'approver_id', 'approved', 'information', 'is_allowed_offsite'];
 

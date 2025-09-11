@@ -63,15 +63,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
     // booking (peminjaman)
-    Route::get('/bookings', [BookingController::class, 'index']);
-    Route::get('/bookings/have-draft', [BookingController::class, 'isStillHaveDraftBooking']);
-    Route::post('/bookings', [BookingController::class, 'store']);
-    Route::get('/bookings/{id}/detail', [BookingController::class, 'getBookingData']);
-    Route::get('/bookings/{id}/steps', [BookingController::class, 'getBookingSteps']);
-    Route::post('/bookings/{id}/room-n-equipment', [BookingController::class, 'storeBookingRoomNEquipment']);
-    Route::post('/bookings/{id}/equipment', [BookingController::class, 'storeBookingEquipment']);
-    Route::get('/bookings/verification', [BookingController::class, 'getBookingsForVerification']);
-    Route::post('/bookings/{id}/verify', [BookingController::class, 'verify']);
+    Route::group(['prefix' => 'bookings', 'as' => 'bookings' ], function () {
+        Route::get('/', [BookingController::class, 'index']);
+        Route::post('/', [BookingController::class, 'store']);
+        Route::get('/have-draft', [BookingController::class, 'isStillHaveDraftBooking']);
+        Route::get('/{id}/detail', [BookingController::class, 'getBookingData']);
+        Route::get('/{id}/steps', [BookingController::class, 'getBookingSteps']);
+        Route::post('/{id}/room-n-equipment', [BookingController::class, 'storeBookingRoomNEquipment']);
+        Route::post('/{id}/equipment', [BookingController::class, 'storeBookingEquipment']);
+        Route::group(['middleware' => 'role:Laboran|Kepala Lab Terpadu'], function () {
+            Route::get('/verification', [BookingController::class, 'getBookingsForVerification']);
+            Route::post('/{id}/verify', [BookingController::class, 'verify']);
+        });
+    });
 
     // Practical Schedule
     Route::get('/practicum-schedule', [PracticumSchedulingController::class, 'index']);

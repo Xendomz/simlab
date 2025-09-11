@@ -79,6 +79,8 @@ const LaboranBookingApproval = () => {
 
     const openRejection = (booking: any) => {
         setSelectedBooking(booking);
+        console.log(booking);
+        
         setOpenRejectionDialog(true);
     };
 
@@ -101,7 +103,7 @@ const LaboranBookingApproval = () => {
 
     const handleApproval = async (data: BookingVerifyDTO): Promise<void> => {
         if (selectedBooking) {
-            const res = await verifyBooking(selectedBooking.id, data);
+            const res = await verifyBooking(selectedBooking, data);
             toast.success(res.message);
             setOpenApprovalDialog(false);
             setOpenEquipmentDialog(false);
@@ -112,7 +114,7 @@ const LaboranBookingApproval = () => {
 
     const handleRejection = async (data: BookingVerifyDTO): Promise<void> => {
         if (selectedBooking) {
-            const res = await verifyBooking(selectedBooking.id, data);
+            const res = await verifyBooking(selectedBooking, data);
             toast.success(res.message);
             setOpenRejectionDialog(false);
             setSelectedBooking(null);

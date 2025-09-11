@@ -35,12 +35,9 @@ export const AuthProvider = ({ children }: AuthProps) => {
                     throw Error("Unauthorized")
                 }
                 setUser(UserView.fromDomain(user))
-            } catch {
-                StorageManager.clear()
-                setToken(null)
-                navigate('/login') // redirect to login when token invalid
+            } finally {
+                setLoading(false)
             }
-            setLoading(false)
         }
 
         initialAuth();

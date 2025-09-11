@@ -1,0 +1,58 @@
+name: Deploy to aaPanel
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 🔹 Build React Frontend (front-simlab)
+      - name: Build React Frontend
+        run: |
+          cd front-simlab
+          npm install
+          npm run build
+
+      # 🔹 Upload React build to Server
+      - name: Upload React Build to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          source: "front-simlab/dist/*"
+          target: "/www/wwwroot/simlab.noalive.id/"
+
+      # 🔹 Upload Backend (back-simlab) to Server
+      - name: Upload Backend to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          source: "back-simlab/*"
+          target: "/www/wwwroot/api-simlab.noalive.id/"
+
+      # 🔹 Run Laravel Scripts on Server
+      - name: Run Laravel Scripts (Composer, Migrate, Cache, Queue)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          script: |
+            cd /www/wwwroot/api-simlab.noalive.id
+            composer install --no-dev --optimize-autoloader
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan queue:restart || true
