@@ -45,7 +45,7 @@ jobs:
 
             cd /www/wwwroot/api-simlab.noalive.id/
             rm -rf vendor
-            COMPOSER_ALLOW_SUPERUSER=1 composer install composer install --prefer-source --no-dev --optimize-autoloader
+            COMPOSER_ALLOW_SUPERUSER=1 composer install --prefer-source --no-dev --optimize-autoloader
             
             php artisan migrate --force
             php artisan co:ca
