@@ -21,10 +21,10 @@ jobs:
           script: |
             cd /www/wwwroot/testingci
             git pull origin ci-cd-testing
-            cd .\back-simlab\
-            composer install --no-dev --optimize-autoloader
-            php artisan migrate --force
-            php artisan co:ca
+            # cd .\back-simlab\
+            # composer install --no-dev --optimize-autoloader
+            # php artisan migrate --force
+            # php artisan co:ca
 
   # deploy-frontend:
   #   runs-on: ubuntu-latest
