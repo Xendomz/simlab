@@ -27,7 +27,7 @@ jobs:
             /www/wwwroot/api-simlab.noalive.id/
 
             cd /www/wwwroot/api-simlab.noalive.id/
-            composer install --no-dev --optimize-autoloader
+            composer install
             php artisan migrate --force
             php artisan co:ca
 
