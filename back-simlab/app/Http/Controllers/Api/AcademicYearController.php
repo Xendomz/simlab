@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\AcademicYearRequest;
-use App\Models\TahunAkademik;
+use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class TahunAkademikController extends BaseController
+class AcademicYearController extends BaseController
 {
     /**
      * Display a paginated and filterable list of academic years
@@ -20,19 +20,19 @@ class TahunAkademikController extends BaseController
     {
         try {
             // Start with a base query
-            $query = TahunAkademik::query();
+            $query = AcademicYear::query();
 
             // Add search functionality
             if ($request->has('search')) {
                 $searchTerm = $request->search;
-                $query->where('academic_year', 'LIKE', "%{$searchTerm}%");
+                $query->where('name', 'LIKE', "%{$searchTerm}%");
                 // Add more searchable fields as needed
             }
 
             // Add sorting functionality
             $sortField = $request->input('sort_by', 'created_at');
             $sortDirection = $request->input('sort_direction', 'desc');
-            $allowedSortFields = ['id', 'academic_year', 'status', 'created_at', 'updated_at'];
+            $allowedSortFields = ['id', 'name', 'status', 'created_at', 'updated_at'];
 
             if (in_array($sortField, $allowedSortFields)) {
                 $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');
@@ -60,10 +60,10 @@ class TahunAkademikController extends BaseController
     public function store(AcademicYearRequest $request)
     {
         try {
-            $academicYear = TahunAkademik::create($request->validated());
-            return $this->sendResponse($academicYear, 'Academic Year Created Successfully', 201);
+            $academicYear = AcademicYear::create($request->validated());
+            return $this->sendResponse($academicYear, 'Berhasil menambah tahun akademik', 201);
         } catch (\Exception $e) {
-            return $this->sendError('Failed to create academic year', [$e->getMessage()], 500);
+            return $this->sendError('Terjadi kesalahan ketika menambah tahun akademik', [$e->getMessage()], 500);
         }
     }
 
@@ -76,7 +76,7 @@ class TahunAkademikController extends BaseController
     public function show($id)
     {
         try {
-            $academicYear = TahunAkademik::findOrFail($id);
+            $academicYear = AcademicYear::findOrFail($id);
             return $this->sendResponse($academicYear, 'Academic Year Retrieved Successfully');
         } catch (ModelNotFoundException $e) {
             return $this->sendError("Academic Year Not Found", [], 404);
@@ -95,32 +95,32 @@ class TahunAkademikController extends BaseController
     public function update(AcademicYearRequest $request, $id)
     {
         try {
-            $academicYear = TahunAkademik::findOrFail($id);
+            $academicYear = AcademicYear::findOrFail($id);
             $academicYear->update($request->validated());
 
-            return $this->sendResponse($academicYear, "Academic Year Updated Successfully");
+            return $this->sendResponse($academicYear, "Berhasil mengubah tahun akademik");
         } catch (ModelNotFoundException $e) {
-            return $this->sendError("Academic Year Not Found", [], 404);
+            return $this->sendError("Tahun akademik tidak ditemukan", [], 404);
         } catch (\Exception $e) {
-            return $this->sendError('Failed to update academic year', [$e->getMessage()], 500);
+            return $this->sendError('Terjadi kesalahan ketika mengubah tahun akademik', [$e->getMessage()], 500);
         }
     }
 
     public function toggleStatus($id)
     {
         try {
-            $academicYear = TahunAkademik::findOrFail($id);
+            $academicYear = AcademicYear::findOrFail($id);
 
             // First deactivate all
-            TahunAkademik::query()->update(['status' => 'Deactive']);
+            AcademicYear::query()->update(['status' => 'Deactive']);
             // Then activate the selected one
             $academicYear->update(['status' => $academicYear->status == 'Active' ? 'Deactive' : 'Active']);
 
-            return $this->sendResponse($academicYear, "Academic Year Updated Successfully");
+            return $this->sendResponse($academicYear, "Berhasil mengubah tahun akademik");
         } catch (ModelNotFoundException $e) {
-            return $this->sendError("Academic Year Not Found", [], 404);
+            return $this->sendError("Tahun akademik tidak ditemukan", [], 404);
         } catch (\Exception $e) {
-            return $this->sendError('Failed to update academic year', [$e->getMessage()], 500);
+            return $this->sendError('Terjadi kesalahan ketika mengubah tahun akademik', [$e->getMessage()], 500);
         }
     }
 
@@ -133,14 +133,14 @@ class TahunAkademikController extends BaseController
     public function destroy($id)
     {
         try {
-            $academicYear = TahunAkademik::findOrFail($id);
+            $academicYear = AcademicYear::findOrFail($id);
             $academicYear->delete();
 
-            return $this->sendResponse([], 'Academic Year Deleted Successfully');
+            return $this->sendResponse([], 'Berhasil menghapus tahun akademik');
         } catch (ModelNotFoundException $e) {
-            return $this->sendError("Academic Year Not Found", [], 404);
+            return $this->sendError("Tahun akademik tidak ditemukan", [], 404);
         } catch (\Exception $e) {
-            return $this->sendError('Failed to delete academic year', [$e->getMessage()], 500);
+            return $this->sendError('Terjadi kesalahan ketika menghapus tahun akademik', [$e->getMessage()], 500);
         }
     }
 }

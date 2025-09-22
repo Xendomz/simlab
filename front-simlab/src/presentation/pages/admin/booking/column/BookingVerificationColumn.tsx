@@ -7,8 +7,8 @@ import { NavLink } from "react-router-dom";
 
 interface ColumnProps {
     role: 'Kepala Lab Terpadu' | 'Laboran';
-    openApproval: (booking: any) => void;
-    openRejection: (booking: any) => void;
+    openApproval: (booking: BookingView) => void;
+    openRejection: (booking: BookingView) => void;
 }
 
 export const BookingVerificationColumn = ({ role, openApproval, openRejection }: ColumnProps): ColumnDef<BookingView>[] => [
@@ -82,8 +82,8 @@ export const BookingVerificationColumn = ({ role, openApproval, openRejection }:
                     {renderApprovalBadge(approval)}
                     {isPending && (
                         <div className='flex gap-2'>
-                            <Button size="sm" onClick={() => openApproval(row.original.id)}>Terima</Button>
-                            <Button size="sm" onClick={() => openRejection(row.original.id)} variant="destructive">Tolak</Button>
+                            <Button size="sm" onClick={() => openApproval(row.original)}>Terima</Button>
+                            <Button size="sm" onClick={() => openRejection(row.original)} variant="destructive">Tolak</Button>
                         </div>
                     )}
                 </>

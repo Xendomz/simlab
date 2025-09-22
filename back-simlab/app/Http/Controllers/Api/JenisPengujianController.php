@@ -55,9 +55,9 @@ class JenisPengujianController extends BaseController
         try {
             $testing_type = JenisPengujian::create($request->validated());
 
-            return $this->sendResponse($testing_type, "Testing Type Create Sucessfully");
+            return $this->sendResponse($testing_type, "Berhasil menambah jenis pengujian");
         } catch (\Exception $e) {
-            return $this->sendError('Failed to create testing type', [$e->getMessage()], 500);
+            return $this->sendError('Terjadi kesalahan dalam menambah jenis pengujian', [$e->getMessage()], 500);
         }
     }
 
@@ -79,11 +79,11 @@ class JenisPengujianController extends BaseController
             $testing_type = JenisPengujian::findOrFail($id);
             $testing_type->update($request->validated());
 
-            return $this->sendResponse($testing_type, "Testing Type Updated Successfully");
+            return $this->sendResponse($testing_type, "Berhasil mengubah jenis pengujian");
         } catch (ModelNotFoundException $e) {
-            return $this->sendError("Testing Type Not Found", [], 404);
+            return $this->sendError("Jenis Pengujian tidak ditemukan", [], 404);
         } catch (\Exception $e) {
-            return $this->sendError('Failed to update testing type', [$e->getMessage()], 500);
+            return $this->sendError('Terjadi kesalahan dalam mengubah jenis pengujian', [$e->getMessage()], 500);
         }
     }
 
@@ -93,11 +93,11 @@ class JenisPengujianController extends BaseController
             $jenis = JenisPengujian::findOrFail($id);
             $jenis->delete();
 
-            return $this->sendResponse([], 'Testing Type Deleted Successfully');
+            return $this->sendResponse([], 'Berhasil menghapus jenis pengujian');
         } catch (ModelNotFoundException $e) {
-            return $this->sendError("Testing Type Not Found", [], 404);
+            return $this->sendError("Jenis Pengujian tidak ditemukan", [], 404);
         } catch (\Exception $e) {
-            return $this->sendError('Failed to delete testing type', [$e->getMessage()], 500);
+            return $this->sendError('Terjadi kesalahan dalam mengubah jenis pengujian', [$e->getMessage()], 500);
         }
     }
 }

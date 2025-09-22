@@ -37,7 +37,7 @@ class PracticumScheduling extends Model
     }
 
     public function academicYear() {
-        return $this->belongsTo(TahunAkademik::class, 'academic_year_id');
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
 
     public function user() {
@@ -62,6 +62,18 @@ class PracticumScheduling extends Model
 
     public function practicumApprovals() {
         return $this->hasMany(PracticumApproval::class, 'practicum_scheduling_id');
+    }
+
+    public function getKoorprodiApprovalStatusAttribute() {
+        return $this->practicumApprovals()
+            ->where('role', 'Koorprodi')
+            ->exists();
+    }
+
+    public function getKepalaLabApprovalStatusAttribute() {
+        return $this->practicumApprovals()
+            ->where('role', 'Kepala Lab Terpadu')
+            ->exists();
     }
 
     public function getKooprodiApprovalAttribute() {

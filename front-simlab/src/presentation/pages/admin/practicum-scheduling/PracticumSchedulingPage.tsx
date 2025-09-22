@@ -10,6 +10,7 @@ import { NavLink } from 'react-router-dom';
 import { usePracticumScheduling } from '@/application/practicum-scheduling/hooks/usePracticumScheduling';
 import { PracticumSchedulingColumn } from './column/PracticumSchedulingColumn';
 import { useEffect, useRef } from 'react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/presentation/components/ui/tooltip';
 
 const PracticumSchedulingPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -51,6 +52,8 @@ const PracticumSchedulingPage = () => {
         practicumScheduling,
         isLoading,
         getData,
+        isStillHaveDraftPracticum,
+        isHasDraftPracticum
     } = usePracticumScheduling({
         currentPage,
         perPage,
@@ -62,6 +65,10 @@ const PracticumSchedulingPage = () => {
     useEffect(() => {
         getData()
     }, [currentPage, perPage])
+
+    useEffect(() => {
+        isStillHaveDraftPracticum()
+    }, [])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -83,14 +90,28 @@ const PracticumSchedulingPage = () => {
                     <CardHeader>
                         <CardTitle>Menu Penjadwalan Praktikum</CardTitle>
                         <CardAction>
-                            <>
-                                <NavLink to={'/panel/penjadwalan-praktikum/create'}>
-                                    <Button>
-                                        Tambah
-                                        <Plus />
-                                    </Button>
-                                </NavLink>
-                            </>
+                            {isHasDraftPracticum ? (
+                                <Tooltip>
+                                    <TooltipTrigger className='cursor-not-allowed' asChild>
+                                        <Button className={'opacity-50'}>
+                                            Tambah
+                                            <Plus />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Harap Selesaikan Pengajuan Sebelumnya</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            ) : (
+                                <>
+                                    <NavLink to={'/panel/penjadwalan-praktikum/create'}>
+                                        <Button>
+                                            Tambah
+                                            <Plus />
+                                        </Button>
+                                    </NavLink>
+                                </>
+                            )}
 
                         </CardAction>
                     </CardHeader>

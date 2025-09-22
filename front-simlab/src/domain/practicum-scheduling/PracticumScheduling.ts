@@ -7,6 +7,7 @@ import { PracticumApproval } from "./PracticumApproval";
 import { PracticumGroup } from "./PracticumGroup";
 import { PracticumSchedulingEquipment } from "./PracticumSchedulingEquipment";
 import { PracticumSchedulingMaterial } from "./PracticumSchedulingMaterial";
+import { PracticumSchedulingStatus } from "./PracticumSchedulingStatus";
 
 
 export class PracticumScheduling {
@@ -17,7 +18,7 @@ export class PracticumScheduling {
         readonly ruanganLaboratoriumId: number,
         readonly praktikumIid: number,
         readonly phoneNumber: number,
-        readonly status: 'draft' | 'submitted',
+        readonly status: PracticumSchedulingStatus,
         readonly createdAt: Time,
         readonly updatedAt: Time,
         readonly academicYear?: AcademicYear,

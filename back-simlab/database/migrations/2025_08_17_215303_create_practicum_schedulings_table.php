@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('ruangan_laboratorium_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('praktikum_id')->nullable()->constrained()->onDelete('cascade');
             $table->char('phone_number', 14);
-            $table->enum('status', ['draft', 'submitted']);
+            $table->enum('status', ['draft', 'pending', 'rejected', 'approved']);
             $table->timestamps();
         });
     }

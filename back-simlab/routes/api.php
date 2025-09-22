@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AcademicYearController;
 use App\Http\Controllers\Api\AlatLaboratoriumController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BahanLaboratoriumController;
@@ -10,7 +11,6 @@ use App\Http\Controllers\Api\PracticumSchedulingController;
 use App\Http\Controllers\Api\PraktikumController;
 use App\Http\Controllers\Api\ProdiController;
 use App\Http\Controllers\Api\RuanganLaboratoriumController;
-use App\Http\Controllers\Api\TahunAkademikController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,8 +46,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::resource('users', UserController::class)->only(['index']);
     });
     Route::middleware(['role:Admin|Laboran'])->group(function () {
-        Route::put('/academic-years/{id}/toggle-status', [TahunAkademikController::class, 'toggleStatus']);
-        Route::resource('academic-years', TahunAkademikController::class);
+        Route::put('/academic-years/{id}/toggle-status', [AcademicYearController::class, 'toggleStatus']);
+        Route::resource('academic-years', AcademicYearController::class);
         Route::resource('majors', JurusanController::class);
         Route::resource('testing-types', JenisPengujianController::class);
         Route::resource('study-programs', ProdiController::class);
@@ -64,9 +64,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // booking (peminjaman)
     Route::group(['prefix' => 'bookings', 'as' => 'bookings' ], function () {
-        Route::get('/', [BookingController::class, 'index']);
-        Route::post('/', [BookingController::class, 'store']);
-        Route::get('/have-draft', [BookingController::class, 'isStillHaveDraftBooking']);
+        Route::group(['middleware' => 'role:Mahasiswa|Dosen|Pihak Luar'], function () {
+            Route::get('/', [BookingController::class, 'index']);
+            Route::post('/', [BookingController::class, 'store']);
+            Route::get('/have-draft', [BookingController::class, 'isStillHaveDraftBooking']);
+        });
         Route::get('/{id}/detail', [BookingController::class, 'getBookingData']);
         Route::get('/{id}/steps', [BookingController::class, 'getBookingSteps']);
         Route::post('/{id}/room-n-equipment', [BookingController::class, 'storeBookingRoomNEquipment']);
@@ -78,12 +80,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Practical Schedule
-    Route::get('/practicum-schedule', [PracticumSchedulingController::class, 'index']);
-    Route::post('/practicum-schedule', [PracticumSchedulingController::class, 'store']);
-    Route::get('/practicum-schedule/{id}/detail', [PracticumSchedulingController::class, 'getPracticumSchedulingData']);
-    Route::post('/practicum-schedule/{id}/equipment-n-material', [PracticumSchedulingController::class, 'storePracticumEquipmentNMaterial']);
-    Route::get('/practicum-schedule/verification', [PracticumSchedulingController::class, 'getPracticumSchedulingForVerification']);
-    Route::post('/practicum-schedule/{id}/verify', [PracticumSchedulingController::class, 'verifyPracticumScheduling']);
+    Route::group(['prefix' => 'practicum-schedule', 'as' => 'practicum', 'middleware', 'role:Dosen|Kepala Lab Terpadu|Laboran|Koorprodi'], function() {
+        Route::get('/{id}/detail', [PracticumSchedulingController::class, 'getPracticumSchedulingData']);
+        Route::get('/{id}/steps', [PracticumSchedulingController::class, 'getPracticumSteps']);
+        Route::group(['middleware' => 'role:Dosen'], function() {
+            Route::get('/', [PracticumSchedulingController::class, 'index']);
+            Route::post('/', [PracticumSchedulingController::class, 'store']);
+            Route::post('/{id}/equipment-n-material', [PracticumSchedulingController::class, 'storePracticumEquipmentNMaterial']);
+            Route::get('/have-draft', [PracticumSchedulingController::class, 'isStillHaveDraftPracticum']);
+        });
+        Route::group(['middleware' => 'role:Kepala Lab Terpadu|Laboran|Koorprodi'], function() {
+            Route::get('/verification', [PracticumSchedulingController::class, 'getPracticumSchedulingForVerification']);
+            Route::post('/{id}/verify', [PracticumSchedulingController::class, 'verifyPracticumScheduling']);
+        });
+    });
 
     // logout route
     Route::post('/logout', [AuthController::class, 'logout']);

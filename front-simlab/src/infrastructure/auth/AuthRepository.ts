@@ -22,7 +22,6 @@ export class AuthRepository implements IAuthRepository {
 
         if (response.status == 401) {
             StorageManager.clear()
-            window.location.href = '/login';
         }
         
         throw json

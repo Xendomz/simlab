@@ -1,5 +1,6 @@
 import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { PracticumScheduling } from "./PracticumScheduling";
+import { PracticumStepper } from "./PracticumStepper";
 
 export interface IPracticumSchedulingRepository {
     getAll(params: {
@@ -34,4 +35,6 @@ export interface IPracticumSchedulingRepository {
     }): Promise<ApiResponse>
 
     verify(id: number, data: { action: 'approve' | 'reject', information?: string, laboran_id?: number }): Promise<ApiResponse>
+    isStillHaveDraftPracticum(): Promise<ApiResponse<boolean>>
+    getPracticumSteps(id: number): Promise<ApiResponse<PracticumStepper[]>>
 }

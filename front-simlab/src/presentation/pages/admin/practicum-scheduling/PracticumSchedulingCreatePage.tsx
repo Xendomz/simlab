@@ -12,13 +12,13 @@ import { Button } from '@/presentation/components/ui/button';
 import { Input } from '@/presentation/components/ui/input';
 import TimePicker from '@/presentation/components/custom/TimePicker';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
-import { Navigate, NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash } from 'lucide-react';
 import { useValidationErrors } from '@/presentation/hooks/useValidationError';
 import { usePracticalWork } from '@/application/practical-work/hooks/usePracticalWork';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/components/ui/select';
 import { toast } from 'sonner';
 import { ApiResponse } from '@/shared/Types';
+import { Combobox } from '@/presentation/components/custom/combobox';
 
 
 const PracticumSchedulingCreatePage = () => {
@@ -199,38 +199,38 @@ const PracticumSchedulingCreatePage = () => {
                             </div>
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor='praktikum_id'>Praktikum <span className="text-red-500">*</span></Label>
-                                <Select
-                                    value={formData.praktikum_id ? String(formData.praktikum_id) : ''}
-                                    onValueChange={val => setFormData(f => ({ ...f, praktikum_id: Number(val) }))}
-                                >
-                                    <SelectTrigger id='praktikum_id' className='w-full'>
-                                        <SelectValue placeholder="Pilih Praktikum" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {practicalWork?.map((item: any) => (
-                                            <SelectItem key={item.id} value={String(item.id)}>{item.name || item.nama || `Praktikum #${item.id}`}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <Combobox
+                                    options={practicalWork}
+                                    value={formData.praktikum_id?.toString() || ''}
+                                    onChange={(val) => {
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            praktikum_id: Number(val)
+                                        }))
+                                    }}
+                                    placeholder="Pilih praktikum"
+                                    optionLabelKey='name'
+                                    optionValueKey='id'
+                                />
                                 {errors.praktikum_id && (
                                     <span className="text-xs text-red-500 mt-1">{errors.praktikum_id}</span>
                                 )}
                             </div>
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor='ruangan_laboratorium_id'>Ruangan Laboratorium <span className="text-red-500">*</span></Label>
-                                <Select
-                                    value={formData.ruangan_laboratorium_id ? String(formData.ruangan_laboratorium_id) : ''}
-                                    onValueChange={val => setFormData(f => ({ ...f, ruangan_laboratorium_id: Number(val) }))}
-                                >
-                                    <SelectTrigger id='ruangan_laboratorium_id' className='w-full'>
-                                        <SelectValue placeholder="Pilih Ruangan" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {laboratoryRoom?.map((item: any) => (
-                                            <SelectItem key={item.id} value={String(item.id)}>{item.name || item.nama || `Ruangan #${item.id}`}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <Combobox
+                                    options={laboratoryRoom}
+                                    value={formData.ruangan_laboratorium_id?.toString() || ''}
+                                    onChange={(val) => {
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            ruangan_laboratorium_id: Number(val)
+                                        }))
+                                    }}
+                                    placeholder="Pilih ruangan"
+                                    optionLabelKey='name'
+                                    optionValueKey='id'
+                                />
                                 {errors.ruangan_laboratorium_id && (
                                     <span className="text-xs text-red-500 mt-1">{errors.ruangan_laboratorium_id}</span>
                                 )}

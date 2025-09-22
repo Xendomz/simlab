@@ -10,6 +10,7 @@ import KepalaLabBookingApprovalDialog from './KepalaLabBookingApprovalDialog';
 import { BookingVerifyDTO } from '@/application/booking/dto/BookingDTO';
 import { toast } from 'sonner';
 import BookingRejectionDialog from './BookingRejectionDialog';
+import { BookingView } from '@/application/booking/BookingView';
 
 const KepalaLabBookingApproval = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -60,17 +61,17 @@ const KepalaLabBookingApproval = () => {
         setTotalItems
     })
 
-    const [id, setId] = useState<number | null>(null)
+    const [selectedBooking, setSelectedBooking] = useState<BookingView | null>(null);
     const [openApprovalDialog, setOpenApprovalDialog] = useState<boolean>(false)
     const [openRejectionDialog, setOpenRejectionDialog] = useState<boolean>(false)
 
-    const openApproval = (id: number) => {
-        setId(id)
+    const openApproval = (booking: BookingView) => {
+        setSelectedBooking(booking);
         setOpenApprovalDialog(true)
     }
     
-    const openRejection = (id: number) => {
-        setId(id)
+    const openRejection = (booking: BookingView) => {
+        setSelectedBooking(booking);
         setOpenRejectionDialog(true)
     }
 
@@ -91,8 +92,8 @@ const KepalaLabBookingApproval = () => {
     }, [searchTerm])
 
     const handleApproval = async (data: BookingVerifyDTO): Promise<void> => {
-        if (id) {
-            const res = await verifyBooking(id, data)
+        if (selectedBooking) {
+            const res = await verifyBooking(selectedBooking.id, data)
             toast.success(res.message)
             setOpenApprovalDialog(false)
             getDataForVerification()
@@ -100,8 +101,8 @@ const KepalaLabBookingApproval = () => {
     }
 
     const handleRejection = async (data: BookingVerifyDTO): Promise<void> => {
-        if (id) {
-            const res = await verifyBooking(id, data)
+        if (selectedBooking) {
+            const res = await verifyBooking(selectedBooking.id, data)
             toast.success(res.message)
             setOpenRejectionDialog(false)
             getDataForVerification()

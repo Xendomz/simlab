@@ -14,10 +14,12 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::insert([
-            'name' => 'Admin (Erlina)',
-            'email' => 'labterpadu@itk.ac.id',
-            'password' => bcrypt('123123'),
-            'role' => 'Admin'
+            [
+                'name' => 'Admin (Erlina)',
+                'email' => 'labterpadu@itk.ac.id',
+                'password' => bcrypt('123123'),
+                'role' => 'Admin'
+            ],
         ]);
     }
 }

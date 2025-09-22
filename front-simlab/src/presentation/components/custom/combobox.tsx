@@ -41,7 +41,7 @@ export function Combobox<T extends Record<string, any>>({
     options.find((opt) => opt[optionValueKey] == value)?.[optionLabelKey]
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -53,7 +53,7 @@ export function Combobox<T extends Record<string, any>>({
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className=" p-0">
+      <PopoverContent className="p-0">
         <Command>
           <CommandInput placeholder="Search..." />
           <CommandList>

@@ -8,6 +8,7 @@ import { PracticumSchedulingEquipmentView } from './PracticumSchedulingEquipment
 import { PracticumSchedulingMaterialView } from './PracticumSchedulingMaterialView';
 import { PracticumApprovalView } from './PracticumApprovalView';
 import { PracticalWorkView } from '../practical-work/PracticalWorkView';
+import { PracticumSchedulingStatus } from '@/domain/practicum-scheduling/PracticumSchedulingStatus';
 
 export class PracticumSchedulingView {
     constructor(
@@ -17,7 +18,7 @@ export class PracticumSchedulingView {
         readonly laboratoryRoomId: number,
         readonly praktikumId: number,
         readonly phoneNumber: number,
-        readonly status: 'draft' | 'submitted',
+        readonly status: PracticumSchedulingStatus,
         readonly createdAt: TimeView,
         readonly updatedAt: TimeView,
         readonly academicYear?: AcademicYearView,

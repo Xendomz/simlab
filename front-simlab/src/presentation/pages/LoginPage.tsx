@@ -50,7 +50,6 @@ export const Login: React.FC = () => {
 
     useEffect(() => {
         const status = location.state?.from?.state?.register_status;
-
         if (status) {
             setRegisterStatus(status)
             navigate(location.pathname, { replace: true });

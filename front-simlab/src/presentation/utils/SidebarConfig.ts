@@ -1,4 +1,4 @@
-import { CalendarClock, CalendarPlus, Key, LayoutDashboard, SquareTerminal, StickyNote } from "lucide-react"
+import { CalendarClock, CalendarPlus, Key, LayoutDashboard, SquareTerminal } from "lucide-react"
 
 export const navItems = [
   {
@@ -14,11 +14,11 @@ export const navItems = [
     icon: Key,
     roles: ['Admin', 'Laboran'],
     items: [
-      { title: "Tahun Akademik", url: "/panel/tahun-akademik", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
-      { title: "Jenis Pengujian", url: "/panel/jenis-pengujian", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
-      { title: "Jurusan", url: "/panel/jurusan", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
-      { title: "Prodi", url: "/panel/Prodi", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
-      { title: "Praktikum", url: "/panel/Praktikum", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
+      { title: "Tahun Akademik", url: "/panel/tahun-akademik", roles: ['Admin', 'Kepala Lab Terpadu'] },
+      { title: "Jenis Pengujian", url: "/panel/jenis-pengujian", roles: ['Admin', 'Kepala Lab Terpadu'] },
+      { title: "Jurusan", url: "/panel/jurusan", roles: ['Admin', 'Kepala Lab Terpadu'] },
+      { title: "Prodi", url: "/panel/Prodi", roles: ['Admin', 'Kepala Lab Terpadu'] },
+      { title: "Praktikum", url: "/panel/Praktikum", roles: ['Admin', 'Kepala Lab Terpadu'] },
       { title: "Ruangan Laboratorium", url: "/panel/ruangan-laboratorium", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
       { title: "Alat Laboratorium", url: "/panel/alat-laboratorium", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
       { title: "Bahan Laboratorium", url: "/panel/bahan-laboratorium", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
@@ -38,15 +38,6 @@ export const navItems = [
       { title: "Laboran", url: "/panel/laboran", roles: ['Admin'] },
       { title: "Mahasiswa", url: "/panel/mahasiswa", roles: ['Admin'] },
       { title: "Pihak Luar", url: "/panel/pihak-luar", roles: ['Admin'] },
-    ],
-  },
-  {
-    title: "Laporan",
-    url: "#",
-    icon: StickyNote,
-    roles: ['Admin'],
-    items: [
-      { title: "Peminjaman", url: "/panel/laporan/peminjaman", roles: ['Admin'] },
     ],
   },
   {

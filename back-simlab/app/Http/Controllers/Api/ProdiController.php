@@ -67,9 +67,9 @@ class ProdiController extends BaseController
         try {
             $study_program = Prodi::create($request->validated());
 
-            return $this->sendResponse($study_program, "Study Program Created Successfully");
+            return $this->sendResponse($study_program, "Berhasil menambah program studi");
         } catch (\Exception $e) {
-            return $this->sendError('Failed to create study program', [$e->getMessage()], 500);
+            return $this->sendError('Terjadi kesalahan dalam menambah program studi', [$e->getMessage()], 500);
         }
     }
 
@@ -91,11 +91,11 @@ class ProdiController extends BaseController
             $study_program = Prodi::findOrFail($id);
             $study_program->update($request->validated());
 
-            return $this->sendResponse($study_program, "Study Program Updated Successfully");
+            return $this->sendResponse($study_program, "Berhasil mengubah program studi");
         } catch (ModelNotFoundException $e) {
-            return $this->sendError("Study Program Not Found", [], 404);
+            return $this->sendError("Program studi tidak ditemukan", [], 404);
         } catch (\Exception $e) {
-            return $this->sendError('Failed to update Study Program', [$e->getMessage()], 500);
+            return $this->sendError('Berhasil mengubah program studi', [$e->getMessage()], 500);
         }
     }
 

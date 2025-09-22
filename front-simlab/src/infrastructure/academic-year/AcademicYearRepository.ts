@@ -1,18 +1,13 @@
-import { AcademicYearInputDTO, AcademicYearTableParam } from "@/application/academic-year/dtos/AcademicYearDTO";
 import { AcademicYear } from "../../domain/academic-year/AcademicYear";
 import { IAdacemicYearRepository } from "../../domain/academic-year/IAcademicYearRepository";
 import { ApiResponse, PaginatedResponse } from "../../shared/Types";
 import { fetchApi } from "../ApiClient";
 import { AcademicYearAPI, toDomain } from "./AcademicYearAPI";
+import { generateQueryStringFromObject } from "../Helper";
 
 export class AcademicYearRepository implements IAdacemicYearRepository {
-    async getAll(params: AcademicYearTableParam): Promise<PaginatedResponse<AcademicYear>> {
-        const queryString = new URLSearchParams(
-            Object.entries(params).reduce((acc, [key, value]) => {
-                acc[key] = String(value);
-                return acc;
-            }, {} as Record<string, string>)
-        ).toString();
+    async getAll(params: { page: number, per_page: number, search: string}): Promise<PaginatedResponse<AcademicYear>> {
+        const queryString = generateQueryStringFromObject(params);
 
         const response = await fetchApi(`/academic-years?${queryString}`, { method: 'GET' });
         const json = await response.json();
@@ -26,7 +21,7 @@ export class AcademicYearRepository implements IAdacemicYearRepository {
         throw json['message'];
 
     }
-    async createData(data: AcademicYearInputDTO): Promise<ApiResponse<AcademicYear>> {
+    async createData(data: { name: string }): Promise<ApiResponse<AcademicYear>> {
         const response = await fetchApi('/academic-years', {
             method: 'POST',
             body: JSON.stringify(data),
@@ -38,7 +33,7 @@ export class AcademicYearRepository implements IAdacemicYearRepository {
         }
         throw json
     }
-    async updateData(id: number, data: AcademicYearInputDTO): Promise<ApiResponse<AcademicYear>> {
+    async updateData(id: number, data: { name: string }): Promise<ApiResponse<AcademicYear>> {
         const response = await fetchApi(`/academic-years/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),

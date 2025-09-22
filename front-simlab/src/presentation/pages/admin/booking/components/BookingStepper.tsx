@@ -28,7 +28,7 @@ const BookingStepper: React.FC<BookingStepperProps> = ({ bookingId }) => {
     }, [])
 
     return (
-        <div className="relative flex flex-col gap-3 w-full">
+        <div className="relative flex flex-col gap-3 w-full mt-5">
             {bookingStepsLoading && (
                 <div className="flex gap-4 w-full animate-pulse justify-center mb-5">
                     {[...Array(3)].map((_, i) => (
@@ -48,7 +48,7 @@ const BookingStepper: React.FC<BookingStepperProps> = ({ bookingId }) => {
             {!bookingStepsLoading && !bookingStepsError && (
                 <div className="pb-4 w-full flex overflow-x-auto scrollbar-hidden">
                     {bookingSteps.map((step, i) => (
-                        <div className={`flex items-center ${(i + 1) == bookingSteps.length ? 'w-fit' : 'w-full'}`}>
+                        <div className={`flex items-center ${(i + 1) == bookingSteps.length ? 'w-fit' : 'w-full'}`} key={i}>
                             <div className='flex flex-col items-center w-fit gap-1'>
                                 <div className={`w-10 h-10 flex items-center justify-center rounded-full text-xs font-semibold shadow-sm
                                     ${step.status === 'approved' ? 'bg-green-600 text-white' : step.status === 'rejected' ? 'bg-red-600 text-white' : 'bg-gray-300 text-gray-600'}`}

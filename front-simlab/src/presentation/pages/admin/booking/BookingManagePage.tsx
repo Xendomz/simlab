@@ -53,6 +53,8 @@ const BookingManagePage = () => {
     } catch (error: any) {
       if (error.code == 404) {
         navigate('/404')
+      } else if (error.code == 403) {
+        navigate('/404')
       }
     }
   }, [getBookingDetail, id, navigate])

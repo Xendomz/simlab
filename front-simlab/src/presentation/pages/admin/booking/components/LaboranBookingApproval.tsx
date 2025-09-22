@@ -6,13 +6,13 @@ import { useBooking } from '@/application/booking/hooks/useBooking';
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
 import Table from '@/presentation/components/Table';
 import { BookingVerificationColumn } from '../column/BookingVerificationColumn';
-import KepalaLabBookingApprovalDialog from './KepalaLabBookingApprovalDialog';
 import { BookingVerifyDTO } from '@/application/booking/dto/BookingDTO';
 import { toast } from 'sonner';
 import BookingRejectionDialog from './BookingRejectionDialog';
 import LaboranBookingApprovalDialog from './LaboranBookingApprovalDialog';
 import LaboranBookingApprovalEquipmentDialog from './LaboranBookingApprovalEquipmentDialog';
 import { BookingType } from '@/domain/booking/BookingType';
+import { BookingView } from '@/application/booking/BookingView';
 
 const LaboranBookingApproval = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -63,12 +63,12 @@ const LaboranBookingApproval = () => {
         setTotalItems
     })
 
-    const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
+    const [selectedBooking, setSelectedBooking] = useState<BookingView | null>(null);
     const [openApprovalDialog, setOpenApprovalDialog] = useState<boolean>(false);
     const [openEquipmentDialog, setOpenEquipmentDialog] = useState<boolean>(false);
     const [openRejectionDialog, setOpenRejectionDialog] = useState<boolean>(false);
 
-    const openApproval = (booking: any) => {
+    const openApproval = (booking: BookingView) => {
         setSelectedBooking(booking);
         if (booking.bookingType === BookingType.Equipment) {
             setOpenEquipmentDialog(true);
@@ -77,10 +77,8 @@ const LaboranBookingApproval = () => {
         }
     };
 
-    const openRejection = (booking: any) => {
+    const openRejection = (booking: BookingView) => {
         setSelectedBooking(booking);
-        console.log(booking);
-        
         setOpenRejectionDialog(true);
     };
 
@@ -103,7 +101,7 @@ const LaboranBookingApproval = () => {
 
     const handleApproval = async (data: BookingVerifyDTO): Promise<void> => {
         if (selectedBooking) {
-            const res = await verifyBooking(selectedBooking, data);
+            const res = await verifyBooking(selectedBooking.id, data);
             toast.success(res.message);
             setOpenApprovalDialog(false);
             setOpenEquipmentDialog(false);
@@ -114,7 +112,7 @@ const LaboranBookingApproval = () => {
 
     const handleRejection = async (data: BookingVerifyDTO): Promise<void> => {
         if (selectedBooking) {
-            const res = await verifyBooking(selectedBooking, data);
+            const res = await verifyBooking(selectedBooking.id, data);
             toast.success(res.message);
             setOpenRejectionDialog(false);
             setSelectedBooking(null);

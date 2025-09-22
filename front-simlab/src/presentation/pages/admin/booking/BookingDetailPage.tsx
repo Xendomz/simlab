@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import React, { useEffect, useRef, useState } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { useBooking } from '@/application/booking/hooks/useBooking';
 import { BookingView } from '@/application/booking/BookingView';
 import Header from '@/presentation/components/Header';
@@ -27,15 +27,19 @@ export const BookingDetailPage: React.FC = () => {
   // Booking Detail State
   const [booking, setBooking] = useState<BookingView>();
   const [bookingLoading, setBookingLoading] = useState<boolean>(false);
-  const [bookingError, setBookingError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const getBookingDetailData = async () => {
     try {
       setBookingLoading(true);
       const res = await getBookingDetail(bookingId);
       setBooking(res.data);
-    } catch (e: any) {
-      setBookingError(e?.message || 'Gagal memuat detail');
+    } catch (error: any) {
+      if (error.code == 404) {
+        navigate('/404')
+      } else if (error.code == 403) {
+        navigate('/404')
+      }
     } finally {
       setBookingLoading(false);
     }
@@ -59,7 +63,7 @@ export const BookingDetailPage: React.FC = () => {
       <div className="flex flex-col gap-4 p-4 pt-0">
         <div className="flex flex-col gap-4 animate-pulse">
           <Skeleton className="h-8 w-1/3 mb-2" />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Skeleton className="h-64 w-full" />
             <div className="flex flex-col gap-4">
               <Skeleton className="h-32 w-full" />
@@ -71,7 +75,7 @@ export const BookingDetailPage: React.FC = () => {
     </>
   );
 
-  if (bookingError) return <div className="text-red-500">{bookingError}</div>;
+  
   if (!booking) return <div>Data tidak ditemukan</div>;
 
   const equipments = Array.isArray((booking as any).bookingEquipment) ? (booking as any).bookingEquipment : [];
@@ -85,16 +89,18 @@ export const BookingDetailPage: React.FC = () => {
       <Header title="Detail Peminjaman" />
       <div className="flex flex-col gap-4 p-4 pt-0" ref={sectionRef}>
         <Tabs defaultValue={defaultTab} className="w-full">
-          <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-            {booking.bookingType != BookingType.Room && (
-              <TabsList className="flex flex-wrap">
-                <TabsTrigger value="general">Informasi Umum</TabsTrigger>
-                {hasEquipment && <TabsTrigger value="equipment">Daftar Alat</TabsTrigger>}
-                {hasMaterial && <TabsTrigger value="material">Daftar Bahan</TabsTrigger>}
-              </TabsList>
-            )}
-            <NavLink to={['Kepala Lab Terpadu', 'Laboran'].includes(user?.role ?? '') ? '/panel/peminjaman/verif' : '/panel/peminjaman'} className={'self-end ml-auto'}>
-              <Button className="gap-2">
+          <div className="flex items-center justify-between flex-col-reverse sm:flex-row mb-2 gap-4">
+            <div>
+              {booking.bookingType != BookingType.Room && (
+                <TabsList className="flex">
+                  <TabsTrigger value="general">Informasi Umum</TabsTrigger>
+                  {hasEquipment && <TabsTrigger value="equipment">Daftar Alat</TabsTrigger>}
+                  {hasMaterial && <TabsTrigger value="material">Daftar Bahan</TabsTrigger>}
+                </TabsList>
+              )}
+            </div>
+            <NavLink to={['Kepala Lab Terpadu', 'Laboran'].includes(user?.role ?? '') ? '/panel/peminjaman/verif' : '/panel/peminjaman'} className={'w-full sm:w-fit'}>
+              <Button className="gap-2 w-full sm:w-fit">
                 <ArrowLeft className="w-4 h-4" />
                 Kembali
               </Button>
@@ -104,7 +110,7 @@ export const BookingDetailPage: React.FC = () => {
           <BookingStepper bookingId={bookingId} />
 
           <TabsContent value="general">
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
               {/* Informasi Umum */}
               <Card>
                 <CardHeader>
@@ -112,7 +118,7 @@ export const BookingDetailPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-8">
-                    <div className="grid sm:grid-cols-2 text-sm gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 text-sm gap-4">
                       <div className='flex flex-col'>
                         <span className="font-semibold">Jenis Peminjaman</span>
                         <div className='text-muted-foreground'>{booking.getFormattedBookingType?.() ?? booking.bookingType}</div>
@@ -165,7 +171,7 @@ export const BookingDetailPage: React.FC = () => {
                     <div className="space-y-8">
                       {booking.user && (
                         <div className="flex flex-col gap-4">
-                          <div className="grid gap-3 sm:grid-cols-2 text-sm">
+                          <div className="grid gap-3 grid-cols-1 md:grid-cols-2 text-sm">
                             <div className='flex flex-col'>
                               <span className="font-semibold">Nama</span>
                               <div className='text-muted-foreground'>{booking.user.name}</div>
@@ -189,7 +195,7 @@ export const BookingDetailPage: React.FC = () => {
                   <CardContent>
                     <div className="space-y-8">
                       {hasRoom ? (
-                        <div className="grid gap-4 sm:grid-cols-2 text-sm">
+                        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 text-sm">
                           <div className='flex flex-col'>
                             <span className="font-semibold">Ruangan </span>
                             <div className='text-muted-foreground'>{booking.laboratoryRoom?.name}</div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -20,9 +20,6 @@ interface LaboranBookingApprovalDialogProps {
 const LaboranBookingApprovalDialog: React.FC<LaboranBookingApprovalDialogProps> = ({ open, onOpenChange, handleSave }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-    }, [open])
-
     const onSubmit = async () => {
         setIsSubmitting(true);
         try {
@@ -37,7 +34,7 @@ const LaboranBookingApprovalDialog: React.FC<LaboranBookingApprovalDialogProps> 
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Pilih Laboran</DialogTitle>
+                    <DialogTitle>Verifikasi Peminjaman Laboratorium</DialogTitle>
                     <DialogDescription>
                         Apakah anda yakin untuk melakukan verifikasi terhadap Peminjaman Ruangan Laboratorium Terpadu ITK?
                     </DialogDescription>

@@ -11,7 +11,7 @@ import { Input } from '@/presentation/components/ui/input'
 interface AcademicYearFormDialogProps {
     title: string,
     open: boolean,
-    data: any
+    data: AcademicYearView[]
     dataId: number | null,
     onOpenChange: (open: boolean) => void,
     handleSave: (data: any) => Promise<void>
@@ -26,7 +26,7 @@ const AcademicYearFormDialog: React.FC<AcademicYearFormDialogProps> = ({
     handleSave
 }) => {
     const [formData, setFormData] = useState<AcademicYearInputDTO>({
-        academic_year: '', // Add other required fields with default values here
+        name: '', // Add other required fields with default values here
     });
     const { errors, setErrors, processErrors } = useValidationErrors()
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,14 +34,15 @@ const AcademicYearFormDialog: React.FC<AcademicYearFormDialogProps> = ({
     useEffect(() => {
         setErrors({})
     }, [open])
-    
+
     useEffect(() => {
         if (dataId) {
-            setFormData({ academic_year: data.find((data: AcademicYearView) => data.id == dataId).academicYear })
+            const academicYear = data.find((data: AcademicYearView) => data.id == dataId)
+            setFormData({ name: academicYear ? academicYear.name : '' })
         } else {
-            setFormData({ academic_year: '' }) // Add other required fields with default values here
+            setFormData({ name: '' }) // Add other required fields with default values here
         }
-    }, [dataId])
+    }, [open])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -68,28 +69,30 @@ const AcademicYearFormDialog: React.FC<AcademicYearFormDialogProps> = ({
     }
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md" onOpenAutoFocus={(e) => e.preventDefault()}>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription></DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} encType='multipart/form-data'>
                     <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
+                        <Label htmlFor='academic_year'>
                             Tahun Akademik <span className="text-red-500">*</span>
                         </Label>
-                        <Input
-                            type='text'
-                            id='academic_year'
-                            name='academic_year'
-                            value={formData['academic_year'] || ''}
-                            onChange={handleChange}
-                            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                            placeholder='Tahun Akademik'
-                        />
-                        {errors['academic_year'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['academic_year']}</p>
-                        )}
+                        <div>
+                            <Input
+                                type='text'
+                                id='academic_year'
+                                name='name'
+                                value={formData['name'] || ''}
+                                onChange={handleChange}
+                                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                                placeholder='Tahun Akademik'
+                            />
+                            {errors['name'] && (
+                                <p className="mt-1 text-xs italic text-red-500">{errors['name']}</p>
+                            )}
+                        </div>
                     </div>
                 </form>
                 <DialogFooter>

@@ -8,6 +8,7 @@ import { PracticumSchedulingEquipmentAPI, toDomain as toPracticumSchedulingEquip
 import { PracticumSchedulingMaterialAPI, toDomain as toPracticumSchedulingMaterial  } from "./PracticumSchedulingMaterialAPI";
 import { Time } from "@/domain/time/Time";
 import { PracticalWorkAPI, toDomain as toPracticalWork } from "../practical-work/PracticalWorkAPI";
+import { PracticumSchedulingStatus } from "@/domain/practicum-scheduling/PracticumSchedulingStatus";
 
 export type PracticumSchedulingAPI = {
     id: number;
@@ -40,7 +41,7 @@ export function toDomain(api: PracticumSchedulingAPI): PracticumScheduling {
         api.ruangan_laboratorium_id,
         api.praktikum_id,
         api.phone_number,
-        api.status,
+        api.status as PracticumSchedulingStatus,
         new Time(api.created_at),
         new Time(api.updated_at),
         api.academicYear ? toAcademicYear(api.academicYear) : undefined,

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useLaboratoryRoom } from '@/application/laboratory-room/hooks/useLaboratoryRoom';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/components/ui/select';
 import { Checkbox } from '@/presentation/components/ui/checkbox';
 import { Label } from '@/presentation/components/ui/label';
 import {
@@ -17,6 +16,7 @@ import { BookingVerifyDTO } from '@/application/booking/dto/BookingDTO'
 import { useValidationErrors } from '@/presentation/hooks/useValidationError';
 import { toast } from 'sonner';
 import { ApiResponse } from '@/shared/Types';
+import { Combobox } from '@/presentation/components/custom/combobox';
 
 interface LaboranBookingApprovalEquipmentDialogProps {
     open: boolean,
@@ -32,7 +32,6 @@ const LaboranBookingApprovalEquipmentDialog: React.FC<LaboranBookingApprovalEqui
 
     const {
         laboratoryRoom: rooms,
-        isLoading: loadingRooms,
         getData: getRooms
     } = useLaboratoryRoom({
         currentPage: 1,
@@ -80,20 +79,17 @@ const LaboranBookingApprovalEquipmentDialog: React.FC<LaboranBookingApprovalEqui
                         Pilih ruangan laboratorium tempat alat akan digunakan dan tentukan apakah alat boleh dibawa ke luar ruangan.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="flex flex-col gap-4 py-2">
+                <div className="flex flex-col gap-2 py-2">
+                    <Label htmlFor="ruangan">Ruangan Laboratorium</Label>
                     <div>
-                        <Label htmlFor="ruangan">Ruangan Laboratorium</Label>
-                        <Select value={selectedRoom} onValueChange={setSelectedRoom} disabled={loadingRooms}>
-                            <SelectTrigger id="ruangan" className="mt-1 w-full">
-                                <SelectValue placeholder={loadingRooms ? 'Memuat...' : 'Pilih ruangan'} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {rooms.length === 0 && <SelectItem value="''" disabled>Tidak ada ruangan</SelectItem>}
-                                {rooms.map((room: any) => (
-                                    <SelectItem key={room.id} value={String(room.id)}>{room.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Combobox
+                            options={rooms}
+                            value={selectedRoom}
+                            onChange={(val) => setSelectedRoom(String(val))}
+                            placeholder="Pilih Ruangan Laboratorium"
+                            optionLabelKey='name'
+                            optionValueKey='id'
+                        />
                         {errors['ruangan_laboratorium_id'] && (
                             <p className=" text-xs italic text-red-500">{errors['ruangan_laboratorium_id']}</p>
                         )}

@@ -33,11 +33,17 @@ import PracticumSchedulingCreatePage from "./presentation/pages/admin/practicum-
 import PracticumSchedulingDetailPage from "./presentation/pages/admin/practicum-scheduling/PracticumSchedulingDetailPage";
 import PracticumSchedulingManagePage from "./presentation/pages/admin/practicum-scheduling/PracticumSchedulingManagePage";
 import PracticumSchedulingVerification from "./presentation/pages/admin/practicum-scheduling/PracticumSchedulingVerification";
+import MainPage from "./presentation/pages/landing/MainPage";
+import NewsContent from "./presentation/pages/landing/news/NewsContent";
 
 export const router = createBrowserRouter([
     {
         path: '/',
-        element: <>Landing Page Disini</>
+        element: <MainPage/>
+    },
+    {
+        path: '/berita/:slug',
+        element: <NewsContent/>
     },
     {
         path: '/login',

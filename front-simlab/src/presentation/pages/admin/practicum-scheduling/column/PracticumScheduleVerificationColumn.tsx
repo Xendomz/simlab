@@ -2,6 +2,7 @@ import { PracticumSchedulingView } from "@/application/practicum-scheduling/Prac
 import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
+import { NavLink } from "react-router-dom";
 
 interface ColumnProps {
     role: 'Kepala Lab Terpadu' | 'Laboran' | 'Koorprodi';
@@ -32,13 +33,20 @@ export const PracticumScheduleVerificationColumn = ({ role, openApproval, openRe
         )
     },
     {
-        header: 'Verifikasi Peminjaman', accessorKey: 'id', cell: ({ row }) => {
+        header: 'Informasi Pengajuan', accessorKey: 'activityName', cell: ({ row }) => (
+            <NavLink to={`/panel/penjadwalan-praktikum/${row.original.id}/detail`}>
+                <Button size="sm" variant="secondary">Detail</Button>
+            </NavLink>
+        )
+    },
+    {
+        header: 'Verifikasi Pengajuan', accessorKey: 'id', cell: ({ row }) => {
             const renderApprovalBadge = (approval: any) => {
                 if (!approval) return null;
                 return approval.approved ? (
-                    <Badge>Peminjaman Distujui</Badge>
+                    <Badge>Pengajuan Distujui</Badge>
                 ) : (
-                    <Badge variant={'destructive'}>Peminjaman Ditolak</Badge>
+                    <Badge variant={'destructive'}>Pengajuan Ditolak</Badge>
                 );
             };
 

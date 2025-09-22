@@ -1,5 +1,5 @@
 export interface AcademicYearInputDTO {
-    academic_year: string
+    name: string
 }
 
 export interface AcademicYearTableParam {

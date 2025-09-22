@@ -112,6 +112,7 @@ const AcademicYearPage = () => {
             toast.success(res.message)
         }
         getData()
+        setId(null)
         setIsOpen(false)
     }
 
@@ -166,7 +167,7 @@ const AcademicYearPage = () => {
                 data={academicYear}
                 dataId={id}
                 handleSave={handleSave}
-                title={type == 'Add' ? 'Tambah tahun akademik' : 'Edit tahun akademik'}
+                title={type == 'Add' ? 'Tambah Tahun Akademik' : 'Edit Tahun Akademik'}
             />
         </>
     )

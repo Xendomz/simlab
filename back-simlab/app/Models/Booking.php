@@ -14,7 +14,7 @@ class Booking extends Model
 
     public function academicYear()
     {
-        return $this->belongsTo(TahunAkademik::class, 'academic_year_id');
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
 
     public function user()
@@ -74,5 +74,14 @@ class Booking extends Model
             ->where('role', 'Laboran')
             ->first();
         return $approval ?: null;
+    }
+
+    public function getLaboranOffsiteApprovedAttribute()
+    {
+        return $this->approvals()
+            ->where('role', 'Laboran')
+            ->where('approved', 1)
+            ->where('is_allowed_offsite', 1)
+            ->exists();
     }
 }
