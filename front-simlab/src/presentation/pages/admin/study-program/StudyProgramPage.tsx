@@ -5,7 +5,6 @@ import Table from "../../../components/Table";
 import { StudyProgramColumn } from "./StudyProgramColumn";
 import useTable from "../../../../application/hooks/useTable";
 import { ModalType } from "../../../../shared/Types";
-import { useMajor } from "@/application/major/hooks/useMajor";
 import { useStudyProgram } from "@/application/study-program/hooks/useStudyProgram";
 import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
@@ -16,6 +15,9 @@ import { toast } from "sonner";
 import { StudyProgramInputDTO } from "@/application/study-program/dto/StudyProgramDTO";
 import StudyProgramFormDialog from "./components/StudyProgramFormDialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
+import { MajorService } from "@/application/major/MajorService";
+import { MajorView } from "@/application/major/MajorView";
+import { MajorSelectView } from "@/application/major/MajorSelectView";
 
 const StudyProgramPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -37,6 +39,24 @@ const StudyProgramPage = () => {
         )
     }, [])
 
+    const majorService = new MajorService()
+    const [majors, setMajors] = useState<MajorSelectView[]>([])
+    const [selectedMajor, setSelectedMajor] = useState<number>(0)
+    const handleFilterMajor = (e: ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        setSelectedMajor(value ? Number(value) : 0);
+        setCurrentPage(1);
+    }
+
+    useEffect(() => {
+        const getMajors = async () => {
+            const response = await majorService.getDataForSelect()
+            setMajors(response.data ?? [])
+        }
+
+        getMajors()
+    }, [])
+
     const {
         currentPage,
         perPage,
@@ -53,25 +73,18 @@ const StudyProgramPage = () => {
         handlePageChange,
     } = useTable()
 
-    const {
-        major,
-        getData: getMajorData
-    } = useMajor({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages() { },
-        setTotalItems() { },
-    })
+    // const {
+    //     major,
+    //     getData: getMajorData
+    // } = useMajor({
+    //     currentPage: 1,
+    //     perPage: 9999,
+    //     searchTerm: '',
+    //     setTotalPages() { },
+    //     setTotalItems() { },
+    // })
 
-    const [selectedMajor, setSelectedMajor] = useState<number>()
-
-    const handleFilterMajor = (e: ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-
-        setSelectedMajor(value ? Number(value) : 0);
-        setCurrentPage(1);
-    }
+    // const [selectedMajor, setSelectedMajor] = useState<number>()
 
     const {
         studyProgram,
@@ -96,10 +109,6 @@ const StudyProgramPage = () => {
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
     useEffect(() => {
-        getMajorData()
-    }, [])
-
-    useEffect(() => {
         getData()
     }, [currentPage, perPage, selectedMajor])
 
@@ -116,7 +125,6 @@ const StudyProgramPage = () => {
     }, [searchTerm])
 
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -180,7 +188,7 @@ const StudyProgramPage = () => {
                                         <SelectGroup>
                                             <SelectLabel>Jurusan</SelectLabel>
                                             <SelectItem value={"0"}>Semua</SelectItem>
-                                            {major?.map((option, index) => (
+                                            {majors?.map((option, index) => (
                                                 <SelectItem key={index} value={option.id.toString()}>{option.name}</SelectItem>
                                             ))}
                                         </SelectGroup>
@@ -208,7 +216,7 @@ const StudyProgramPage = () => {
                 open={isOpen}
                 onOpenChange={setIsOpen}
                 data={studyProgram}
-                major={major}
+                majors={majors}
                 dataId={id}
                 handleSave={handleSave}
                 title={type == 'Add' ? 'Tambah program studi' : 'Edit program studi'}

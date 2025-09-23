@@ -1,7 +1,8 @@
 import { MajorRepository } from "@/infrastructure/major/MajorReposistory";
 import { MajorView } from "./MajorView";
-import { PaginatedResponse } from "@/shared/Types";
+import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { MajorInputDTO, MajorTableParam } from "./dto/MajorDTO";
+import { MajorSelectView } from "./MajorSelectView";
 
 export class MajorService {
     private readonly majorRepository = new MajorRepository()
@@ -25,5 +26,14 @@ export class MajorService {
 
     async deleteData(id: number) {
         return await this.majorRepository.deleteData(id)
+    }
+
+    async getDataForSelect(): Promise<ApiResponse<MajorSelectView[]>> {
+        const majors = await this.majorRepository.getDataForSelect()
+
+        return {
+            ...majors,
+            data: majors.data ? majors.data.map(MajorSelectView.fromDomain) : undefined
+        }
     }
 }

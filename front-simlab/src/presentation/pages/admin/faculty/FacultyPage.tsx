@@ -1,22 +1,22 @@
-import { useEffect, useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
-import { AcademicYearColumn } from "./AcademicYearColumn";
-import Table from "../../../components/Table";
-import { ModalType } from "../../../../shared/Types";
-import useTable from "../../../../application/hooks/useTable";
+import { useEffect, useRef, useState } from 'react';
+import useTable from '@/application/hooks/useTable';
+import { FacultyService } from '@/application/faculty/FacultyService';
+import { FacultyView } from '@/application/faculty/FacultyView';
+import Header from '@/presentation/components/Header';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
-import Header from "@/presentation/components/Header";
-import { Plus } from "lucide-react";
-import { Button } from "@/presentation/components/ui/button";
-import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
-import { toast } from "sonner";
-import { AcademicYearInputDTO } from "@/application/academic-year/AcademicYearDTO";
-import AcademicYearFormDialog from "./components/AcademicYearFormDialog";
-import { AcademicYearService } from "@/application/academic-year/AcademicYearService";
-import { AcademicYearView } from "@/application/academic-year/AcademicYearView";
+import { Button } from '@/presentation/components/ui/button';
+import { Plus } from 'lucide-react';
+import Table from '@/presentation/components/Table';
+import { FacultyColumn } from './FacultyColumn';
+import { ModalType } from '@/shared/Types';
+import { FacultyInputDTO } from '@/application/faculty/FacultyDTO';
+import { toast } from 'sonner';
+import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog';
+import FacultyFormDialog from './components/FacultyFormDialog';
 
-const AcademicYearPage = () => {
+const FacultyPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
 
     useGSAP(() => {
@@ -52,18 +52,18 @@ const AcademicYearPage = () => {
         handlePageChange,
     } = useTable()
 
-    const academicYearService = new AcademicYearService()
-    const [academicYear, setAcademicYear] = useState<AcademicYearView[]>([])
+    const facultyService = new FacultyService()
+    const [faculty, setFaculty] = useState<FacultyView[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
     const getData = async () => {
         setIsLoading(true)
-        const response = await academicYearService.getAcademicYearData({
+        const response = await facultyService.getFacultyData({
             page: currentPage,
             per_page: perPage,
             search: searchTerm
-        })
-        setAcademicYear(response.data ?? [])
+        });
+        setFaculty(response.data ?? [])
         setTotalItems(response.total ?? 0)
         setTotalPages(response.last_page ?? 0)
         setIsLoading(false)
@@ -85,12 +85,10 @@ const AcademicYearPage = () => {
         return () => clearTimeout(timer)
     }, [searchTerm])
 
-    const [isOpen, setIsOpen] = useState(false)
+    const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
     const [type, setType] = useState<ModalType>('Add')
-
-    const [confirmOpen, setConfirmOpen] = useState(false)
-    const [confirmType, setConfirmType] = useState<"delete" | "status" | null>(null)
+    const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
     const openModal = (modalType: ModalType, id: number | null = null) => {
         setType(modalType)
@@ -98,46 +96,40 @@ const AcademicYearPage = () => {
         setIsOpen(true)
     }
 
-    const openConfirm = (type: "delete" | "status", id: number) => {
-        setConfirmType(type)
+    const openConfirm = (id: number) => {
         setId(id)
         setConfirmOpen(true)
     }
 
-    const handleSave = async (formData: AcademicYearInputDTO): Promise<void> => {
+    const handleSave = async (formData: FacultyInputDTO): Promise<void> => {
         if (id) {
-            const res = await academicYearService.updateData(id, formData)
+            const res = await facultyService.updateData(id, formData)
             toast.success(res.message)
         } else {
-            const res = await academicYearService.createData(formData)
+            const res = await facultyService.createData(formData)
             toast.success(res.message)
         }
+
         getData()
-        setId(null)
         setIsOpen(false)
     }
 
-    const handleConfirm = async() => {
-        if (!id) return 
-        if (confirmType == 'delete') {
-            const res = await academicYearService.deleteData(id)
-            toast.success(res.message)
-        } else {
-            const res = await academicYearService.toggleStatus(id)            
-            toast.success(res.message)
-        }
+    const handleDelete = async () => {
+        if (!id) return
+        const res = await facultyService.deleteData(id)
+        toast.success(res.message)
+
         getData()
         setConfirmOpen(false)
     }
 
-
     return (
         <>
-            <Header title='Menu Tahun Akademik' />
+            <Header title='Menu Fakultas' />
             <div className="flex flex-1 flex-col gap-4 p-4 pt-0" ref={sectionRef}>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Menu Tahun Akademik</CardTitle>
+                        <CardTitle>Menu Fakultas</CardTitle>
                         <CardAction>
                             <Button variant={"default"} onClick={() => openModal('Add')}>
                                 Tambah
@@ -147,8 +139,8 @@ const AcademicYearPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={academicYear}
-                            columns={AcademicYearColumn({ openModal, openConfirm })}
+                            data={faculty}
+                            columns={FacultyColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
                             handleSearch={(e) => handleSearch(e)}
@@ -161,17 +153,17 @@ const AcademicYearPage = () => {
                     </CardContent>
                 </Card>
             </div>
-            <ConfirmationDialog open={confirmOpen} onOpenChange={setConfirmOpen} onConfirm={handleConfirm} />
-            <AcademicYearFormDialog
+            <ConfirmationDialog open={confirmOpen} onOpenChange={setConfirmOpen} onConfirm={handleDelete} />
+            <FacultyFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={academicYear}
+                data={faculty}
                 dataId={id}
                 handleSave={handleSave}
-                title={type == 'Add' ? 'Tambah Tahun Akademik' : 'Edit Tahun Akademik'}
+                title={type == 'Add' ? 'Tambah Fakultas' : 'Edit Fakultas'}
             />
         </>
     )
 }
 
-export default AcademicYearPage
+export default FacultyPage

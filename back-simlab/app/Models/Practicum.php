@@ -5,14 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Jurusan extends Model
+class Practicum extends Model
 {
     use HasFactory;
-
-    protected $fillable = ['major_code', 'name'];
+    protected $fillable = ['name', 'study_program_id', 'sks'];
 
     public function studyProgram()
     {
-        return $this->hasMany(Prodi::class, 'jurusan_id');
+        return $this->belongsTo(StudyProgram::class, 'study_program_id');
     }
 }

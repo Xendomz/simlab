@@ -18,7 +18,7 @@ export class AcademicYearRepository implements IAdacemicYearRepository {
                 data: data.data?.map(toDomain) || []
             };
         }
-        throw json['message'];
+        throw json;
 
     }
     async createData(data: { name: string }): Promise<ApiResponse<AcademicYear>> {
@@ -27,9 +27,13 @@ export class AcademicYearRepository implements IAdacemicYearRepository {
             body: JSON.stringify(data),
         });
 
-        const json = await response.json()
+        const json = await response.json() as ApiResponse
         if (response.ok) {
-            return json
+            const data = json.data as AcademicYearAPI
+            return {
+                ...json,
+                data: toDomain(data)
+            }
         }
         throw json
     }
@@ -39,9 +43,13 @@ export class AcademicYearRepository implements IAdacemicYearRepository {
             body: JSON.stringify(data),
         });
 
-        const json = await response.json()
+        const json = await response.json() as ApiResponse
         if (response.ok) {
-            return json
+            const data = json.data as AcademicYearAPI
+            return {
+                ...json,
+                data: toDomain(data)
+            }
         }
 
         throw json
@@ -51,9 +59,13 @@ export class AcademicYearRepository implements IAdacemicYearRepository {
             method: 'PUT',
         });
 
-        const json = await response.json()
+        const json = await response.json() as ApiResponse
         if (response.ok) {
-            return json
+            const data = json.data as AcademicYearAPI
+            return {
+                ...json,
+                data: toDomain(data)
+            }
         }
 
         throw json
@@ -63,9 +75,13 @@ export class AcademicYearRepository implements IAdacemicYearRepository {
             method: 'DELETE',
         });
 
-        const json = await response.json()
+        const json = await response.json() as ApiResponse
         if (response.ok) {
-            return json
+            const data = json.data as AcademicYearAPI
+            return {
+                ...json,
+                data: toDomain(data)
+            }
         }
 
         throw json

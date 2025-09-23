@@ -3,103 +3,126 @@
 namespace Database\Seeders;
 
 use App\Models\Prodi;
+use App\Models\StudyProgram;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class ProdiSeeder extends Seeder
+class StudyProgramSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Prodi::insert([
+        StudyProgram::insert([
             [
-                'jurusan_id' => 3,
+                'code' => '01',
+                'major_id' => 1,
                 'name' => 'Fisika'
             ],
             [
-                'jurusan_id' => 1,
+                'code' => '02',
+                'major_id' => 1,
                 'name' => 'Matematika'
             ],
             [
-                'jurusan_id' => 4,
+                'code' => '03',
+                'major_id' => 5,
                 'name' => 'Teknik Mesin'
             ],
             [
-                'jurusan_id' => 4,
+                'code' => '04',
+                'major_id' => 2,
                 'name' => 'Teknik Elektro'
             ],
             [
-                'jurusan_id' => 4,
+                'code' => '05',
+                'major_id' => 6,
                 'name' => 'Teknik Kimia'
             ],
             [
-                'jurusan_id' => 2,
+                'code' => '06',
+                'major_id' => 5,
                 'name' => 'Teknik Material dan Metalurgi'
             ],
             [
-                'jurusan_id' => 5,
+                'code' => '07',
+                'major_id' => 4,
                 'name' => 'Teknik Sipil'
             ],
             [
-                'jurusan_id' => 5,
+                'code' => '08',
+                'major_id' => 4,
                 'name' => 'Perencanaan Wilayah Kota'
             ],
             [
-                'jurusan_id' => 3,
+                'code' => '09',
+                'major_id' => 3,
                 'name' => 'Teknik Perkapalan'
             ],
             [
-                'jurusan_id' => 1,
+                'code' => '10',
+                'major_id' => 2,
                 'name' => 'Sistem Informasi'
             ],
             [
-                'jurusan_id' => 1,
+                'code' => '11',
+                'major_id' => 2,
                 'name' => 'Informatika'
             ],
             [
-                'jurusan_id' => 4,
+                'code' => '12',
+                'major_id' => 5,
                 'name' => 'Teknik Industri'
             ],
             [
-                'jurusan_id' => 2,
+                'code' => '13',
+                'major_id' => 3,
                 'name' => 'Teknik Lingkungan'
             ],
             [
-                'jurusan_id' => 3,
+                'code' => '14',
+                'major_id' => 3,
                 'name' => 'Teknik Kelautan',
             ],
             [
-                'jurusan_id' => 5,
+                'code' => '15',
+                'major_id' => 4,
                 'name' => 'Arsitektur'
             ],
             [
-                'jurusan_id' => 3,
+                'code' => '16',
+                'major_id' => 6,
                 'name' => 'Teknologi Pangan'
             ],
             [
-                'jurusan_id' => 1,
+                'code' => '17',
+                'major_id' => 1,
                 'name' => 'Statistika'
             ],
             [
-                'jurusan_id' => 1,
+                'code' => '18',
+                'major_id' => 1,
                 'name' => 'Ilmu Aktuaria'
             ],
             [
-                'jurusan_id' => 1,
+                'code' => '19',
+                'major_id' => 2,
                 'name' => 'Bisnis Digital'
             ],
             [
-                'jurusan_id' => 4,
+                'code' => '20',
+                'major_id' => 6,
                 'name' => 'Rekayasa Keselamatan'
             ],
             [
-                'jurusan_id' => 5,
+                'code' => '21',
+                'major_id' => 4,
                 'name' => 'Desain Komunikasi Visual'
             ],
             [
-                'jurusan_id' => 4,
+                'code' => '22',
+                'major_id' => 5,
                 'name' => 'Teknik Logistik'
             ]
         ]);

@@ -16,7 +16,7 @@ use App\Models\Booking;
 use App\Models\BookingApproval;
 use App\Models\BookingEquipment;
 use App\Models\BookingMaterial;
-use App\Models\TahunAkademik;
+use App\Models\AcademicYear;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -31,7 +31,7 @@ class BookingController extends BaseController
 
     public function __construct()
     {
-        $this->activeAcademicYear = TahunAkademik::where('status', 'Active')->first();
+        $this->activeAcademicYear = AcademicYear::where('status', 'Active')->first();
         $this->currentKepalaLab = User::where('role', 'Kepala Lab Terpadu')->first();
     }
 

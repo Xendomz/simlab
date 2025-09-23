@@ -29,15 +29,6 @@ class AcademicYearController extends BaseController
                 // Add more searchable fields as needed
             }
 
-            // Add sorting functionality
-            $sortField = $request->input('sort_by', 'created_at');
-            $sortDirection = $request->input('sort_direction', 'desc');
-            $allowedSortFields = ['id', 'name', 'status', 'created_at', 'updated_at'];
-
-            if (in_array($sortField, $allowedSortFields)) {
-                $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');
-            }
-
             // Get pagination parameters with defaults
             $perPage = $request->input('per_page', 10);
             $page = $request->input('page', 1);

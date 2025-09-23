@@ -35,6 +35,7 @@ import PracticumSchedulingManagePage from "./presentation/pages/admin/practicum-
 import PracticumSchedulingVerification from "./presentation/pages/admin/practicum-scheduling/PracticumSchedulingVerification";
 import MainPage from "./presentation/pages/landing/MainPage";
 import NewsContent from "./presentation/pages/landing/news/NewsContent";
+import FacultyPage from "./presentation/pages/admin/faculty/FacultyPage";
 
 export const router = createBrowserRouter([
     {
@@ -88,6 +89,14 @@ export const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute allowedRoles={['Admin']}>
                         <TestingTypePage />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: 'fakultas',
+                element: (
+                    <ProtectedRoute allowedRoles={['Admin']}>
+                        <FacultyPage />
                     </ProtectedRoute>
                 )
             },

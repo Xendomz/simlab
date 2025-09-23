@@ -22,7 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'prodi_id',
+        'study_program_id',
         'identity_num'
     ];
 
@@ -48,7 +48,7 @@ class User extends Authenticatable
 
     public function studyProgram()
     {
-        return $this->belongsTo(Prodi::class, 'prodi_id');
+        return $this->belongsTo(StudyProgram::class, 'prodi_id');
     }
 
     public function ruanganLaboratorium()

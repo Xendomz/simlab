@@ -1,5 +1,5 @@
 export interface StudyProgramInputDTO {
-    jurusan_id: number | null
+    major_id: number | null
     name: string,
 }
 

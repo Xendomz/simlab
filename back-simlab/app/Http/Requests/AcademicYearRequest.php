@@ -11,7 +11,7 @@ class AcademicYearRequest extends ApiRequest
 
     public function rules(): array
     {
-        $id = $this->route('id');
+        $id = $this->route('academic_year');
 
         $uniqueRule = "unique:academic_years,name";
         if ($id) {

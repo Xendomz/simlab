@@ -16,6 +16,7 @@ export const navItems = [
     items: [
       { title: "Tahun Akademik", url: "/panel/tahun-akademik", roles: ['Admin', 'Kepala Lab Terpadu'] },
       { title: "Jenis Pengujian", url: "/panel/jenis-pengujian", roles: ['Admin', 'Kepala Lab Terpadu'] },
+      { title: "Fakultas", url: "/panel/fakultas", roles: ['Admin'] },
       { title: "Jurusan", url: "/panel/jurusan", roles: ['Admin', 'Kepala Lab Terpadu'] },
       { title: "Prodi", url: "/panel/Prodi", roles: ['Admin', 'Kepala Lab Terpadu'] },
       { title: "Praktikum", url: "/panel/Praktikum", roles: ['Admin', 'Kepala Lab Terpadu'] },

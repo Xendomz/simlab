@@ -9,7 +9,7 @@ use App\Models\PracticumGroup;
 use App\Models\PracticumScheduling;
 use App\Models\PracticumSchedulingEquipment;
 use App\Models\PracticumSchedulingMaterial;
-use App\Models\TahunAkademik;
+use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -22,7 +22,7 @@ class PracticumSchedulingController extends BaseController
 
     public function __construct()
     {
-        $this->activeAcademicYear = TahunAkademik::where('status', 'Active')->first();
+        $this->activeAcademicYear = AcademicYear::where('status', 'Active')->first();
     }
 
     private function isAllowedAccess($practicumData, $user = null)

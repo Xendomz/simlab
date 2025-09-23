@@ -1,12 +1,18 @@
-import { MajorInputDTO, MajorTableParam } from "@/application/major/dto/MajorDTO";
+import { MajorSelect } from "@/domain/major/MajorSelect";
 import { IMajorReporsitory } from "../../domain/major/IMajorRepository";
 import { Major } from "../../domain/major/Major";
 import { ApiResponse, PaginatedResponse } from "../../shared/Types";
 import { fetchApi } from "../ApiClient";
 import { MajorAPI, toDomain } from "./MajorAPI";
+import { MajorSelectAPI, toDomain as toMajorSelect } from "./MajorSelectAPI";
 
 export class MajorRepository implements IMajorReporsitory {
-    async getAll(params: MajorTableParam): Promise<PaginatedResponse<Major>> {
+    async getAll(params: {
+        page: number,
+        per_page: number,
+        search: string,
+        filter_faculty?: number
+    }): Promise<PaginatedResponse<Major>> {
         const queryString = new URLSearchParams(
             Object.entries(params).reduce((acc, [key, value]) => {
                 acc[key] = String(value);
@@ -27,20 +33,32 @@ export class MajorRepository implements IMajorReporsitory {
         throw json['message'];
     }
 
-    async createData(data: MajorInputDTO): Promise<ApiResponse> {
+    async createData(data: {
+        faculty_id: number | null;
+        code: string;
+        name: string;
+    }): Promise<ApiResponse<Major>> {
         const response = await fetchApi('/majors', {
             method: 'POST',
             body: JSON.stringify(data),
         });
 
-        const json = await response.json()
+        const json = await response.json() as ApiResponse
         if (response.ok) {
-            return json
+            const data = json.data as MajorAPI
+            return {
+                ...json,
+                data: toDomain(data)
+            }
         }
         throw json
     }
 
-    async updateData(id: number, data: MajorInputDTO): Promise<ApiResponse> {
+    async updateData(id: number, data: {
+        faculty_id: number | null;
+        code: string;
+        name: string;
+    }): Promise<ApiResponse<Major>> {
         const response = await fetchApi(`/majors/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
@@ -48,7 +66,11 @@ export class MajorRepository implements IMajorReporsitory {
 
         const json = await response.json()
         if (response.ok) {
-            return json
+            const data = json.data as MajorAPI
+            return {
+                ...json,
+                data: toDomain(data)
+            }
         }
 
         throw json
@@ -63,6 +85,21 @@ export class MajorRepository implements IMajorReporsitory {
             return json
         }
 
+        throw json
+    }
+
+    async getDataForSelect(): Promise<ApiResponse<MajorSelect[]>> {
+        const response = await fetchApi(`/majors/select`)
+
+        const json = await response.json() as ApiResponse
+        if (response.ok) {
+            const data = json.data as MajorSelectAPI[]
+
+            return {
+                ...json,
+                data: data.map(toMajorSelect)
+            }
+        }
         throw json
     }
 }

@@ -6,12 +6,15 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BahanLaboratoriumController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\JenisPengujianController;
-use App\Http\Controllers\Api\JurusanController;
+use App\Http\Controllers\Api\MajorController;
 use App\Http\Controllers\Api\PracticumSchedulingController;
 use App\Http\Controllers\Api\PraktikumController;
 use App\Http\Controllers\Api\ProdiController;
 use App\Http\Controllers\Api\RuanganLaboratoriumController;
+use App\Http\Controllers\Api\StudyProgramController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\FacultyController;
+use App\Models\AcademicYear;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,7 +36,7 @@ Route::controller(AuthController::class)->group(function () {
 
 // Universal Api
 Route::prefix('pub')->group(function () {
-    Route::get('/study-programs', [ProdiController::class, 'getPublicStudyProgramData']);
+    Route::get('/study-programs', [StudyProgramController::class, 'getPublicStudyProgramData']);
 });
 
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -46,11 +49,25 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::resource('users', UserController::class)->only(['index']);
     });
     Route::middleware(['role:Admin|Laboran'])->group(function () {
+        // Academic Year Route
         Route::put('/academic-years/{id}/toggle-status', [AcademicYearController::class, 'toggleStatus']);
         Route::resource('academic-years', AcademicYearController::class);
-        Route::resource('majors', JurusanController::class);
+
+        // Faculty Route
+        Route::get('/faculties/select', [FacultyController::class, 'getDataForSelect']);
+        Route::resource('faculties', FacultyController::class);
+
+        // Major Route
+        Route::get('/majors/select', [MajorController::class, 'getDataForSelect']);
+        Route::resource('majors', MajorController::class);
+
+        // Testing Type Route
         Route::resource('testing-types', JenisPengujianController::class);
-        Route::resource('study-programs', ProdiController::class);
+
+        // Study Program Route
+        Route::resource('study-programs', StudyProgramController::class);
+
+        // Practicum
         Route::resource('practical-works', PraktikumController::class)->except(['index']);
         Route::resource('laboratory-rooms', RuanganLaboratoriumController::class)->except(['index']);
         Route::resource('laboratory-equipments', AlatLaboratoriumController::class)->except(['index']);

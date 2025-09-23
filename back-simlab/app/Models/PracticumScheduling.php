@@ -33,7 +33,7 @@ class PracticumScheduling extends Model
     }
 
     public function practicum() {
-        return $this->belongsTo(Praktikum::class, 'praktikum_id');
+        return $this->belongsTo(Practicum::class, 'practicum_id');
     }
 
     public function academicYear() {

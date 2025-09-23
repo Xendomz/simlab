@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('academic_year_id')->constrained('tahun_akademiks')->onDelete('cascade');
+            $table->foreignId('academic_year_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('laboran_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->foreignId('ruangan_laboratorium_id')->nullable()->constrained()->onDelete('cascade');
