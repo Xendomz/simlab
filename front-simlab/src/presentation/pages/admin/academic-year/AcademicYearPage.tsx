@@ -53,7 +53,7 @@ const AcademicYearPage = () => {
     } = useTable()
 
     const academicYearService = new AcademicYearService()
-    const [academicYear, setAcademicYear] = useState<AcademicYearView[]>([])
+    const [academicYears, setAcademicYears] = useState<AcademicYearView[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
     const getData = async () => {
@@ -63,7 +63,7 @@ const AcademicYearPage = () => {
             per_page: perPage,
             search: searchTerm
         })
-        setAcademicYear(response.data ?? [])
+        setAcademicYears(response.data ?? [])
         setTotalItems(response.total ?? 0)
         setTotalPages(response.last_page ?? 0)
         setIsLoading(false)
@@ -147,7 +147,7 @@ const AcademicYearPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={academicYear}
+                            data={academicYears}
                             columns={AcademicYearColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -165,7 +165,7 @@ const AcademicYearPage = () => {
             <AcademicYearFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={academicYear}
+                data={academicYears}
                 dataId={id}
                 handleSave={handleSave}
                 title={type == 'Add' ? 'Tambah Tahun Akademik' : 'Edit Tahun Akademik'}

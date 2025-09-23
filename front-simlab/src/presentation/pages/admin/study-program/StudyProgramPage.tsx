@@ -5,7 +5,6 @@ import Table from "../../../components/Table";
 import { StudyProgramColumn } from "./StudyProgramColumn";
 import useTable from "../../../../application/hooks/useTable";
 import { ModalType } from "../../../../shared/Types";
-import { useStudyProgram } from "@/application/study-program/hooks/useStudyProgram";
 import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Button } from "@/presentation/components/ui/button";
@@ -16,8 +15,9 @@ import { StudyProgramInputDTO } from "@/application/study-program/dto/StudyProgr
 import StudyProgramFormDialog from "./components/StudyProgramFormDialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import { MajorService } from "@/application/major/MajorService";
-import { MajorView } from "@/application/major/MajorView";
 import { MajorSelectView } from "@/application/major/MajorSelectView";
+import { StudyProgramView } from "@/application/study-program/StudyProgramView";
+import { StudyProgramService } from "@/application/study-program/StudyProgramService";
 
 const StudyProgramPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -73,39 +73,43 @@ const StudyProgramPage = () => {
         handlePageChange,
     } = useTable()
 
-    // const {
-    //     major,
-    //     getData: getMajorData
-    // } = useMajor({
-    //     currentPage: 1,
-    //     perPage: 9999,
-    //     searchTerm: '',
-    //     setTotalPages() { },
-    //     setTotalItems() { },
-    // })
+    const studyProgramService = new StudyProgramService()
+    const [studyPrograms, setStudyPrograms] = useState<StudyProgramView[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    // const [selectedMajor, setSelectedMajor] = useState<number>()
+    const getData = async () => {
+        setIsLoading(true)
+        const response = await studyProgramService.getStudyProgramData({
+            page: currentPage,
+            per_page: perPage,
+            search: searchTerm,
+            filter_major: selectedMajor
+        })
+        setStudyPrograms(response.data ?? [])
+        setTotalItems(response.total ?? 0)
+        setTotalPages(response.last_page ?? 0)
+        setIsLoading(false)
+    }
 
-    const {
-        studyProgram,
-        isLoading,
-        getData,
-        create,
-        update,
-        remove,
-    } = useStudyProgram({
-        currentPage,
-        perPage,
-        searchTerm,
-        filter_major: selectedMajor,
-        setTotalPages,
-        setTotalItems
-    })
+    useEffect(() => {
+        getData()
+    }, [currentPage, perPage, selectedMajor])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (currentPage === 1) {
+                getData()
+            } else {
+                setCurrentPage(1)
+            }
+        }, 500)
+
+        return () => clearTimeout(timer)
+    }, [searchTerm])
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
     const [type, setType] = useState<ModalType>('Add')
-
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
     useEffect(() => {
@@ -137,10 +141,10 @@ const StudyProgramPage = () => {
 
     const handleSave = async (formData: StudyProgramInputDTO): Promise<void> => {
         if (id) {
-            const res = await update(id, formData)
+            const res = await studyProgramService.updateData(id, formData)
             toast.success(res.message)
         } else {
-            const res = await create(formData)
+            const res = await studyProgramService.createData(formData)
             toast.success(res.message)
         }
         getData()
@@ -150,7 +154,7 @@ const StudyProgramPage = () => {
 
     const handleDelete = async () => {
         if (!id) return
-        const res = await remove(id)
+        const res = await studyProgramService.deleteData(id)
         toast.success(res.message)
 
         getData()
@@ -197,7 +201,7 @@ const StudyProgramPage = () => {
                             </div>
                         </div>
                         <Table
-                            data={studyProgram}
+                            data={studyPrograms}
                             columns={StudyProgramColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -215,7 +219,7 @@ const StudyProgramPage = () => {
             <StudyProgramFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={studyProgram}
+                data={studyPrograms}
                 majors={majors}
                 dataId={id}
                 handleSave={handleSave}

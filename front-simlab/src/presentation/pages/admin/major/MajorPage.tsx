@@ -49,12 +49,12 @@ const MajorPage = () => {
     }
 
     useEffect(() => {
-        const getFaculties = async () => {
+        const getFacultiesacti = async () => {
             const response = await facultyService.getDataForSelect();
             setFaculties(response.data ?? [])
         }
 
-        getFaculties()
+        getFacultiesacti()
     }, [])
 
     const {
@@ -74,7 +74,7 @@ const MajorPage = () => {
     } = useTable()
 
     const majorService = new MajorService()
-    const [major, setMajor] = useState<MajorView[]>([])
+    const [majors, setMajors] = useState<MajorView[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
     const getData = async () => {
@@ -85,7 +85,7 @@ const MajorPage = () => {
             search: searchTerm,
             filter_faculty: selectedFaculty
         });
-        setMajor(response.data ?? [])
+        setMajors(response.data ?? [])
         setTotalItems(response.total ?? 0)
         setTotalPages(response.last_page ?? 0)
         setIsLoading(false)
@@ -201,7 +201,7 @@ const MajorPage = () => {
                             </div>
                         </div>
                         <Table
-                            data={major}
+                            data={majors}
                             columns={MajorColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -219,7 +219,7 @@ const MajorPage = () => {
             <MajorFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={major}
+                data={majors}
                 dataId={id}
                 faculties={faculties}
                 handleSave={handleSave}

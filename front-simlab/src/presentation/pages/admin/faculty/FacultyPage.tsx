@@ -53,7 +53,7 @@ const FacultyPage = () => {
     } = useTable()
 
     const facultyService = new FacultyService()
-    const [faculty, setFaculty] = useState<FacultyView[]>([])
+    const [faculties, setFaculties] = useState<FacultyView[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
     const getData = async () => {
@@ -63,7 +63,7 @@ const FacultyPage = () => {
             per_page: perPage,
             search: searchTerm
         });
-        setFaculty(response.data ?? [])
+        setFaculties(response.data ?? [])
         setTotalItems(response.total ?? 0)
         setTotalPages(response.last_page ?? 0)
         setIsLoading(false)
@@ -139,7 +139,7 @@ const FacultyPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={faculty}
+                            data={faculties}
                             columns={FacultyColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -157,7 +157,7 @@ const FacultyPage = () => {
             <FacultyFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={faculty}
+                data={faculties}
                 dataId={id}
                 handleSave={handleSave}
                 title={type == 'Add' ? 'Tambah Fakultas' : 'Edit Fakultas'}

@@ -139,7 +139,7 @@ const StudyProgramFormDialog: React.FC<StudyProgramFormDialogProps> = ({
                             Tutup
                         </Button>
                     </DialogClose>
-                    <Button type="button" onClick={handleSubmit}>
+                    <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
                         {isSubmitting ? 'Menyimpan...' : 'Simpan'}
                     </Button>
                 </DialogFooter>
