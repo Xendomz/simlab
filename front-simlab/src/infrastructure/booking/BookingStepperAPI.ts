@@ -14,7 +14,7 @@ export function toDomain(api: BookingStepperAPI): BookingStepper {
   return new BookingStepper(
     api.id,
     api.role,
-    api.status as "approved" | "rejected" | "pending",
+    api.status as "approved" | "rejected" | "pending" | "revision",
     api.information,
     api.approved_at ? new Time(api.approved_at) : undefined,
     api.approver ?? undefined

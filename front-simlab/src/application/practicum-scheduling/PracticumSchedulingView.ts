@@ -7,8 +7,8 @@ import { PracticumGroupView } from './PracticumGroupView';
 import { PracticumSchedulingEquipmentView } from './PracticumSchedulingEquipmentView';
 import { PracticumSchedulingMaterialView } from './PracticumSchedulingMaterialView';
 import { PracticumApprovalView } from './PracticumApprovalView';
-import { PracticalWorkView } from '../practical-work/PracticalWorkView';
 import { PracticumSchedulingStatus } from '@/domain/practicum-scheduling/PracticumSchedulingStatus';
+import { PracticumView } from '../practicum/PracticumView';
 
 export class PracticumSchedulingView {
     constructor(
@@ -24,7 +24,7 @@ export class PracticumSchedulingView {
         readonly academicYear?: AcademicYearView,
         readonly user?: UserView,
         readonly laboratoryRoom?: LaboratoryRoomView,
-        readonly practicum?: PracticalWorkView,
+        readonly practicum?: PracticumView,
         readonly practicumGroups?: PracticumGroupView[],
         readonly practicumSchedulingEquipments?: PracticumSchedulingEquipmentView[],
         readonly practicumSchedulingMaterials?: PracticumSchedulingMaterialView[],
@@ -49,7 +49,7 @@ export class PracticumSchedulingView {
             entity.academicYear ? AcademicYearView.fromDomain(entity.academicYear) : undefined,
             entity.user ? UserView.fromDomain(entity.user) : undefined,
             entity.laboratoryRoom ? LaboratoryRoomView.fromDomain(entity.laboratoryRoom) : undefined,
-            entity.practicum ? PracticalWorkView.fromDomain(entity.practicum) : undefined,
+            entity.practicum ? PracticumView.fromDomain(entity.practicum) : undefined,
             entity.practicumGroups ? entity.practicumGroups.map(PracticumGroupView.fromDomain) : undefined,
             entity.practicumSchedulingEquipments ? entity.practicumSchedulingEquipments.map(PracticumSchedulingEquipmentView.fromDomain) : undefined,
             entity.practicumSchedulingMaterials ? entity.practicumSchedulingMaterials.map(PracticumSchedulingMaterialView.fromDomain) : undefined,

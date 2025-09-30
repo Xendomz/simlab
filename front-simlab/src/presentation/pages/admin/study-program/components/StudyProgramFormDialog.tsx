@@ -1,5 +1,5 @@
 import { MajorSelectView } from '@/application/major/MajorSelectView';
-import { StudyProgramInputDTO } from '@/application/study-program/dto/StudyProgramDTO';
+import { StudyProgramInputDTO } from '@/application/study-program/StudyProgramDTO';
 import { StudyProgramView } from '@/application/study-program/StudyProgramView';
 import { Button } from '@/presentation/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog';

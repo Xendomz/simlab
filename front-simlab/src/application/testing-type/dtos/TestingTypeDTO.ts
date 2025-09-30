@@ -1,5 +1,9 @@
 export interface TestingTypeInputDTO {
-    testing_type: string
+    name: string,
+    unit: string,
+    student_price: number | null,
+    lecturer_price: number | null,
+    external_price: number | null
 }
 
 export interface TestingTypeTableParam {

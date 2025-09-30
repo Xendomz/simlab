@@ -1,14 +1,14 @@
 import { FacultyView } from '@/application/faculty/FacultyView';
-import { MajorInputDTO } from '@/application/major/dto/MajorDTO';
+import { MajorInputDTO } from '@/application/major/MajorDTO';
 import { MajorView } from '@/application/major/MajorView';
 import { Button } from '@/presentation/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog';
 import { Input } from '@/presentation/components/ui/input';
 import { Label } from '@/presentation/components/ui/label';
 import { useValidationErrors } from '@/presentation/hooks/useValidationError';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select';
 import { ApiResponse } from '@/shared/Types';
 import React, { useEffect, useState } from 'react'
+import { Combobox } from '@/presentation/components/custom/combobox';
 
 interface MajorFormDialogProps {
     title: string,
@@ -40,16 +40,15 @@ const MajorFormDialog: React.FC<MajorFormDialogProps> = ({
 
     useEffect(() => {
         setErrors({})
-    }, [open])
-
-    useEffect(() => {
         if (dataId) {
-            const major = data.find((data: MajorView) => data.id == dataId)
-            setFormData({
-                faculty_id: major?.faculty?.id ?? null,
-                code: major?.code ?? '',
-                name: major?.name ?? '',
-            })
+            const selectedMajor = data.find((data: MajorView) => data.id == dataId)
+            if (selectedMajor) {
+                setFormData({
+                    faculty_id: selectedMajor.faculty?.id ?? null,
+                    code: selectedMajor.code,
+                    name: selectedMajor.name,
+                })
+            }
         } else {
             setFormData(defaultFormData)
         }
@@ -92,26 +91,20 @@ const MajorFormDialog: React.FC<MajorFormDialogProps> = ({
                             Nama Fakultas <span className="text-red-500">*</span>
                         </Label>
                         <div>
-                            <Select name='faculty_id' value={formData['faculty_id'] !== null ? String(formData['faculty_id']) : ''} onValueChange={(value) =>
-                                handleChange({
-                                    target: {
-                                        name: 'faculty_id',
-                                        value: value
-                                    }
-                                } as React.ChangeEvent<HTMLInputElement>)}>
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Pilih Fakultas" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Fakultas</SelectLabel>
-                                        {faculties?.map((option, index) => (
-                                            <SelectItem key={index} value={option.id.toString()}>{option.name}</SelectItem>
-                                        ))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                            {errors['jurusan_id'] && (
+                            <Combobox
+                                options={faculties}
+                                value={formData.faculty_id?.toString() || ''}
+                                onChange={(val) => {
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        faculty_id: val ? Number(val) : null
+                                    }))
+                                }}
+                                placeholder="Pilih Fakultas"
+                                optionLabelKey='name'
+                                optionValueKey='id'
+                            />
+                            {errors['faculty_id'] && (
                                 <p className="mt-1 text-xs italic text-red-500">{errors['faculty_id']}</p>
                             )}
                         </div>
@@ -127,7 +120,6 @@ const MajorFormDialog: React.FC<MajorFormDialogProps> = ({
                                 name='code'
                                 value={formData['code'] || ''}
                                 onChange={handleChange}
-                                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-300`}
                                 placeholder='Kode Jurusan'
                             />
                             {errors['code'] && (
@@ -146,7 +138,6 @@ const MajorFormDialog: React.FC<MajorFormDialogProps> = ({
                                 name='name'
                                 value={formData['name'] || ''}
                                 onChange={handleChange}
-                                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                                 placeholder='Nama Jurusan'
                             />
                             {errors['name'] && (

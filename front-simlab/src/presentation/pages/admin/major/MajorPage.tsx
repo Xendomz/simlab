@@ -12,12 +12,12 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import MajorFormDialog from "./components/MajorFormDialog";
-import { MajorInputDTO } from "@/application/major/dto/MajorDTO";
+import { MajorInputDTO } from "@/application/major/MajorDTO";
 import { MajorView } from "@/application/major/MajorView";
 import { MajorService } from "@/application/major/MajorService";
 import { FacultyView } from "@/application/faculty/FacultyView";
 import { FacultyService } from "@/application/faculty/FacultyService";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
+import { Combobox } from "@/presentation/components/custom/combobox";
 
 const MajorPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -41,20 +41,15 @@ const MajorPage = () => {
 
     const facultyService = new FacultyService()
     const [faculties, setFaculties] = useState<FacultyView[]>([])
-    const [selectedFaculty, setselectedFaculty] = useState<number>(0)
-    const handleFilterFaculty = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-        setselectedFaculty(value ? Number(value) : 0);
-        setCurrentPage(1);
-    }
+    const [selectedFaculty, setSelectedFaculty] = useState<number>(0)
 
     useEffect(() => {
-        const getFacultiesacti = async () => {
+        const getFaculties = async () => {
             const response = await facultyService.getDataForSelect();
             setFaculties(response.data ?? [])
         }
 
-        getFacultiesacti()
+        getFaculties()
     }, [])
 
     const {
@@ -178,26 +173,18 @@ const MajorPage = () => {
                     <CardContent>
                         <div className="w-full mb-3 md:w-1/3">
                             <div className="relative">
-                                <Select name='faculty_id' onValueChange={(value) =>
-                                    handleFilterFaculty({
-                                        target: {
-                                            name: 'faculty_id',
-                                            value: value
-                                        }
-                                    } as React.ChangeEvent<HTMLSelectElement>)}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Pilih Fakultas" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Fakultas</SelectLabel>
-                                            <SelectItem value={"0"}>Semua</SelectItem>
-                                            {faculties?.map((option, index) => (
-                                                <SelectItem key={index} value={option.id.toString()}>{option.name}</SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                <Combobox
+                                    options={faculties}
+                                    value={selectedFaculty?.toString() || ''}
+                                    onChange={(val) => {
+                                        setSelectedFaculty(val ? Number(val) : 0)
+                                        setCurrentPage(1)
+                                    }}
+                                    placeholder="Pilih Fakultas"
+                                    optionLabelKey='name'
+                                    optionValueKey='id'
+                                    isFilter
+                                />
                             </div>
                         </div>
                         <Table
@@ -223,7 +210,7 @@ const MajorPage = () => {
                 dataId={id}
                 faculties={faculties}
                 handleSave={handleSave}
-                title={type == 'Add' ? 'Tambah tahun akademik' : 'Edit tahun akademik'}
+                title={type == 'Add' ? 'Tambah Jurusan' : 'Edit Jurusan'}
             />
         </>
     )

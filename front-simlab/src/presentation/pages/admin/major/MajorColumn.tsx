@@ -16,7 +16,7 @@ export const MajorColumn = ({ openModal, openConfirm }: ColumnProps): ColumnDef<
         accessorKey: 'id',
         cell: ({ row }) => (
             <div className="flex gap-2">
-                <Button size={'sm'} onClick={() => openModal('Edit',row.original.id)}>
+                <Button size={'sm'} variant={'warning'} onClick={() => openModal('Edit',row.original.id)}>
                     Edit
                 </Button>
                 <Button size={'sm'} variant={'destructive'} onClick={() => openConfirm(row.original.id)}>

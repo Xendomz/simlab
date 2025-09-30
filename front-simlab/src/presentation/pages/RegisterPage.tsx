@@ -17,7 +17,7 @@ export const RegisterPage: React.FC = () => {
         name: '',
         identity_num: '',
         role: '',
-        prodi_id: '',
+        study_program_id: '',
         email: '',
         password: '',
         c_password: ''
@@ -161,13 +161,13 @@ export const RegisterPage: React.FC = () => {
                         )}
                     </div>
                     <div className="flex flex-col gap-2">
-                        <Label htmlFor="prodi_id">
+                        <Label htmlFor="study_program_id">
                             Program Studi (Kosongkan jika eksternal)
                         </Label>
-                        <Select name='prodi_id' onValueChange={(value) =>
+                        <Select name='study_program_id' onValueChange={(value) =>
                             handleChange({
                                 target: {
-                                    name: 'prodi_id',
+                                    name: 'study_program_id',
                                     value: value
                                 }
                             } as React.ChangeEvent<HTMLSelectElement>)}>
@@ -184,8 +184,8 @@ export const RegisterPage: React.FC = () => {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                        {errors['prodi_id'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['prodi_id']}</p>
+                        {errors['study_program_id'] && (
+                            <p className="mt-1 text-xs italic text-red-500">{errors['study_program_id']}</p>
                         )}
                     </div>
                     <div className="flex flex-col gap-2">

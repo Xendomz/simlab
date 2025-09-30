@@ -15,7 +15,7 @@ export const FacultyColumn = ({ openModal, openConfirm }: ColumnProps): ColumnDe
       accessorKey: 'id' as keyof FacultyView,
       cell: ({row}) => (
         <div className='flex gap-2'>
-          <Button size={'sm'} onClick={() => openModal('Edit' ,row.original.id)}>
+          <Button size={'sm'} variant={'warning'} onClick={() => openModal('Edit' ,row.original.id)}>
             Edit
           </Button>
           <Button variant={'destructive'} size={'sm'} onClick={() => openConfirm(row.original.id)}>

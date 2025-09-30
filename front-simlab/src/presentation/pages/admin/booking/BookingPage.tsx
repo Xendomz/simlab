@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import useTable from '@/application/hooks/useTable';
 import { useBooking } from '@/application/booking/hooks/useBooking';
 import Header from '@/presentation/components/Header';
@@ -11,6 +11,7 @@ import { BookingColumn } from './column/BookingColumn';
 import Table from '@/presentation/components/Table';
 import { NavLink } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/presentation/components/ui/tooltip';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select'
 
 const BookingPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -48,6 +49,14 @@ const BookingPage = () => {
         handlePageChange,
     } = useTable()
 
+    const [selectedStatus, setSelectedStatus] = useState<string>('')
+    const handleFilterStatus = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+
+        setSelectedStatus(value);
+        setCurrentPage(1);
+    }
+
     const {
         booking,
         isLoading,
@@ -59,12 +68,13 @@ const BookingPage = () => {
         perPage,
         searchTerm,
         setTotalPages,
-        setTotalItems
+        setTotalItems,
+        status: selectedStatus
     })
 
     useEffect(() => {
         getData()
-    }, [currentPage, perPage])
+    }, [currentPage, perPage, selectedStatus])
 
     useEffect(() => {
         isStillHaveDraftBooking()
@@ -118,6 +128,30 @@ const BookingPage = () => {
                         </CardAction>
                     </CardHeader>
                     <CardContent>
+                        <div className="w-full mb-3 md:w-1/3">
+                            <div className="relative">
+                                <Select name='filter_status' onValueChange={(value) =>
+                                    handleFilterStatus({
+                                        target: {
+                                            name: 'filter_status',
+                                            value: value
+                                        }
+                                    } as React.ChangeEvent<HTMLSelectElement>)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Pilih Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Status</SelectLabel>
+                                            <SelectItem value=" ">All</SelectItem>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="rejected">Rejected</SelectItem>
+                                            <SelectItem value="approved">Approved</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
                         <Table
                             data={booking}
                             columns={BookingColumn()}

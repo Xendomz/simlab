@@ -14,8 +14,8 @@ import { LaboratoryEquipmentColumn } from '@/presentation/pages/admin/booking/co
 import { LaboratoryMaterialColumn } from '@/presentation/pages/admin/booking/column/LaboratoryMaterialColumn'
 import { Button } from '@/presentation/components/ui/button'
 
-import { useLaboratoryEquipment } from '@/application/laboratory-equipment/hooks/useLaboratoryEquipment'
-import { useLaboratoryMaterial } from '@/application/laboratory-material/hooks/useLaboratoryMaterial'
+// import { useLaboratoryEquipment } from '@/application/laboratory-equipment/hooks/useLaboratoryEquipment'
+// import { useLaboratoryMaterial } from '@/application/laboratory-material/hooks/useLaboratoryMaterial'
 import { Input } from '@/presentation/components/ui/input'
 import { LaboratoryEquipmentView } from '@/application/laboratory-equipment/LaboratoryEquipmentView'
 import { LaboratoryMaterialView } from '@/application/laboratory-material/LaboratoryMaterialView'

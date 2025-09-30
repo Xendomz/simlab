@@ -1,7 +1,7 @@
 import { MajorRepository } from "@/infrastructure/major/MajorReposistory";
 import { MajorView } from "./MajorView";
 import { ApiResponse, PaginatedResponse } from "@/shared/Types";
-import { MajorInputDTO, MajorTableParam } from "./dto/MajorDTO";
+import { MajorInputDTO, MajorTableParam } from "./MajorDTO";
 import { MajorSelectView } from "./MajorSelectView";
 
 export class MajorService {

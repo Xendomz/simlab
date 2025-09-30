@@ -29,8 +29,8 @@ class UserRequest extends ApiRequest
             'identity_num' => 'nullable|string|max:191',
         ];
 
-        if ($this->input('role') === 'Dosen') {
-            $rules['prodi_id'] = 'required';
+        if (in_array($this->input('role'), ['dosen', 'kepala_lab_terpadu', 'koorprodi', 'mahasiswa', 'kepala_lab_jurusan'])) {
+            $rules['study_program_id'] = 'required';
         }
 
         return $rules;
@@ -52,7 +52,7 @@ class UserRequest extends ApiRequest
 
             'role.required' => 'Peran tidak boleh kosong!',
 
-            'prodi_id.required' => 'Prodi tidak boleh kosong!',
+            'study_program_id.required' => 'Prodi tidak boleh kosong!',
 
             'identity_num.string' => 'Nomor identitas harus berupa teks!',
             'identity_num.max' => 'Nomor identitas maksimal 191 karakter!',

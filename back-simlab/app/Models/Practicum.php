@@ -14,4 +14,9 @@ class Practicum extends Model
     {
         return $this->belongsTo(StudyProgram::class, 'study_program_id');
     }
+
+    public function practicumModules()
+    {
+        return $this->hasMany(PracticumModule::class, 'practicum_id');
+    }
 }

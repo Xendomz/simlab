@@ -1,21 +1,24 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import Table from "../../../components/Table";
 import { LaboratoryMaterialColumn } from "./LaboratoryMaterialColumn";
 import useTable from "@/application/hooks/useTable";
-import { useLaboratoryRoom } from "@/application/laboratory-room/hooks/useLaboratoryRoom";
 import { ModalType } from "@/shared/Types";
 import { toast } from "sonner";
-import { LaboratoryMaterialInputDTO } from "@/application/laboratory-material/dto/LaboratoryMaterialDTO";
+import { LaboratoryMaterialInputDTO } from "@/application/laboratory-material/LaboratoryMaterialDTO";
 import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Button } from "@/presentation/components/ui/button";
 import { Plus } from "lucide-react";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
-import { useLaboratoryMaterial } from "@/application/laboratory-material/hooks/useLaboratoryMaterial";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import LaboratoryMaterialFormDialog from "./components/LaboratoryMaterialFormDialog";
+import { LaboratoryRoomService } from "@/application/laboratory-room/LaboratoryRoomService";
+import { LaboratoryRoomSelectView } from "@/application/laboratory-room/LaboratoryRoomSelectView";
+import { LaboratoryMaterialService } from "@/application/laboratory-material/LaboratoryMaterialService";
+import { LaboratoryMaterialView } from "@/application/laboratory-material/LaboratoryMaterialView";
+import { Combobox } from "@/presentation/components/custom/combobox";
+import LaboratoryMaterialDetailDialog from "./components/LaboratoryMaterialDetailDialog";
 
 const LaboratoryMaterialPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -37,6 +40,19 @@ const LaboratoryMaterialPage = () => {
         )
     }, [])
 
+    const laboratoryRoomService = new LaboratoryRoomService()
+    const [laboratoryRooms, setLaboratoryRooms] = useState<LaboratoryRoomSelectView[]>([])
+    const [selectedLaboratoryRoom, setSelectedLaboratoryRoom] = useState<number>(0)
+
+    useEffect(() => {
+        const getLaboratoryRooms = async () => {
+            const response = await laboratoryRoomService.getDataForSelect()
+            setLaboratoryRooms(response.data ?? [])
+        }
+
+        getLaboratoryRooms()
+    }, [])
+
     const {
         currentPage,
         perPage,
@@ -53,50 +69,24 @@ const LaboratoryMaterialPage = () => {
         handlePageChange,
     } = useTable()
 
-    const {
-        laboratoryRoom,
-        getData: getLaboratoryRoomData,
-    } = useLaboratoryRoom({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages() { },
-        setTotalItems() { }
-    })
+    const laboratoryMaterialService = new LaboratoryMaterialService()
+    const [laboratoryMaterials, setLaboratoryMaterials] = useState<LaboratoryMaterialView[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    const [selectedLaboratoryRoom, setSelectedLaboratoryRoom] = useState<number>(0)
+    const getData = async () => {
+        setIsLoading(true)
+        const response = await laboratoryMaterialService.getLaboratoryMaterialData({
+            page: currentPage,
+            per_page: perPage,
+            search: searchTerm,
+            filter_laboratory_room: selectedLaboratoryRoom
+        })
 
-    const handleFilterLaboratoryRoom = (e: ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-
-        setSelectedLaboratoryRoom(value ? Number(value) : 0);
-        setCurrentPage(1);
+        setLaboratoryMaterials(response.data ?? [])
+        setTotalItems(response.total ?? 0)
+        setTotalPages(response.last_page ?? 0)
+        setIsLoading(false)
     }
-
-    const {
-        laboratoryMaterial,
-        isLoading,
-        getData,
-        create,
-        update,
-        remove,
-    } = useLaboratoryMaterial({
-        currentPage,
-        perPage,
-        searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
-
-    const [isOpen, setIsOpen] = useState<boolean>(false)
-    const [id, setId] = useState<number | null>(null)
-    const [type, setType] = useState<ModalType>('Add')
-
-    const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
-
-    useEffect(() => {
-        getLaboratoryRoomData()
-    }, [])
 
     useEffect(() => {
         getData()
@@ -114,8 +104,13 @@ const LaboratoryMaterialPage = () => {
         return () => clearTimeout(timer)
     }, [searchTerm])
 
+    const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false)
+    const [id, setId] = useState<number | null>(null)
+    const [type, setType] = useState<ModalType>('Add')
+    const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
+
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -126,13 +121,17 @@ const LaboratoryMaterialPage = () => {
         setConfirmOpen(true)
     }
 
+    const openModalDetail = (id: number) => {
+        setId(id)
+        setIsDetailOpen(true)
+    }
 
     const handleSave = async (formData: LaboratoryMaterialInputDTO): Promise<void> => {
         if (id) {
-            const res = await update(id, formData)
+            const res = await laboratoryMaterialService.updateData(id, formData)
             toast.success(res.message)
         } else {
-            const res = await create(formData)
+            const res = await laboratoryMaterialService.createData(formData)
             toast.success(res.message)
         }
         getData()
@@ -142,7 +141,7 @@ const LaboratoryMaterialPage = () => {
 
     const handleDelete = async () => {
         if (!id) return
-        const res = await remove(id)
+        const res = await laboratoryMaterialService.deleteData(id)
         toast.success(res.message)
 
         getData()
@@ -166,31 +165,23 @@ const LaboratoryMaterialPage = () => {
                     <CardContent>
                         <div className="w-full mb-3 md:w-1/3">
                             <div className="relative">
-                                <Select name='ruangan_laboratorium_id' onValueChange={(value) =>
-                                    handleFilterLaboratoryRoom({
-                                        target: {
-                                            name: 'ruangan_laboratorium_id',
-                                            value: value
-                                        }
-                                    } as React.ChangeEvent<HTMLSelectElement>)}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Pilih Ruangan" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Ruangan</SelectLabel>
-                                            <SelectItem value=" ">All</SelectItem>
-                                            {laboratoryRoom?.map((option) => (
-                                                <SelectItem key={option.id} value={option.id.toString()}>{option.name}</SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                <Combobox
+                                    options={laboratoryRooms}
+                                    value={selectedLaboratoryRoom?.toString() || ''}
+                                    onChange={(val) => {
+                                        setSelectedLaboratoryRoom(val ? Number(val) : 0)
+                                        setCurrentPage(1)
+                                    }}
+                                    placeholder="Pilih Ruangan Laboratorium"
+                                    optionLabelKey='name'
+                                    optionValueKey='id'
+                                    isFilter
+                                />
                             </div>
                         </div>
                         <Table
-                            data={laboratoryMaterial}
-                            columns={LaboratoryMaterialColumn({ openModal, openConfirm })}
+                            data={laboratoryMaterials}
+                            columns={LaboratoryMaterialColumn({ openModal, openConfirm, openModalDetail })}
                             loading={isLoading}
                             searchTerm={searchTerm}
                             handleSearch={(e) => handleSearch(e)}
@@ -207,12 +198,17 @@ const LaboratoryMaterialPage = () => {
             <LaboratoryMaterialFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={laboratoryMaterial}
-                laboratoryRoom={laboratoryRoom}
+                data={laboratoryMaterials}
+                laboratoryRooms={laboratoryRooms}
                 dataId={id}
                 handleSave={handleSave}
                 title={type == 'Add' ? 'Tambah Bahan Laboratorium' : 'Edit Bahan Laboratorium'}
             />
+            <LaboratoryMaterialDetailDialog
+                laboratoryMaterials={laboratoryMaterials}
+                laboratoryMaterialId={id}
+                open={isDetailOpen}
+                onOpenChange={setIsDetailOpen} />
         </>
     )
 }

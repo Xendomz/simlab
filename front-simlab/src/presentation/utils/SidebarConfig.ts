@@ -1,76 +1,79 @@
+import { userRole } from "@/domain/User/UserRole";
 import { CalendarClock, CalendarPlus, Key, LayoutDashboard, SquareTerminal } from "lucide-react"
 
-export const navItems = [
+export const navItems: NavItem[] = [
   {
     title: "Dashboard",
     url: "/panel",
     icon: LayoutDashboard,
     is_end: true,
-    roles: ['Admin', 'Kepala Lab Terpadu','Koorprodi', 'Kepala Lab Unit', 'Laboran','Mahasiswa','Pihak Luar', 'Dosen' ],
+    // roles: [userRole.Admin, userRole.KepalaLabTerpadu,userRole.Kooprodi, userRole.KepalaLabJurusan,  userRole.Laboran,userRole.Mahasiswa,userRole.PihakLuar,userRole.Dosen' ],
+    roles: [userRole.Admin, userRole.KepalaLabTerpadu, userRole.Kooprodi, userRole.KepalaLabJurusan, userRole.Laboran, userRole.Laboran, userRole.PihakLuar, userRole.Dosen, userRole.AdminKeuangan ],
   },
   {
     title: "Data Master",
     url: "#",
     icon: Key,
-    roles: ['Admin', 'Laboran'],
+    roles: [userRole.Admin, userRole.Laboran],
     items: [
-      { title: "Tahun Akademik", url: "/panel/tahun-akademik", roles: ['Admin', 'Kepala Lab Terpadu'] },
-      { title: "Jenis Pengujian", url: "/panel/jenis-pengujian", roles: ['Admin', 'Kepala Lab Terpadu'] },
-      { title: "Fakultas", url: "/panel/fakultas", roles: ['Admin'] },
-      { title: "Jurusan", url: "/panel/jurusan", roles: ['Admin', 'Kepala Lab Terpadu'] },
-      { title: "Prodi", url: "/panel/Prodi", roles: ['Admin', 'Kepala Lab Terpadu'] },
-      { title: "Praktikum", url: "/panel/Praktikum", roles: ['Admin', 'Kepala Lab Terpadu'] },
-      { title: "Ruangan Laboratorium", url: "/panel/ruangan-laboratorium", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
-      { title: "Alat Laboratorium", url: "/panel/alat-laboratorium", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
-      { title: "Bahan Laboratorium", url: "/panel/bahan-laboratorium", roles: ['Admin', 'Kepala Lab Terpadu', 'Laboran'] },
+      { title: "Tahun Akademik", url: "/panel/tahun-akademik", roles: [userRole.Admin] },
+      { title: "Fakultas", url: "/panel/fakultas", roles: [userRole.Admin] },
+      { title: "Jurusan", url: "/panel/jurusan", roles: [userRole.Admin] },
+      { title: "Prodi", url: "/panel/prodi", roles: [userRole.Admin] },
+      { title: "Praktikum", url: "/panel/praktikum", roles: [userRole.Admin] },
+      { title: "Modul Praktikum", url: "/panel/modul-praktikum", roles: [userRole.Admin] },
+      { title: "Jenis Pengujian", url: "/panel/jenis-pengujian", roles: [userRole.Admin] },
+      { title: "Ruangan Laboratorium", url: "/panel/ruangan-laboratorium", roles: [userRole.Admin, userRole.Laboran] },
+      { title: "Alat Laboratorium", url: "/panel/alat-laboratorium", roles: [userRole.Admin, userRole.Laboran] },
+      { title: "Bahan Laboratorium", url: "/panel/bahan-laboratorium", roles: [userRole.Admin, userRole.Laboran] },
     ],
   },
   {
     title: "Manajemen User",
     url: "#",
     icon: SquareTerminal,
-    roles: ['Admin'],
+    roles: [userRole.Admin],
     items: [
-      { title: "Admin", url: "/panel/admin", roles: ['Admin'] },
-      { title: "Kepala Lab Terpadu", url: "/panel/kepala-lab-terpadu", roles: ['Admin'] },
-      { title: "Koorprodi", url: "/panel/koorprodi", roles: ['Admin'] },
-      { title: "Kepala Lab. Unit", url: "/panel/kepala-lab-unit", roles: ['Admin'] },
-      { title: "Dosen", url: "/panel/dosen", roles: ['Admin'] },
-      { title: "Laboran", url: "/panel/laboran", roles: ['Admin'] },
-      { title: "Mahasiswa", url: "/panel/mahasiswa", roles: ['Admin'] },
-      { title: "Pihak Luar", url: "/panel/pihak-luar", roles: ['Admin'] },
+      { title: "Admin", url: "/panel/admin", roles: [userRole.Admin] },
+      { title: "Kepala Lab Terpadu", url: "/panel/kepala-lab-terpadu", roles: [userRole.Admin] },
+      { title: "Koorprodi", url: "/panel/koorprodi", roles: [userRole.Admin] },
+      { title: "Kepala Lab Jurusan", url: "/panel/kepala-lab-jurusan", roles: [userRole.Admin] },
+      { title: "Dosen", url: "/panel/dosen", roles: [userRole.Admin] },
+      { title: "Laboran", url: "/panel/laboran", roles: [userRole.Admin] },
+      { title: "Mahasiswa", url: "/panel/mahasiswa", roles: [userRole.Admin] },
+      { title: "Pihak Luar", url: "/panel/pihak-luar", roles: [userRole.Admin] },
     ],
   },
   {
     title: "Peminjaman",
     url: "/panel/peminjaman",
     icon: CalendarClock,
-    roles: ['Koorprodi', 'Kepala Lab Unit','Mahasiswa','Pihak Luar','Dosen'],
+    roles: [userRole.Kooprodi, userRole.KepalaLabJurusan, userRole.Mahasiswa,userRole.PihakLuar,userRole.Dosen],
   },
   {
     title: "Penjadwalan Praktikum",
     url: "/panel/penjadwalan-praktikum",
     icon: CalendarPlus,
-    roles: ['Dosen'],
+    roles: [userRole.Dosen],
   },
   {
     title: "Manajemen Peminjaman",
     url: "#",
     icon: CalendarClock,
-    roles: ['Kepala Lab Terpadu', 'Laboran'],
+    roles: [userRole.KepalaLabTerpadu, userRole.Laboran],
     items: [
-      // { title: "Peminjaman", url: "/panel/peminjaman", roles: ['Kepala Lab Terpadu']},
-      { title: "Verifikasi Peminjaman", url: "/panel/peminjaman/verif", roles: ['Kepala Lab Terpadu', 'Laboran']},
+      // { title: "Peminjaman", url: "/panel/peminjaman", roles: [userRole.KepalaLabTerpadu]},
+      { title: "Verifikasi Peminjaman", url: "/panel/peminjaman/verif", roles: [userRole.KepalaLabTerpadu, userRole.Laboran]},
     ],
   },
   {
     title: "Manajemen Penjadwalan Praktikum",
     url: "#",
     icon: CalendarPlus,
-    roles: ['Kepala Lab Terpadu', 'Laboran', 'Koorprodi'],
+    roles: [userRole.KepalaLabTerpadu, userRole.Laboran, userRole.Kooprodi],
     items: [
-      // { title: "Peminjaman", url: "/panel/peminjaman", roles: ['Kepala Lab Terpadu']},
-      { title: "Verifikasi Penjadwalan Praktikum", url: "/panel/penjadwalan-praktikum/verif", roles: ['Kepala Lab Terpadu', 'Laboran', 'Koorprodi']},
+      // { title: "Peminjaman", url: "/panel/peminjaman", roles: [userRole.KepalaLabTerpadu]},
+      { title: "Verifikasi Penjadwalan Praktikum", url: "/panel/penjadwalan-praktikum/verif", roles: [userRole.KepalaLabTerpadu, userRole.Laboran, userRole.Kooprodi]},
     ],
   },
 ]
@@ -78,7 +81,7 @@ export const navItems = [
 interface NavSubItem {
     title: string;
     url: string;
-    roles: string[];
+    roles: userRole[];
 }
 
 interface NavItem {
@@ -86,11 +89,11 @@ interface NavItem {
     url: string;
     icon?: any;
     is_end?: boolean;
-    roles: string[];
+    roles: userRole[];
     items?: NavSubItem[];
 }
 
-export function filterNavByRole(navItems: NavItem[], role: string): NavItem[] {
+export function filterNavByRole(navItems: NavItem[], role: userRole): NavItem[] {
     return navItems
         .filter(item => item.roles.includes(role))
         .map(item => {

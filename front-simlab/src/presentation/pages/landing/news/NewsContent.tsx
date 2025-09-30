@@ -41,7 +41,7 @@ const NewsContent = () => {
                             </div>
                             <div className='flex flex-col gap-10'>
                                 {[...Array(3)].map((_, idx) => (
-                                    <div key={idx} className='flex flex-col lg:grid lg:grid-cols-3 gap-2'>
+                                    <div key={idx} className='text-secondary flex flex-col lg:grid lg:grid-cols-3 gap-2'>
                                         <img src="https://labterpadu.itk.ac.id/images/news/1618455634new3.jpg" className='w-full h-full object-cover rounded-lg' alt="" />
                                         <div className='col-span-2'>
                                             <span className='text-xs'>Friday, 17 May 2024</span>

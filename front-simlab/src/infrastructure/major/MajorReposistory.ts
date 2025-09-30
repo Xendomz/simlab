@@ -5,6 +5,7 @@ import { ApiResponse, PaginatedResponse } from "../../shared/Types";
 import { fetchApi } from "../ApiClient";
 import { MajorAPI, toDomain } from "./MajorAPI";
 import { MajorSelectAPI, toDomain as toMajorSelect } from "./MajorSelectAPI";
+import { generateQueryStringFromObject } from "../Helper";
 
 export class MajorRepository implements IMajorReporsitory {
     async getAll(params: {
@@ -13,16 +14,10 @@ export class MajorRepository implements IMajorReporsitory {
         search: string,
         filter_faculty?: number
     }): Promise<PaginatedResponse<Major>> {
-        const queryString = new URLSearchParams(
-            Object.entries(params).reduce((acc, [key, value]) => {
-                acc[key] = String(value);
-                return acc;
-            }, {} as Record<string, string>)
-        ).toString();
+        const queryString = generateQueryStringFromObject(params)
 
         const response = await fetchApi(`/majors?${queryString}`, { method: 'GET' });
         const json = await response.json();
-
         if (response.ok) {
             const data = json['data'] as PaginatedResponse<MajorAPI>
             return {

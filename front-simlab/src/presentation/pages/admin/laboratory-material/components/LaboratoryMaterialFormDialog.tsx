@@ -1,13 +1,14 @@
-import { LaboratoryMaterialInputDTO } from "@/application/laboratory-material/dto/LaboratoryMaterialDTO"
+import { LaboratoryMaterialInputDTO } from "@/application/laboratory-material/LaboratoryMaterialDTO"
 import { LaboratoryMaterialView } from "@/application/laboratory-material/LaboratoryMaterialView"
-import { LaboratoryRoomView } from "@/application/laboratory-room/LaboratoryRoomView"
+import { LaboratoryRoomSelectView } from "@/application/laboratory-room/LaboratoryRoomSelectView"
+import { Combobox } from "@/presentation/components/custom/combobox"
 import { Button } from "@/presentation/components/ui/button"
 import { Calendar } from "@/presentation/components/ui/calendar"
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/presentation/components/ui/dialog"
 import { Input } from "@/presentation/components/ui/input"
 import { Label } from "@/presentation/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/presentation/components/ui/popover"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/presentation/components/ui/select"
+import { ScrollArea } from "@/presentation/components/ui/scroll-area"
 import { Textarea } from "@/presentation/components/ui/textarea"
 import { useValidationErrors } from "@/presentation/hooks/useValidationError"
 import { ApiResponse } from "@/shared/Types"
@@ -17,8 +18,8 @@ import { CalendarIcon } from "lucide-react"
 interface LaboratoryRoomFormDialogProps {
     title: string,
     open: boolean,
-    laboratoryRoom: LaboratoryRoomView[]
-    data: any,
+    laboratoryRooms: LaboratoryRoomSelectView[]
+    data: LaboratoryMaterialView[],
     dataId: number | null,
     onOpenChange: (open: boolean) => void,
     handleSave: (data: any) => Promise<void>
@@ -30,14 +31,14 @@ const LaboratoryMaterialFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
     title,
     open,
     data,
-    laboratoryRoom,
+    laboratoryRooms,
     dataId,
     onOpenChange,
     handleSave
 }) => {
-    const [formData, setFormData] = useState<LaboratoryMaterialInputDTO>({
+    const defaultFormData: LaboratoryMaterialInputDTO = {
         code: '',
-        ruangan_laboratorium_id: undefined,
+        laboratory_room_id: undefined,
         material_name: '',
         brand: '',
         stock: 0,
@@ -46,46 +47,33 @@ const LaboratoryMaterialFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
         expiry_date: undefined,
         description: '',
         refill_date: undefined
-    });
+    }
+    const [formData, setFormData] = useState<LaboratoryMaterialInputDTO>(defaultFormData);
 
     const { errors, setErrors, processErrors } = useValidationErrors()
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         setErrors({})
-    }, [open])
-
-    useEffect(() => {
         if (dataId) {
-            const selectedData = data.find((data: LaboratoryMaterialView) => data.id == dataId)
+            const laboratoryMaterial = data.find((data: LaboratoryMaterialView) => data.id == dataId)
             setFormData({
-                code: selectedData.code,
-                ruangan_laboratorium_id: selectedData.laboratoryRoomId,
-                material_name: selectedData.materialName,
-                brand: selectedData.brand,
-                stock: selectedData.stock,
-                unit: selectedData.unit,
-                purchase_date: selectedData.purchaseDate,
-                expiry_date: selectedData.expiryDate,
-                description: selectedData.description,
-                refill_date: selectedData.refillDate
+                code: laboratoryMaterial?.code ?? '',
+                laboratory_room_id: laboratoryMaterial?.laboratoryRoom?.id,
+                material_name: laboratoryMaterial?.materialName ?? '',
+                brand: laboratoryMaterial?.brand ?? '',
+                stock: laboratoryMaterial?.stock ?? 0,
+                unit: laboratoryMaterial?.unit ?? '',
+                purchase_date: laboratoryMaterial?.purchaseDate ?? undefined,
+                expiry_date: laboratoryMaterial?.expiryDate ?? undefined,
+                description: laboratoryMaterial?.description ?? '',
+                refill_date: laboratoryMaterial?.refillDate ?? undefined
             })
 
         } else {
-            setFormData({
-                code: '',
-                ruangan_laboratorium_id: undefined,
-                material_name: '',
-                brand: '',
-                stock: 0,
-                unit: '',
-                purchase_date: undefined,
-                expiry_date: undefined,
-                description: '',
-                refill_date: undefined
-            })
+            setFormData(defaultFormData)
         }
-    }, [dataId])
+    }, [open])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -111,202 +99,214 @@ const LaboratoryMaterialFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-xl grid-rows-[auto_minmax(0,1fr)_auto] p-0 max-h-[90dvh]">
-                <DialogHeader className='p-6'>
+            <DialogContent className="sm:max-w-xl">
+                <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription></DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className='grid md:grid-cols-2 gap-x-5 gap-y-2 overflow-y-auto px-6 pb-6' encType="multipart/form-data">
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
-                            Kode Bahan <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            type='text'
-                            id='code'
-                            name='code'
-                            value={formData['code'] || ''}
-                            onChange={dataId ? undefined : handleChange}
-                            placeholder='Kode Bahan'
-                            disabled={dataId ? true : false}
-                        />
-                        {errors['code'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['code']}</p>
-                        )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
-                            Nama Bahan <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            type='text'
-                            id='material_name'
-                            name='material_name'
-                            value={formData['material_name'] || ''}
-                            onChange={handleChange}
-                            placeholder='Nama Bahan'
-                        />
-                        {errors['material_name'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['material_name']}</p>
-                        )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
-                            Merek Bahan
-                        </Label>
-                        <Input
-                            type='text'
-                            id='brand'
-                            name='brand'
-                            value={formData['brand'] || ''}
-                            onChange={handleChange}
-                            placeholder='Merek Bahan'
-                        />
-                        {errors['brand'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['brand']}</p>
-                        )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
-                            Stok Bahan <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            type='number'
-                            id='stock'
-                            name='stock'
-                            value={formData['stock'] || ''}
-                            onChange={handleChange}
-                            placeholder='0'
-                        />
-                        {errors['stock'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['stock']}</p>
-                        )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
-                            Satuan Bahan <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            type='text'
-                            id='unit'
-                            name='unit'
-                            value={formData['unit'] || ''}
-                            onChange={handleChange}
-                            placeholder='Satuan Bahan'
-                        />
-                        {errors['unit'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['unit']}</p>
-                        )}
-                    </div>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5" encType="multipart/form-data">
+                    <ScrollArea className='h-full max-h-[70vh]'>
+                        <div className="grid md:grid-cols-2 gap-x-2 gap-y-5 p-1">
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='testing_type'>
+                                    Kode Bahan <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='text'
+                                        id='code'
+                                        name='code'
+                                        value={formData['code'] || ''}
+                                        onChange={dataId ? undefined : handleChange}
+                                        placeholder='Kode Bahan'
+                                        disabled={dataId ? true : false}
+                                    />
+                                    {errors['code'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['code']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='testing_type'>
+                                    Nama Bahan <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='text'
+                                        id='material_name'
+                                        name='material_name'
+                                        value={formData['material_name'] || ''}
+                                        onChange={handleChange}
+                                        placeholder='Nama Bahan'
+                                    />
+                                    {errors['material_name'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['material_name']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='testing_type'>
+                                    Merek Bahan
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='text'
+                                        id='brand'
+                                        name='brand'
+                                        value={formData['brand'] || ''}
+                                        onChange={handleChange}
+                                        placeholder='Merek Bahan'
+                                    />
+                                    {errors['brand'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['brand']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='testing_type'>
+                                    Stok Bahan <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='number'
+                                        id='stock'
+                                        name='stock'
+                                        value={formData['stock'] || ''}
+                                        onChange={handleChange}
+                                        placeholder='0'
+                                    />
+                                    {errors['stock'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['stock']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='testing_type'>
+                                    Satuan Bahan <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='text'
+                                        id='unit'
+                                        name='unit'
+                                        value={formData['unit'] || ''}
+                                        onChange={handleChange}
+                                        placeholder='Satuan Bahan'
+                                    />
+                                    {errors['unit'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['unit']}</p>
+                                    )}
+                                </div>
+                            </div>
 
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
-                            Lokasi Alat <span className="text-red-500">*</span>
-                        </Label>
-                        <Select
-                            name='ruangan_laboratorium_id'
-                            value={formData['ruangan_laboratorium_id'] ? String(formData['ruangan_laboratorium_id']) : ''}
-                            onValueChange={(value) =>
-                                handleChange({
-                                    target: {
-                                        name: 'ruangan_laboratorium_id',
-                                        value: value
-                                    }
-                                } as React.ChangeEvent<HTMLSelectElement>)
-                            }
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Pilih Lokasi" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>Ruangan</SelectLabel>
-                                    {laboratoryRoom?.map((option) => (
-                                        <SelectItem key={option.id} value={option.id.toString()}>{option.name}</SelectItem>
-                                    ))}
-                                </SelectGroup>
-                            </SelectContent>
-                        </Select>
-                        {errors['ruangan_laboratorium_id'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['ruangan_laboratorium_id']}</p>
-                        )}
-                    </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='testing_type'>
+                                    Lokasi Alat <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Combobox
+                                        options={laboratoryRooms}
+                                        value={formData.laboratory_room_id?.toString() || ''}
+                                        onChange={(val) => {
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                laboratory_room_id: val ? Number(val) : 0
+                                            }))
+                                        }}
+                                        placeholder="Pilih Lokasi"
+                                        optionLabelKey='name'
+                                        optionValueKey='id'
+                                    />
+                                    {errors['laboratory_room_id'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['laboratory_room_id']}</p>
+                                    )}
+                                </div>
+                            </div>
 
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
-                            Tanggal Beli Bahan <span className="text-red-500">*</span>
-                        </Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    data-empty={!formData['purchase_date']}
-                                    className="data-[empty=true]:text-muted-foreground justify-start text-left font-normal"
-                                >
-                                    <CalendarIcon />
-                                    {formData['purchase_date'] ? format(formData['purchase_date'], "PPP") : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar mode="single" selected={formData['purchase_date']} onSelect={(date: Date) => setFormData({ ...formData, purchase_date: date })} required />
-                            </PopoverContent>
-                        </Popover>
-                        {errors['purchase_date'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['purchase_date']}</p>
-                        )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
-                            Tanggal Kadaluarsa Bahan
-                        </Label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    data-empty={!formData['expiry_date']}
-                                    className="data-[empty=true]:text-muted-foreground justify-start text-left font-normal"
-                                >
-                                    <CalendarIcon />
-                                    {formData['expiry_date'] ? format(formData['expiry_date'], "PPP") : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
-                                <Calendar mode="single" selected={formData['expiry_date']} onSelect={(date: Date) => setFormData({ ...formData, expiry_date: date })} required />
-                            </PopoverContent>
-                        </Popover>
-                        {errors['expiry_date'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['expiry_date']}</p>
-                        )}
-                    </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='testing_type'>
+                                    Tanggal Beli Bahan <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Popover modal={true}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                data-empty={!formData['purchase_date']}
+                                                className="data-[empty=true]:text-muted-foreground justify-start text-left font-normal w-full"
+                                            >
+                                                <CalendarIcon />
+                                                {formData['purchase_date'] ? format(formData['purchase_date'], "PPP") : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar mode="single" selected={formData['purchase_date']} onSelect={(date: Date) => {
+                                                setFormData({ ...formData, purchase_date: date })
+                                            }} required />
+                                        </PopoverContent>
+                                    </Popover>
+                                    {errors['purchase_date'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['purchase_date']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='testing_type'>
+                                    Tanggal Kadaluarsa Bahan
+                                </Label>
+                                <div>
+                                    <Popover modal={true}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                data-empty={!formData['expiry_date']}
+                                                className="data-[empty=true]:text-muted-foreground justify-start text-left font-normal w-full"
+                                            >
+                                                <CalendarIcon />
+                                                {formData['expiry_date'] ? format(formData['expiry_date'], "PPP") : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar mode="single" selected={formData['expiry_date']} onSelect={(date: Date) => setFormData({ ...formData, expiry_date: date })} required />
+                                        </PopoverContent>
+                                    </Popover>
+                                    {errors['expiry_date'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['expiry_date']}</p>
+                                    )}
+                                </div>
+                            </div>
 
-                    <div className="flex flex-col gap-2 md:col-span-2">
-                        <Label className="block mb-2 text-sm font-bold text-gray-700" htmlFor='testing_type'>
-                            Keterangan Bahan
-                        </Label>
-                        <Textarea
-                            name="description"
-                            id="description"
-                            onChange={handleChange}
-                            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                            placeholder='Keterangan'
-                            value={formData['description'] || ''}
-                        >
-                        </Textarea>
-                        {errors['description'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['description']}</p>
-                        )}
-                    </div>
-                </form>
-                <DialogFooter className='p-6'>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">
-                            Close
+                            <div className="flex flex-col gap-2 md:col-span-2">
+                                <Label htmlFor='testing_type'>
+                                    Keterangan Bahan
+                                </Label>
+                                <div>
+                                    <Textarea
+                                        name="description"
+                                        id="description"
+                                        onChange={handleChange}
+                                        placeholder='Keterangan'
+                                        value={formData['description'] || ''}
+                                    >
+                                    </Textarea>
+                                    {errors['description'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['description']}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </ScrollArea>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                                Tutup
+                            </Button>
+                        </DialogClose>
+                        <Button type="submit" onClick={handleSubmit}>
+                            {isSubmitting ? 'Menyimpan...' : 'Simpan'}
                         </Button>
-                    </DialogClose>
-                    <Button type="button" onClick={handleSubmit}>
-                        {isSubmitting ? 'Saving...' : 'Save'}
-                    </Button>
-                </DialogFooter>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     )

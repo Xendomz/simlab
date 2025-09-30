@@ -11,6 +11,8 @@ import { BookingVerifyDTO } from '@/application/booking/dto/BookingDTO';
 import { toast } from 'sonner';
 import BookingRejectionDialog from './BookingRejectionDialog';
 import { BookingView } from '@/application/booking/BookingView';
+import BookingRevisionDialog from './BookingRevisionDialog';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select'
 
 const KepalaLabBookingApproval = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -48,6 +50,14 @@ const KepalaLabBookingApproval = () => {
         handlePageChange,
     } = useTable()
 
+    const [selectedStatus, setSelectedStatus] = useState<string>('')
+    const handleFilterStatus = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+
+        setSelectedStatus(value);
+        setCurrentPage(1);
+    }
+
     const {
         booking,
         isLoading,
@@ -58,7 +68,8 @@ const KepalaLabBookingApproval = () => {
         perPage,
         searchTerm,
         setTotalPages,
-        setTotalItems
+        setTotalItems,
+        status: selectedStatus
     })
 
     const [selectedBooking, setSelectedBooking] = useState<BookingView | null>(null);
@@ -69,7 +80,7 @@ const KepalaLabBookingApproval = () => {
         setSelectedBooking(booking);
         setOpenApprovalDialog(true)
     }
-    
+
     const openRejection = (booking: BookingView) => {
         setSelectedBooking(booking);
         setOpenRejectionDialog(true)
@@ -77,7 +88,7 @@ const KepalaLabBookingApproval = () => {
 
     useEffect(() => {
         getDataForVerification()
-    }, [currentPage, perPage])
+    }, [currentPage, perPage, selectedStatus])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -109,6 +120,18 @@ const KepalaLabBookingApproval = () => {
         }
     }
 
+    const handleVerification = async (action: 'approve' | 'reject' | 'revision', information: string, laboran_id?: number): Promise<void> => {
+        if (!selectedBooking) return
+        const res = await verifyBooking(selectedBooking.id, {
+            action: action,
+            information: information,
+            laboran_id: laboran_id
+        })
+        toast.success(res.message)
+        setOpenRejectionDialog(false)
+        getDataForVerification()
+    }
+
     return (
         <>
             <div className="flex flex-1 flex-col gap-4 p-4 pt-0" ref={sectionRef}>
@@ -117,6 +140,30 @@ const KepalaLabBookingApproval = () => {
                         <CardTitle>Menu Verifikasi Peminjaman</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        <div className="w-full mb-3 md:w-1/3">
+                            <div className="relative">
+                                <Select name='filter_status' onValueChange={(value) =>
+                                    handleFilterStatus({
+                                        target: {
+                                            name: 'filter_status',
+                                            value: value
+                                        }
+                                    } as React.ChangeEvent<HTMLSelectElement>)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Pilih Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Status</SelectLabel>
+                                            <SelectItem value=" ">All</SelectItem>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="rejected">Rejected</SelectItem>
+                                            <SelectItem value="approved">Approved</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
                         <Table
                             data={booking}
                             columns={BookingVerificationColumn({ role: 'Kepala Lab Terpadu', openApproval, openRejection })}
@@ -131,8 +178,9 @@ const KepalaLabBookingApproval = () => {
                             handlePageChange={handlePageChange} />
                     </CardContent>
                 </Card>
+                <BookingRevisionDialog open={openRejectionDialog} onOpenChange={setOpenRejectionDialog} handleRejection={handleRejection} />
                 <BookingRejectionDialog open={openRejectionDialog} onOpenChange={setOpenRejectionDialog} handleRejection={handleRejection} />
-                <KepalaLabBookingApprovalDialog open={openApprovalDialog} onOpenChange={setOpenApprovalDialog} handleSave={handleApproval} />
+                <KepalaLabBookingApprovalDialog open={openApprovalDialog} onOpenChange={setOpenApprovalDialog} handleSave={handleVerification} />
             </div>
         </>
     )

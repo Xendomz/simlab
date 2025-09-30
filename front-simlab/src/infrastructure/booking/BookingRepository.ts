@@ -8,7 +8,7 @@ import { BookingStepper } from "@/domain/booking/BookingStepper";
 import { BookingStepperAPI, toDomain as toBookingStepperDomain } from "./BookingStepperAPI";
 
 export class BookingRepository implements IBookingRepository {
-    async getAll(params: { page: number; per_page: number; search: string; }): Promise<PaginatedResponse<Booking>> {
+    async getAll(params: { page: number; per_page: number; search: string; filter_status?: string; }): Promise<PaginatedResponse<Booking>> {
         const queryString = new URLSearchParams(
             Object.entries(params).reduce((acc, [key, value]) => {
                 acc[key] = String(value);
@@ -29,7 +29,7 @@ export class BookingRepository implements IBookingRepository {
         throw json['message']
     }
 
-    async getBookingsForVerification(params: { page: number; per_page: number; search: string; }): Promise<PaginatedResponse<Booking>> {
+    async getBookingsForVerification(params: { page: number; per_page: number; search: string; filter_status?: string; }): Promise<PaginatedResponse<Booking>> {
         const queryString = new URLSearchParams(
             Object.entries(params).reduce((acc, [key, value]) => {
                 acc[key] = String(value);
@@ -161,7 +161,7 @@ export class BookingRepository implements IBookingRepository {
         throw json
     }
 
-    async verifyBooking(booking_id: number, data: { action: "approve" | "reject"; laboran_id?: number; information?: string; ruangan_laboratorium_id?: number; is_allowed_offsite?: boolean | null }): Promise<ApiResponse> {
+    async verifyBooking(booking_id: number, data: { action: "approve" | "reject" | "revision"; laboran_id?: number; information?: string; laboratory_room_id?: number; is_allowed_offsite?: boolean | null }): Promise<ApiResponse> {
 
         const response = await fetchApi(`/bookings/${booking_id}/verify`, {
             method: 'POST',

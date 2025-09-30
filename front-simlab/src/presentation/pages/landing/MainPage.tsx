@@ -29,7 +29,7 @@ const MainPage = () => {
 
                 </div>
                 <div className='px-10 xl:px-32'>
-                    <div className='text-white px-5 py-10 md:p-20 grid grid-cols-1 md:grid-cols-2 gap-20 bg-gradient-to-b md:bg-gradient-to-r from-[#e8ad38] via-[#083e6b] to-[#0a61aa] rounded-2xl shadow-lg hover:scale-105 transition-all  duration-200 ease-linear'>
+                    <div className='text-white px-5 py-10 md:p-20 grid grid-cols-1 md:grid-cols-2 gap-20 bg-gradient-to-b md:bg-gradient-to-r from-warning via-secondary to-secondary rounded-2xl shadow-lg hover:scale-105 transition-all  duration-200 ease-linear'>
                         <div className='flex flex-col gap-5'>
                             <span className='text-5xl font-bold'>
                                 Visi
@@ -62,69 +62,69 @@ const MainPage = () => {
                 <div className='min-h-[420px] px-10 xl:px-32 flex flex-col gap-20'>
                     <div className='flex flex-col gap-1 w-fit mx-auto'>
                         <span className='text-4xl font-semibold'>Layanan Kami</span>
-                        <div className='w-full h-2 bg-gradient-to-r from-[#e8ad38] to-[#0a61aa] rounded-lg'></div>
+                        <div className='w-full h-2 bg-gradient-to-r from-warning to-[#0a61aa] rounded-lg'></div>
                     </div>
                     <div className="flex flex-wrap justify-center rounded-lg gap-10">
-                        <div className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 p-8 bg-white border border-gray-100 rounded-lg text-[#e8ad38] text-center font-medium shadow-xl flex flex-col items-center justify-center gap-8 hover:scale-105 transition-all">
-                            <div className='size-20 rounded-full bg-[#e8ad38]'>
+                        <div className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 p-8 bg-white border border-gray-100 rounded-lg text-warning text-center font-medium shadow-xl flex flex-col items-center justify-center gap-8 hover:scale-105 transition-all">
+                            <div className='size-20 rounded-full bg-warning'>
 
                             </div>
                             Layanan Peminjaman Laboratorium
                         </div>
-                        <div className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 p-8 bg-white border border-gray-100 rounded-lg text-[#e8ad38] text-center font-medium shadow-xl flex flex-col items-center justify-center gap-8 hover:scale-105 transition-all">
-                            <div className='size-20 rounded-full bg-[#e8ad38]'>
+                        <div className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 p-8 bg-white border border-gray-100 rounded-lg text-warning text-center font-medium shadow-xl flex flex-col items-center justify-center gap-8 hover:scale-105 transition-all">
+                            <div className='size-20 rounded-full bg-warning'>
 
                             </div>
                             Layanan Penelitian
                         </div>
-                        <div className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 p-8 bg-white border border-gray-100 rounded-lg text-[#e8ad38] text-center font-medium shadow-xl flex flex-col items-center justify-center gap-8 hover:scale-105 transition-all">
-                            <div className='size-20 rounded-full bg-[#e8ad38]'>
+                        <div className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 p-8 bg-white border border-gray-100 rounded-lg text-warning text-center font-medium shadow-xl flex flex-col items-center justify-center gap-8 hover:scale-105 transition-all">
+                            <div className='size-20 rounded-full bg-warning'>
 
                             </div>
                             Layanan Pengujian
                         </div>
-                        <div className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 p-8 bg-white border border-gray-100 rounded-lg text-[#e8ad38] text-center font-medium shadow-xl flex flex-col items-center justify-center gap-8 hover:scale-105 transition-all">
-                            <div className='size-20 rounded-full bg-[#e8ad38]'>
+                        <div className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 p-8 bg-white border border-gray-100 rounded-lg text-warning text-center font-medium shadow-xl flex flex-col items-center justify-center gap-8 hover:scale-105 transition-all">
+                            <div className='size-20 rounded-full bg-warning'>
 
                             </div>
                             Pengabdian Masyarakat
                         </div>
                     </div>
                 </div>
-                <div className='min-h-[400px] px-10 xl:px-32 flex flex-col gap-20 py-20 bg-[#e8ad38]'>
+                <div className='min-h-[400px] px-10 xl:px-32 flex flex-col gap-20 py-20 bg-secondary'>
                     <div className='flex flex-col gap-1 w-fit mx-auto'>
                         <span className='text-4xl font-semibold text-white'>Layanan Kami</span>
                         <div className='w-full h-2 bg-white rounded-lg'></div>
                     </div>
                     <div className="flex flex-wrap justify-center rounded-lg gap-10">
                         {[...Array(6)].map((_, idx) => (
-                            <div key={idx} className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 bg-white  rounded-lg text-[#e8ad38] text-center font-medium shadow-xl flex flex-col items-center gap-8 hover:scale-105 transition-all">
+                            <div key={idx} className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 bg-white  rounded-lg text-warning text-center font-medium shadow-xl flex flex-col items-center hover:scale-105 transition-all">
                                 <div className='relative w-full rounded-t-lg'>
                                     <div className="absolute inset-0 bg-black opacity-10 z-0"></div>
                                     <img src="https://labterpadu.itk.ac.id/Alat%20Laboratorium/gambar_alat.jpg" className='aspect-[4/3] object-cover rounded-t-lg' alt="" />
                                 </div>
                                 <div className='flex flex-col gap-2 p-5'>
-                                    <span className='font-semibold text-lg line-clamp-2 text-black'>
+                                    <span className='font-semibold text-lg line-clamp-2 text-primary'>
                                         Oven pengeringan
                                     </span>
-                                    <span className='line-clamp-3 text-sm text-ellipsis overflow-hidden whitespace-nowraptruncate'>Labter 1 - Lab. Termal (R109)</span>
+                                    <span className='text-warning line-clamp-3 text-sm text-ellipsis overflow-hidden whitespace-nowraptruncate'>Labter 1 - Lab. Termal (R109)</span>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <NavLink to={'/'} className="mx-auto bg-white rounded-lg px-5 py-2 text-[#e8ad38] font-semibold hover:bg-black hover:text-[#e8ad38] transition-colors duration-300 shadow-lg w-fit">
+                    <NavLink to={'/'} className="mx-auto bg-white rounded-lg px-5 py-2 text-secondary font-semibold hover:bg-warning hover:text-secondary transition-colors duration-300 shadow-lg w-fit">
                         Selengkapnya
                     </NavLink>
                 </div>
 
                 <div className='min-h-[400px] px-10 xl:px-32 flex flex-col gap-20 py-20'>
                     <div className='flex flex-col gap-1 w-fit mx-auto'>
-                        <span className='text-4xl font-semibold'>Layanan Kami</span>
-                        <div className='w-full h-2 bg-[#e8ad38] rounded-lg'></div>
+                        <span className='text-4xl font-semibold'>Berita Terkini</span>
+                        <div className='w-full h-2 bg-warning rounded-lg'></div>
                     </div>
                     <NavLink to={'/berita/test'} className="flex flex-wrap justify-center rounded-lg gap-10">
                         {[...Array(6)].map((_, idx) => (
-                            <div key={idx} className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 bg-white rounded-lg text-[#e8ad38] font-medium shadow-xl flex flex-col items-center gap-3 hover:scale-105 transition-all">
+                            <div key={idx} className="min-h-32 w-full md:basis-1/3 lg:basis-1/4 bg-white rounded-lg text-secondary font-medium shadow-xl flex flex-col items-center gap-3 hover:scale-105 transition-all">
                                 <div className='relative w-full rounded-t-lg'>
                                     <div className="absolute inset-0 bg-black opacity-10 z-0 rounded-t-lg"></div>
                                     <img src="https://labterpadu.itk.ac.id/images/news/1618455634new3.jpg" className='aspect-[4/3] object-cover rounded-t-lg' alt="" />
@@ -139,11 +139,11 @@ const MainPage = () => {
                             </div>
                         ))}
                     </NavLink>
-                    <NavLink to={'/'} className="mx-auto bg-black rounded-lg px-5 py-2 text-[#e8ad38] font-semibold hover:bg-[#e8ad38] hover:text-white transition-colors duration-300 shadow-lg w-fit">
+                    <NavLink to={'/'} className="mx-auto bg-secondary rounded-lg px-5 py-2 text-warning font-semibold hover:bg-warning hover:text-white transition-colors duration-300 shadow-lg w-fit">
                         Selengkapnya
                     </NavLink>
                 </div>
-                <div className='min-h-[420px] bg-[#e8ad38] px-10 xl:px-32 flex flex-col md:flex-row justify-between py-20 gap-10 md:gap-0 md:py-0'>
+                <div className='min-h-[420px] bg-warning px-10 xl:px-24 flex flex-col md:flex-row justify-between py-20 gap-10 md:gap-0 md:py-0'>
                     <img src="https://itk.ac.id/assets/image/Logo_ITK_White.webp" className='w-64 object-contain h-auto' />
                     <div className='flex flex-col gap-10 text-white py-0 md:py-20'>
                         <span className='font-semibold text-3xl'>Kontak</span>

@@ -13,11 +13,11 @@ class BookingEquipmentMaterialRequest extends ApiRequest
     {
         return [
             'laboratoryEquipments' => 'required|array|min:1',
-            'laboratoryEquipments.*.id' => 'required|distinct|exists:alat_laboratoria,id',
+            'laboratoryEquipments.*.id' => 'required|distinct|exists:laboratory_equipments,id',
             'laboratoryEquipments.*.quantity' => 'required|integer|min:1',
 
             'laboratoryMaterials' => 'array',
-            'laboratoryMaterials.*.id' => 'required|distinct|exists:bahan_laboratoria,id',
+            'laboratoryMaterials.*.id' => 'required|distinct|exists:laboratory_materials,id',
             'laboratoryMaterials.*.quantity' => 'required|integer|min:1',
         ];
     }

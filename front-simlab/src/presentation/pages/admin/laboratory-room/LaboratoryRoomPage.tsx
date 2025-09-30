@@ -4,9 +4,8 @@ import { useGSAP } from "@gsap/react"
 import Table from "../../../components/Table";
 import { LaboratoryRoomColumn } from "./LaboratoryRoomColumn";
 import useTable from "@/application/hooks/useTable";
-import { useLaboratoryRoom } from "@/application/laboratory-room/hooks/useLaboratoryRoom";
 import { ModalType } from "@/shared/Types";
-import { LaboratoryRoomInputDTO } from "@/application/laboratory-room/dto/LaboratoryRoomDTO";
+import { LaboratoryRoomInputDTO } from "@/application/laboratory-room/LaboratoryRoomDTO";
 import { toast } from "sonner";
 import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
@@ -15,6 +14,8 @@ import { Plus } from "lucide-react";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import LaboratoryRoomFormDialog from "./components/LaboratoryRoomFormDialog";
 import { useUser } from "@/application/user/hooks/useUser";
+import { LaboratoryRoomView } from "@/application/laboratory-room/LaboratoryRoomView";
+import { LaboratoryRoomService } from "@/application/laboratory-room/LaboratoryRoomService";
 
 const LaboratoryRoomPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -52,43 +53,22 @@ const LaboratoryRoomPage = () => {
         handlePageChange,
     } = useTable()
 
-    const {
-        laboratoryRoom,
-        isLoading,
-        getData,
-        create,
-        update,
-        remove,
-    } = useLaboratoryRoom({
-        currentPage,
-        perPage,
-        searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
+    const laboratoryRoomService = new LaboratoryRoomService()
+    const [laboratoryRooms, setLaboratoryRooms] = useState<LaboratoryRoomView[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    const {
-        user,
-        getData: getUserData
-    } = useUser({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        filter_study_program:0,
-        setTotalPages() {},
-        setTotalItems() {},
-        role: 'Laboran',
-    })
-
-    const [isOpen, setIsOpen] = useState<boolean>(false)
-    const [id, setId] = useState<number | null>(null)
-    const [type, setType] = useState<ModalType>('Add')
-
-    const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
-
-    useEffect(() => {
-        getUserData()
-    }, [])
+    const getData = async () => {
+        setIsLoading(true)
+        const response = await laboratoryRoomService.getLaboratoryRoomData({
+            page: currentPage,
+            per_page: perPage,
+            search: searchTerm,
+        })
+        setLaboratoryRooms(response.data ?? [])
+        setTotalItems(response.total ?? 0)
+        setTotalPages(response.last_page ?? 0)
+        setIsLoading(false)
+    }
 
     useEffect(() => {
         getData()
@@ -106,8 +86,30 @@ const LaboratoryRoomPage = () => {
         return () => clearTimeout(timer)
     }, [searchTerm])
 
+    const {
+        user,
+        getData: getUserData
+    } = useUser({
+        currentPage: 1,
+        perPage: 9999,
+        searchTerm: '',
+        filter_study_program: 0,
+        setTotalPages() { },
+        setTotalItems() { },
+        role: 'Laboran',
+    })
+
+    const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [id, setId] = useState<number | null>(null)
+    const [type, setType] = useState<ModalType>('Add')
+
+    const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
+
+    useEffect(() => {
+        getUserData()
+    }, [])
+
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -120,10 +122,10 @@ const LaboratoryRoomPage = () => {
 
     const handleSave = async (formData: LaboratoryRoomInputDTO): Promise<void> => {
         if (id) {
-            const res = await update(id, formData)
+            const res = await laboratoryRoomService.updateData(id, formData)
             toast.success(res.message)
         } else {
-            const res = await create(formData)
+            const res = await laboratoryRoomService.createData(formData)
             toast.success(res.message)
         }
         getData()
@@ -133,7 +135,7 @@ const LaboratoryRoomPage = () => {
 
     const handleDelete = async () => {
         if (!id) return
-        const res = await remove(id)
+        const res = await laboratoryRoomService.deleteData(id)
         toast.success(res.message)
 
         getData()
@@ -156,7 +158,7 @@ const LaboratoryRoomPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={laboratoryRoom}
+                            data={laboratoryRooms}
                             columns={LaboratoryRoomColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -174,11 +176,11 @@ const LaboratoryRoomPage = () => {
             <LaboratoryRoomFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={laboratoryRoom}
+                data={laboratoryRooms}
                 laboran={user}
                 dataId={id}
                 handleSave={handleSave}
-                title={type == 'Add' ? 'Tambah data praktikum' : 'Edit data praktikum'}
+                title={type == 'Add' ? 'Tambah Ruangan Laboratorium' : 'Edit Ruangan Laboratorium'}
             />
         </>
     )

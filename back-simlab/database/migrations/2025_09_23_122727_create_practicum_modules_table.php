@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('practicum_modules', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('practicum_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->enum('status', ['Active', 'Deactive'])->default('Deactive');
             $table->timestamps();
         });
     }

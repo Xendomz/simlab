@@ -19,7 +19,7 @@ class MajorRequest extends ApiRequest
      */
     public function rules(): array
     {
-        $id = $this->route('id');
+        $id = $this->route('major');
         $uniqueRule = 'unique:majors,code';
         if ($id) {
             $uniqueRule .= ",{$id},id";

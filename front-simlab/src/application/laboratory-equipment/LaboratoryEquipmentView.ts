@@ -1,11 +1,11 @@
 import { LaboratoryEquipment } from "@/domain/laboratory-equipment/LaboratoryEquipment";
 import { LaboratoryRoomView } from "../laboratory-room/LaboratoryRoomView";
+import { MoneyView } from "../money/MoneyView";
 
 export class LaboratoryEquipmentView {
     private constructor(
         readonly id: number,
         readonly equipmentName: string,
-        readonly ruanganLaboratoriumId: number,
         readonly quantity: number,
         readonly unit: string,
         readonly equipmentFunction: string,
@@ -16,16 +16,18 @@ export class LaboratoryEquipmentView {
         readonly condition: string,
         readonly conditionDescription: string,
         readonly assetCode: string,
+        readonly studentPrice: MoneyView,
+        readonly lecturerPrice: MoneyView,
+        readonly externalPrice: MoneyView,
         readonly createdAt: Date | null,
         readonly updatedAt: Date | null,
-        readonly ruanganLaboratorium?: LaboratoryRoomView
+        readonly laboratoryRoom?: LaboratoryRoomView
     ){}
 
     static fromDomain(entity: LaboratoryEquipment): LaboratoryEquipmentView {
         return new LaboratoryEquipmentView(
             entity.id,
             entity.equipmentName,
-            entity.ruanganLaboratoriumId,
             entity.quantity,
             entity.unit,
             entity.equipmentFunction,
@@ -36,9 +38,12 @@ export class LaboratoryEquipmentView {
             entity.condition,
             entity.conditionDescription,
             entity.assetCode,
+            MoneyView.toViewModel(entity.studentPrice),
+            MoneyView.toViewModel(entity.lecturerPrice),
+            MoneyView.toViewModel(entity.externalPrice),
             entity.createdAt,
             entity.updatedAt,
-            entity.ruanganLaboratorium ? LaboratoryRoomView.fromDomain(entity.ruanganLaboratorium) : undefined
+            entity.laboratoryRoom ? LaboratoryRoomView.fromDomain(entity.laboratoryRoom) : undefined
         )
     }
 }

@@ -60,6 +60,10 @@ class BookingController extends BaseController
             $user = auth()->user();
             $query->where('user_id', $user->id);
 
+            if ($request->filter_status) {
+                $query->where('status', $request->filter_status);
+            }
+
             if ($request->has('search') && strlen($request->search) > 0) {
                 $searchTerm = $request->search;
                 $query->where('purpose', 'LIKE', "%{$searchTerm}%");
@@ -95,6 +99,11 @@ class BookingController extends BaseController
             $query = Booking::query();
             $query->where('academic_year_id', $this->activeAcademicYear->id);
             $query->where('status', '<>' , 'draft');
+
+            if ($request->filter_status) {
+                $query->where('status', $request->filter_status);
+            }
+
             // Jika Laboran, filter hanya booking yang laboran_id = user id
             if ($user->role === 'Laboran') {
                 $query->where('laboran_id', $user->id);
@@ -109,14 +118,6 @@ class BookingController extends BaseController
                 $searchTerm = $request->search;
                 $query->where('purpose', 'LIKE', "%{$searchTerm}%");
                 // Add more searchable fields as needed
-            }
-
-            $sortField = $request->input('sort_by', 'created_at');
-            $sortDirection = $request->input('sort_direction', 'desc');
-            $allowedSortFields = ['id', 'academic_year', 'status', 'created_at', 'updated_at'];
-
-            if (in_array($sortField, $allowedSortFields)) {
-                $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');
             }
 
             // Get pagination parameters with defaults
@@ -155,7 +156,14 @@ class BookingController extends BaseController
                 return $this->sendError($validationError, [], 400);
             }
 
-            $isApprove = $request->action === 'approve';
+            // $isApprove: 1 = approve, 2 = revision, 0 = reject/other
+            if ($request->action === 'approve') {
+                $isApprove = 1;
+            } elseif ($request->action === 'revision') {
+                $isApprove = 2;
+            } else {
+                $isApprove = 0;
+            }
 
             $this->assignBookingDataByRole($booking, $user, $request, $isApprove);
 
@@ -181,7 +189,7 @@ class BookingController extends BaseController
             'role' => $user->role,
             'approver_id' => $user->id,
             'approved' => $isApprove ? 1 : 0,
-            'information' => $isApprove ? null : $request->information,
+            'information' => $request->information ?? null,
         ];
 
         // Khusus untuk Laboran yang menyetujui peminjaman alat, kita perlu
@@ -206,7 +214,7 @@ class BookingController extends BaseController
 
         if ($user->role === 'Laboran' && $isApprove && $booking->booking_type === 'equipment') {
             $booking->update([
-                'ruangan_laboratorium_id' => $request->ruangan_laboratorium_id,
+                'laboratory_room_id' => $request->laboratory_room_id,
             ]);
         }
 
@@ -289,7 +297,7 @@ class BookingController extends BaseController
             }
 
             // set ruangan_laboratorium_id to null when type is equipment
-            $data['ruangan_laboratorium_id'] = $request->booking_type === 'equipment' ? null : $request->ruangan_laboratorium_id;
+            $data['laboratory_room_id'] = $request->booking_type === 'equipment' ? null : $request->ruangan_laboratorium_id;
 
             $booking = Booking::create($data);
             if ($isRoom) {
@@ -413,7 +421,7 @@ class BookingController extends BaseController
                 foreach ($data['laboratoryEquipments'] as $eq) {
                     BookingEquipment::create([
                         'booking_id' => $booking->id,
-                        'alat_laboratorium_id' => $eq['id'],
+                        'laboratory_equipment_id' => $eq['id'],
                         'quantity' => $eq['quantity']
                     ]);
                 }
@@ -424,7 +432,7 @@ class BookingController extends BaseController
                 foreach ($data['laboratoryMaterials'] as $mt) {
                     BookingMaterial::create([
                         'booking_id' => $booking->id,
-                        'bahan_laboratorium_id' => $mt['id'], // TODO: change to bahan_laboratorium_id if schema requires
+                        'laboratory_material_id' => $mt['id'], // TODO: change to bahan_laboratorium_id if schema requires
                         'quantity' => $mt['quantity']
                     ]);
                 }
@@ -482,7 +490,7 @@ class BookingController extends BaseController
             foreach ($data['laboratoryEquipments'] as $eq) {
                 BookingEquipment::create([
                     'booking_id' => $booking->id,
-                    'alat_laboratorium_id' => $eq['id'],
+                    'laboratory_equipment_id' => $eq['id'],
                     'quantity' => $eq['quantity']
                 ]);
             }

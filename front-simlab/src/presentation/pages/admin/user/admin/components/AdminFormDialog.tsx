@@ -6,36 +6,46 @@ import { Button } from '@/presentation/components/ui/button'
 import { UserView } from '@/application/user/UserView'
 import { Label } from '@/presentation/components/ui/label'
 import { Input } from '@/presentation/components/ui/input'
+import { UserInputDTO } from '@/application/user/UserDTO'
 
 interface AdminFormDialogProps {
     title: string,
     open: boolean,
-    data: any
+    data: UserView[]
     dataId: number | null,
     onOpenChange: (open: boolean) => void,
-    handleSave: (data: any) => Promise<void>
+    handleSave: (data: UserInputDTO) => Promise<void>
 }
 
 const AdminFormDialog: React.FC<AdminFormDialogProps> = ({ title, open, onOpenChange, data, dataId, handleSave }) => {
-    const [formData, setFormData] = useState<Record<string, any>>({});
+    const defaultFormData: UserInputDTO = {
+        name: null,
+        email: null,
+        role: null,
+        study_program_id: null,
+        identity_num: null,
+        password: null
+    }
+    const [formData, setFormData] = useState<UserInputDTO>(defaultFormData);
     const { errors, setErrors, processErrors } = useValidationErrors()
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         setErrors({})
-    }, [open])
-
-    useEffect(() => {
         if (dataId) {
-            const adminData = {
-                name: data.find((data: UserView) => data.id == dataId).name,
-                email: data.find((data: UserView) => data.id == dataId).email,
-                password: null,
-                role: data.find((data: UserView) => data.id == dataId).role
+            const selectedAdmin = data.find((admin) => admin.id, dataId)
+            if (selectedAdmin) {
+                setFormData({
+                    name: selectedAdmin.name,
+                    email: selectedAdmin.email,
+                    password: '',
+                    role: selectedAdmin.role,
+                    study_program_id: null,
+                    identity_num: null,
+                })
             }
-            setFormData(adminData)
         } else {
-            setFormData({})
+            setFormData(defaultFormData)
         }
     }, [open])
 
@@ -71,67 +81,73 @@ const AdminFormDialog: React.FC<AdminFormDialogProps> = ({ title, open, onOpenCh
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription></DialogDescription>
                 </DialogHeader>
-                <form>
-                    <div className="mb-4">
+                <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+                    <div className="flex flex-col gap-2">
                         <Label htmlFor='email'>
                             Email <span className="text-red-500">*</span>
                         </Label>
-                        <Input
-                            type='email'
-                            id='email'
-                            name='email'
-                            value={formData['email'] || ''}
-                            onChange={dataId ? undefined : handleChange}
-                            placeholder='Email'
-                            disabled={dataId ? true : false}
-                        />
-                        {errors['email'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['email']}</p>
-                        )}
+                        <div>
+                            <Input
+                                type='email'
+                                id='email'
+                                name='email'
+                                value={formData['email'] || ''}
+                                onChange={dataId ? undefined : handleChange}
+                                placeholder='Email'
+                                disabled={dataId ? true : false}
+                            />
+                            {errors['email'] && (
+                                <p className="mt-1 text-xs italic text-red-500">{errors['email']}</p>
+                            )}
+                        </div>
                     </div>
-                    <div className="mb-4">
-                        <label htmlFor='name'>
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor='name'>
                             Nama Petugas Laboran <span className="text-red-500">*</span>
-                        </label>
-                        <Input
-                            type='text'
-                            id='name'
-                            name='name'
-                            value={formData['name'] || ''}
-                            onChange={handleChange}
-                            placeholder='Nama Petugas Laboran'
-                        />
-                        {errors['name'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['name']}</p>
-                        )}
+                        </Label>
+                        <div>
+                            <Input
+                                type='text'
+                                id='name'
+                                name='name'
+                                value={formData['name'] || ''}
+                                onChange={handleChange}
+                                placeholder='Nama Petugas Laboran'
+                            />
+                            {errors['name'] && (
+                                <p className="mt-1 text-xs italic text-red-500">{errors['name']}</p>
+                            )}
+                        </div>
                     </div>
-                    <div className="mb-4">
-                        <label htmlFor='password'>
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor='password'>
                             Password
-                        </label>
-                        <Input
-                            type='password'
-                            id='password'
-                            name='password'
-                            value={formData['password'] || ''}
-                            onChange={handleChange}
-                            placeholder='*****'
-                        />
-                        {errors['password'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['password']}</p>
-                        )}
+                        </Label>
+                        <div>
+                            <Input
+                                type='password'
+                                id='password'
+                                name='password'
+                                value={formData['password'] || ''}
+                                onChange={handleChange}
+                                placeholder='*****'
+                            />
+                            {errors['password'] && (
+                                <p className="mt-1 text-xs italic text-red-500">{errors['password']}</p>
+                            )}
+                        </div>
                     </div>
-                </form>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">
-                            Close
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                                Tutup
+                            </Button>
+                        </DialogClose>
+                        <Button type="submit" onClick={handleSubmit}>
+                            {isSubmitting ? 'Menyimpan...' : 'Simpan'}
                         </Button>
-                    </DialogClose>
-                    <Button type="button" onClick={handleSubmit}>
-                        {isSubmitting ? 'Saving...' : 'Save'}
-                    </Button>
-                </DialogFooter>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     )

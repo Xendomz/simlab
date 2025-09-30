@@ -2,7 +2,7 @@ import { useCallback, useState } from "react"
 import { UserView } from "../UserView"
 import { UserService } from "../UserService"
 import { Role } from "@/shared/Types"
-import { UserInputDTO } from "../dto/UserDTO"
+import { UserInputDTO } from "../UserDTO"
 
 export const useUser = ({
     currentPage,

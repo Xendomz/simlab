@@ -7,8 +7,8 @@ import { PracticumGroupAPI, toDomain as toPracticumGroup } from "./PracticumGrou
 import { PracticumSchedulingEquipmentAPI, toDomain as toPracticumSchedulingEquipment } from "./PracticumSchedulingEquipmentAPI";
 import { PracticumSchedulingMaterialAPI, toDomain as toPracticumSchedulingMaterial  } from "./PracticumSchedulingMaterialAPI";
 import { Time } from "@/domain/time/Time";
-import { PracticalWorkAPI, toDomain as toPracticalWork } from "../practical-work/PracticalWorkAPI";
 import { PracticumSchedulingStatus } from "@/domain/practicum-scheduling/PracticumSchedulingStatus";
+import { PracticumAPI, toDomain as toPracticum } from "../practicum/PracticumAPI";
 
 export type PracticumSchedulingAPI = {
     id: number;
@@ -23,7 +23,7 @@ export type PracticumSchedulingAPI = {
     academicYear?: AcademicYearAPI;
     user?: UserApi;
     laboratory_room?: LaboratoryRoomAPI;
-    practicum?: PracticalWorkAPI;
+    practicum?: PracticumAPI;
     practicum_groups?: PracticumGroupAPI[];
     practicum_scheduling_equipments?: PracticumSchedulingEquipmentAPI[];
     practicum_scheduling_materials?: PracticumSchedulingMaterialAPI[];
@@ -47,7 +47,7 @@ export function toDomain(api: PracticumSchedulingAPI): PracticumScheduling {
         api.academicYear ? toAcademicYear(api.academicYear) : undefined,
         api.user ? toUser(api.user) : undefined,
         api.laboratory_room ? toLaboratoryRoom(api.laboratory_room) : undefined,
-        api.practicum ? toPracticalWork(api.practicum) : undefined,
+        api.practicum ? toPracticum(api.practicum) : undefined,
         api.practicum_groups ? api.practicum_groups.map(toPracticumGroup) : undefined,
         api.practicum_scheduling_equipments ? api.practicum_scheduling_equipments.map(toPracticumSchedulingEquipment) : undefined,
         api.practicum_scheduling_materials ? api.practicum_scheduling_materials.map(toPracticumSchedulingMaterial) : undefined,

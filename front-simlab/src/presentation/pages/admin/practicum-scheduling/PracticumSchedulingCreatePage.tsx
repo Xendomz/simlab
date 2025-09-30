@@ -4,7 +4,7 @@ import { useAuth } from '@/application/hooks/useAuth'
 import { useGSAP } from '@gsap/react'
 import React, { useEffect, useRef, useState } from 'react'
 import Header from '@/presentation/components/Header';
-import { useLaboratoryRoom } from '@/application/laboratory-room/hooks/useLaboratoryRoom';
+// import { useLaboratoryRoom } from '@/application/laboratory-room/hooks/useLaboratoryRoom';
 import { usePracticumScheduling } from '@/application/practicum-scheduling/hooks/usePracticumScheduling';
 import { PracticumSchedulingInputDTO } from '@/application/practicum-scheduling/dto/PracticumSchedulingDTO';
 import { Label } from '@/presentation/components/ui/label';
@@ -15,7 +15,6 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/presenta
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trash } from 'lucide-react';
 import { useValidationErrors } from '@/presentation/hooks/useValidationError';
-import { usePracticalWork } from '@/application/practical-work/hooks/usePracticalWork';
 import { toast } from 'sonner';
 import { ApiResponse } from '@/shared/Types';
 import { Combobox } from '@/presentation/components/custom/combobox';
@@ -104,17 +103,17 @@ const PracticumSchedulingCreatePage = () => {
     });
 
     // Practical work (practicum) select data
-    const {
-        practicalWork,
-        getData: getPracticalWorks
-    } = usePracticalWork({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        filter_study_program: user?.studyProgramId,
-        setTotalPages() { },
-        setTotalItems() { }
-    });
+    // const {
+    //     practicalWork,
+    //     getData: getPracticalWorks
+    // } = usePracticalWork({
+    //     currentPage: 1,
+    //     perPage: 9999,
+    //     searchTerm: '',
+    //     filter_study_program: user?.studyProgramId,
+    //     setTotalPages() { },
+    //     setTotalItems() { }
+    // });
 
     const {
         create,

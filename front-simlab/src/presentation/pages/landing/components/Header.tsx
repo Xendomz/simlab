@@ -72,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                                         href={item.href}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="font-semibold text-[#0a61aa] hover:text-[#e8ad38] transition-colors duration-200"
+                                        className="font-semibold text-secondary hover:text-warning transition-colors duration-200"
                                     >
                                         {item.label}
                                     </a>
@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                                     <NavLink
                                         to={item.href || "#"}
                                         className={({ isActive }) =>
-                                            `font-semibold text-[#0a61aa] hover:text-[#e8ad38] transition-colors duration-200 ${isActive ? "font-semibold underline" : ""
+                                            `font-semibold text-secondary hover:text-warning transition-colors duration-200 ${isActive ? "font-semibold underline" : ""
                                             }`
                                         }
                                     >
@@ -94,11 +94,11 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                                     onClick={() =>
                                         setOpenDropdown(openDropdown === item.label ? null : item.label)
                                     }
-                                    className="flex items-center font-semibold cursor-pointer text-[#0a61aa] hover:text-[#e8ad38] transition-colors duration-200 group"
+                                    className="flex items-center font-semibold cursor-pointer text-secondary hover:text-warning transition-colors duration-200 group"
                                 >
                                     {item.label}
                                     <svg
-                                        className={`w-3 h-3 ml-2 fill-[#0a61aa] group-hover:fill-[#e8ad38] transition-transform duration-200 ${openDropdown === item.label ? "rotate-180" : ""
+                                        className={`w-3 h-3 ml-2 fill-secondary group-hover:fill-warning transition-transform duration-200 ${openDropdown === item.label ? "rotate-180" : ""
                                             }`}
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="12"
@@ -122,7 +122,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                                                     href={child.href}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className=" text-black text-xs hover:bg-[#0a61aa] hover:text-white duration-200 flex items-center p-2 rounded"
+                                                    className=" text-black text-xs hover:bg-secondary hover:text-white duration-200 flex items-center p-2 rounded"
                                                 >
                                                     {child.label}
                                                 </a>
@@ -132,7 +132,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                                                 <NavLink
                                                     to={child.href || "#"}
                                                     className={({ isActive }) =>
-                                                        ` text-black text-xs hover:bg-[#0a61aa] hover:text-white duration-200 transition-colors flex items-center p-2 rounded ${isActive ? "bg-slate-100 font-semibold" : ""
+                                                        ` text-black text-xs hover:bg-secondary hover:text-white duration-200 transition-colors flex items-center p-2 rounded ${isActive ? "bg-slate-100 font-semibold" : ""
                                                         }`
                                                     }
                                                 >
@@ -147,16 +147,16 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                     ))}
                 </ul>
 
-                <NavLink to={'/login'} className="hidden lg:block bg-white border rounded-lg px-5 py-2 text-xs xl:text-sm text-[#0a61aa] font-semibold hover:bg-[#0a61aa] hover:text-[#e8ad38] transition-colors duration-300 shadow-lg">
+                <NavLink to={'/login'} className="hidden lg:block bg-white border rounded-lg px-5 py-2 text-xs xl:text-sm text-secondary font-semibold hover:bg-secondary hover:text-warning transition-colors duration-300 shadow-lg">
                     Masuk Simlab
                 </NavLink>
                 <button
                     className="lg:hidden flex flex-col gap-1"
                     onClick={() => setMobileOpen(!mobileOpen)}
                 >
-                    <div className="h-1 w-8 bg-[#e8ad38]"></div>
-                    <div className="h-1 w-8 bg-[#e8ad38]"></div>
-                    <div className="h-1 w-8 bg-[#e8ad38]"></div>
+                    <div className="h-1 w-8 bg-warning"></div>
+                    <div className="h-1 w-8 bg-warning"></div>
+                    <div className="h-1 w-8 bg-warning"></div>
                 </button>
             </div>
             {/* Mobile Menu - Floating From Top */}
@@ -179,7 +179,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                             alt="ITK Logo"
                         />
                         <button
-                            className=" text-[#e8ad38] font-bold"
+                            className=" text-warning font-bold"
                             onClick={() => setMobileOpen(false)}
                         >
                             ✕
@@ -195,7 +195,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                                             href={item.href}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="font-semibold text-[#e8ad38] hover:text-black transition-colors duration-200"
+                                            className="font-semibold text-secondary hover:text-warning transition-colors duration-200"
                                             onClick={() => setMobileOpen(false)}
                                         >
                                             {item.label}
@@ -204,7 +204,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                                         <NavLink
                                             to={item.href || "#"}
                                             className={({ isActive }) =>
-                                                `font-semibold text-[#e8ad38] hover:text-black transition-colors duration-200 ${isActive ? "font-semibold underline" : ""
+                                                `font-semibold text-secondary hover:text-warning transition-colors duration-200 ${isActive ? "font-semibold underline" : ""
                                                 }`
                                             }
                                             onClick={() => setMobileOpen(false)}
@@ -216,7 +216,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                                 {/* Dropdown inside mobile */}
                                 {item.children && (
                                     <details>
-                                        <summary className="cursor-pointer font-semibold text-[#e8ad38] hover:text-black transition-colors duration-200">
+                                        <summary className="cursor-pointer font-semibold text-secondary hover:text-warning transition-colors duration-200">
                                             {item.label}
                                         </summary>
                                         <ul className="pl-4 mt-2 flex flex-col gap-2">
@@ -227,7 +227,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                                                             href={child.href}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="text-black text-xs hover:text-[#e8ad38] duration-200"
+                                                            className="text-black text-xs hover:text-warning duration-200"
                                                             onClick={() => setMobileOpen(false)}
                                                         >
                                                             {child.label}
@@ -238,7 +238,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                                                         <NavLink
                                                             to={child.href || "#"}
                                                             className={({ isActive }) =>
-                                                                `text-black text-xs hover:text-[#e8ad38] duration-200 ${isActive ? "font-semibold underline" : ""
+                                                                `text-black text-xs hover:text-warning duration-200 ${isActive ? "font-semibold underline" : ""
                                                                 }`
                                                             }
                                                             onClick={() => setMobileOpen(false)}
@@ -258,7 +258,7 @@ const Header: React.FC<HeaderProps> = ({ className }) => {
                         <li>
                             <NavLink
                                 to={"/login"}
-                                className="block bg-white border rounded-lg px-5 py-2 text-xs text-[#e8ad38] font-semibold hover:bg-black hover:text-[#e8ad38] transition-colors duration-300 shadow"
+                                className="block bg-white border rounded-lg px-5 py-2 text-xs text-secondary font-semibold hover:bg-secondary hover:text-warning transition-colors duration-300 shadow"
                                 onClick={() => setMobileOpen(false)}
                             >
                                 Masuk Simlab

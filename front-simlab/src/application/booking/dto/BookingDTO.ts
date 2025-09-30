@@ -4,6 +4,7 @@ export interface BookingTableParam {
     page: number,
     per_page: number,
     search: string,
+    filter_status?: string
 }
 
 export interface BookingReportTableParam {
@@ -44,9 +45,9 @@ export interface BookingRoomNEquipmentInputDTO {
 }
 
 export interface BookingVerifyDTO {
-    action: 'approve' | 'reject',
+    action: 'approve' | 'reject' | 'revision',
     laboran_id?: number,
     information?: string,
-    ruangan_laboratorium_id?: number,
+    laboratory_room_id?: number,
     is_allowed_offsite?: boolean | null
 }

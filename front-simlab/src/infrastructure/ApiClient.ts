@@ -1,6 +1,6 @@
 import { StorageManager } from "./StorageManager";
 
-const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_URL
+const API_URL = import.meta.env.VITE_REACT_APP_BACKEND_URL + '/api'
 
 interface RequestOptions extends RequestInit {
     token?: string;

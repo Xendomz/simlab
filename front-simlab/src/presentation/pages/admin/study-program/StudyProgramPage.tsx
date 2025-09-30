@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import Table from "../../../components/Table";
@@ -11,13 +11,13 @@ import { Button } from "@/presentation/components/ui/button";
 import { Plus } from "lucide-react";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import { toast } from "sonner";
-import { StudyProgramInputDTO } from "@/application/study-program/dto/StudyProgramDTO";
+import { StudyProgramInputDTO } from "@/application/study-program/StudyProgramDTO";
 import StudyProgramFormDialog from "./components/StudyProgramFormDialog";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import { MajorService } from "@/application/major/MajorService";
 import { MajorSelectView } from "@/application/major/MajorSelectView";
 import { StudyProgramView } from "@/application/study-program/StudyProgramView";
 import { StudyProgramService } from "@/application/study-program/StudyProgramService";
+import { Combobox } from "@/presentation/components/custom/combobox";
 
 const StudyProgramPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -42,11 +42,6 @@ const StudyProgramPage = () => {
     const majorService = new MajorService()
     const [majors, setMajors] = useState<MajorSelectView[]>([])
     const [selectedMajor, setSelectedMajor] = useState<number>(0)
-    const handleFilterMajor = (e: ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-        setSelectedMajor(value ? Number(value) : 0);
-        setCurrentPage(1);
-    }
 
     useEffect(() => {
         const getMajors = async () => {
@@ -178,26 +173,18 @@ const StudyProgramPage = () => {
                     <CardContent>
                         <div className="w-full mb-3 md:w-1/3">
                             <div className="relative">
-                                <Select name='jurusan_id' onValueChange={(value) =>
-                                    handleFilterMajor({
-                                        target: {
-                                            name: 'jurusan_id',
-                                            value: value
-                                        }
-                                    } as React.ChangeEvent<HTMLSelectElement>)}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Pilih Jurusan" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Jurusan</SelectLabel>
-                                            <SelectItem value={"0"}>Semua</SelectItem>
-                                            {majors?.map((option, index) => (
-                                                <SelectItem key={index} value={option.id.toString()}>{option.name}</SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                <Combobox
+                                    options={majors}
+                                    value={selectedMajor?.toString() || ''}
+                                    onChange={(val) => {
+                                        setSelectedMajor(val ? Number(val) : 0)
+                                        setCurrentPage(1)
+                                    }}
+                                    placeholder="Pilih Jurusan"
+                                    optionLabelKey='name'
+                                    optionValueKey='id'
+                                    isFilter
+                                />
                             </div>
                         </div>
                         <Table

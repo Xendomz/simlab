@@ -24,7 +24,8 @@ type ComboboxProps<T extends Record<string, any>> = {
   onChange: (value: string) => void
   placeholder?: string
   optionValueKey?: keyof T
-  optionLabelKey?: keyof T
+  optionLabelKey?: keyof T,
+  isFilter?: boolean
 }
 
 export function Combobox<T extends Record<string, any>>({
@@ -34,6 +35,7 @@ export function Combobox<T extends Record<string, any>>({
   placeholder = "Select option...",
   optionValueKey = "value",
   optionLabelKey = "label",
+  isFilter = false
 }: ComboboxProps<T>) {
   const [open, setOpen] = React.useState(false)
 
@@ -47,18 +49,36 @@ export function Combobox<T extends Record<string, any>>({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between font-normal"
+          className={`w-full justify-between font-normal ${selectedLabel ? '' : 'text-muted-foreground'}`}
         >
           {selectedLabel || placeholder}
           <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0">
+      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)]">
         <Command>
           <CommandInput placeholder="Search..." />
           <CommandList>
             <CommandEmpty>No result found.</CommandEmpty>
             <CommandGroup>
+              {isFilter && (
+                <CommandItem
+                  value={'0'}
+                  onSelect={() => {
+                    onChange('0')
+                    setOpen(false)
+                  }}
+                  className="flex justify-between"
+                >
+                  Semua
+                  <CheckIcon
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value == '0' ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </CommandItem>
+              )}
               {options.map((option, i) => {
                 const optionValue = option[optionValueKey] as string
                 const optionLabel = option[optionLabelKey] as string

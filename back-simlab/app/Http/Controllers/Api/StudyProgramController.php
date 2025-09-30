@@ -81,7 +81,7 @@ class StudyProgramController extends BaseController
         } catch (ModelNotFoundException $e) {
             return $this->sendError("Program studi tidak ditemukan", [], 404);
         } catch (\Exception $e) {
-            return $this->sendError('Berhasil mengubah data program studi', [$e->getMessage()], 500);
+            return $this->sendError('Terjadi kesalahan ketika mengubah data program studi', [$e->getMessage()], 500);
         }
     }
 
@@ -96,6 +96,15 @@ class StudyProgramController extends BaseController
             return $this->sendError("Program studi tidak ditemukan", [], 404);
         } catch (\Exception $e) {
             return $this->sendError('Terjadi kesalahan ketika menghapus data program studi', [$e->getMessage()], 500);
+        }
+    }
+
+    public function getDataForSelect() {
+        try {
+            $study_programs = StudyProgram::select('id', 'name')->get();
+            return $this->sendResponse($study_programs, 'Data program studi berhasil diambil');
+        } catch (\Exception $e) {
+            return $this->sendError('Gagal mengambil data program studi', [$e->getMessage()], 500);
         }
     }
 }

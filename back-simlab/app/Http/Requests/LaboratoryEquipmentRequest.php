@@ -19,8 +19,9 @@ class LaboratoryEquipmentRequest extends ApiRequest
      */
     public function rules(): array
     {
+        $maxInt = 2147483647; // batas maksimum integer signed 32-bit
         $rules = [
-            'ruangan_laboratorium_id' => 'required|exists:ruangan_laboratoria,id',
+            'laboratory_room_id' => 'required|exists:laboratory_rooms,id',
             'equipment_name' => 'required|string|max:255',
             'quantity' => 'required|integer|min:1',
             'unit' => 'required|string|max:50',
@@ -31,6 +32,9 @@ class LaboratoryEquipmentRequest extends ApiRequest
             'condition' => 'required|string|max:50',
             'condition_description' => 'nullable|string|max:255',
             'asset_code' => 'required|string|max:100',
+            'student_price' => 'required|integer|min:0|max:' . $maxInt,
+            'lecturer_price' => 'required|integer|min:0|max:' . $maxInt,
+            'external_price' => 'required|integer|min:0|max:' . $maxInt,
         ];
 
         if ($this->hasFile('photo')) {
@@ -43,8 +47,8 @@ class LaboratoryEquipmentRequest extends ApiRequest
     public function messages(): array
     {
         return [
-            'ruangan_laboratorium_id.required' => 'Ruangan laboratorium wajib dipilih.',
-            'ruangan_laboratorium_id.exists' => 'Ruangan laboratorium tidak valid.',
+            'laboratory_room_id.required' => 'Ruangan laboratorium wajib dipilih.',
+            'laboratory_room_id.exists' => 'Ruangan laboratorium tidak valid.',
             'equipment_name.required' => 'Nama alat wajib diisi.',
             'equipment_name.max' => 'Nama alat maksimal 255 karakter.',
             'quantity.required' => 'Jumlah wajib diisi.',
@@ -66,6 +70,18 @@ class LaboratoryEquipmentRequest extends ApiRequest
             'photo.file' => 'Foto harus berupa file.',
             'photo.mimes' => 'Format foto harus JPG, JPEG, PNG, atau WEBP.',
             'photo.max' => 'Ukuran foto maksimal 3 MB.',
+            'student_price.required' => 'Harga mahasiswa wajib diisi',
+            'student_price.integer' => 'Harga mahasiswa harus berupa angka',
+            'student_price.min' => 'Harga mahasiswa minimal 0',
+            'student_price.max' => 'Harga mahasiswa maksimal 2.147.483.647',
+            'lecturer_price.required' => 'Harga dosen wajib diisi',
+            'lecturer_price.integer' => 'Harga dosen harus berupa angka',
+            'lecturer_price.min' => 'Harga dosen minimal 0',
+            'lecturer_price.max' => 'Harga dosen maksimal 2.147.483.647',
+            'external_price.required' => 'Harga eksternal wajib diisi',
+            'external_price.integer' => 'Harga eksternal harus berupa angka',
+            'external_price.min' => 'Harga eksternal minimal 0',
+            'external_price.max' => 'Harga eksternal maksimal 2.147.483.647',
         ];
     }
 }

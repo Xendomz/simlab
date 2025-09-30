@@ -13,6 +13,7 @@ import LaboranBookingApprovalDialog from './LaboranBookingApprovalDialog';
 import LaboranBookingApprovalEquipmentDialog from './LaboranBookingApprovalEquipmentDialog';
 import { BookingType } from '@/domain/booking/BookingType';
 import { BookingView } from '@/application/booking/BookingView';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select'
 
 const LaboranBookingApproval = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -50,6 +51,14 @@ const LaboranBookingApproval = () => {
         handlePageChange,
     } = useTable()
 
+    const [selectedStatus, setSelectedStatus] = useState<string>('')
+    const handleFilterStatus = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+
+        setSelectedStatus(value);
+        setCurrentPage(1);
+    }
+
     const {
         booking,
         isLoading,
@@ -60,7 +69,8 @@ const LaboranBookingApproval = () => {
         perPage,
         searchTerm,
         setTotalPages,
-        setTotalItems
+        setTotalItems,
+        status: selectedStatus
     })
 
     const [selectedBooking, setSelectedBooking] = useState<BookingView | null>(null);
@@ -84,7 +94,7 @@ const LaboranBookingApproval = () => {
 
     useEffect(() => {
         getDataForVerification()
-    }, [currentPage, perPage])
+    }, [currentPage, perPage, selectedStatus])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -120,6 +130,22 @@ const LaboranBookingApproval = () => {
         }
     };
 
+    const handleVerification = async (action: 'approve' | 'reject' | 'revision', information: string, laboratory_room_id?: number, is_allowed_offsite?: boolean | null): Promise<void> => {
+        if (!selectedBooking) return
+        const res = await verifyBooking(selectedBooking.id, {
+            action: action,
+            information: information,
+            laboratory_room_id: laboratory_room_id,
+            is_allowed_offsite: is_allowed_offsite
+        })
+        toast.success(res.message)
+        setOpenRejectionDialog(false)
+        setOpenApprovalDialog(false);
+        setOpenEquipmentDialog(false);
+        setSelectedBooking(null);
+        getDataForVerification()
+    }
+
     return (
         <>
             <div className="flex flex-1 flex-col gap-4 p-4 pt-0" ref={sectionRef}>
@@ -128,6 +154,30 @@ const LaboranBookingApproval = () => {
                         <CardTitle>Menu Verifikasi Peminjaman</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        <div className="w-full mb-3 md:w-1/3">
+                            <div className="relative">
+                                <Select name='filter_status' onValueChange={(value) =>
+                                    handleFilterStatus({
+                                        target: {
+                                            name: 'filter_status',
+                                            value: value
+                                        }
+                                    } as React.ChangeEvent<HTMLSelectElement>)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Pilih Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Status</SelectLabel>
+                                            <SelectItem value=" ">All</SelectItem>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="rejected">Rejected</SelectItem>
+                                            <SelectItem value="approved">Approved</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
                         <Table
                             data={booking}
                             columns={BookingVerificationColumn({ role: 'Laboran', openApproval, openRejection })}
@@ -143,8 +193,8 @@ const LaboranBookingApproval = () => {
                     </CardContent>
                 </Card>
                 <BookingRejectionDialog open={openRejectionDialog} onOpenChange={setOpenRejectionDialog} handleRejection={handleRejection} />
-                <LaboranBookingApprovalDialog open={openApprovalDialog} onOpenChange={setOpenApprovalDialog} handleSave={handleApproval} />
-                <LaboranBookingApprovalEquipmentDialog open={openEquipmentDialog} onOpenChange={setOpenEquipmentDialog} handleSave={handleApproval} />
+                <LaboranBookingApprovalDialog open={openApprovalDialog} onOpenChange={setOpenApprovalDialog} handleSave={handleVerification} />
+                <LaboranBookingApprovalEquipmentDialog open={openEquipmentDialog} onOpenChange={setOpenEquipmentDialog} handleSave={handleVerification} />
             </div>
         </>
     )

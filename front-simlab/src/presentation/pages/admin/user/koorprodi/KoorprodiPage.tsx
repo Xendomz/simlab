@@ -9,8 +9,10 @@ import Table from '@/presentation/components/Table'
 import { KoorprodiColumn } from './KoorprodiColumn'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
 import { toast } from 'sonner'
-import { useStudyProgram } from '@/application/study-program/hooks/useStudyProgram'
+// import { useStudyProgram } from '@/application/study-program/hooks/useStudyProgram'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select'
+import { StudyProgramService } from '@/application/study-program/StudyProgramService'
+import { StudyProgramSelectView } from '@/application/study-program/StudyProgramSelectView'
 
 const KoorprodiPage = () => {
     const sectionRef = useRef(null)
@@ -31,6 +33,18 @@ const KoorprodiPage = () => {
             },
         )
     }, [])
+
+        const studyProgramService = new StudyProgramService()
+        const [studyPrograms, setStudyPrograms] = useState<StudyProgramSelectView[]>([])
+    
+        useEffect(() => {
+            const getStudyPrograms = async () => {
+                const response = await studyProgramService.getDataForSelect()
+                setStudyPrograms(response.data ?? [])
+            }
+    
+            getStudyPrograms()
+        }, [])
     
     const {
         currentPage,
@@ -47,17 +61,6 @@ const KoorprodiPage = () => {
         handlePerPageChange,
         handlePageChange,
     } = useTable()
-
-    const {
-        studyProgram,
-        getData: getStudyProgramData,
-    } = useStudyProgram({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages() { },
-        setTotalItems() { }
-    })
 
     const [selectedStudyProgram, setSelectedStudyProgram] = useState<number>(0)
 
@@ -85,10 +88,6 @@ const KoorprodiPage = () => {
 
     const [id, setId] = useState<number | null>(null)
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
-
-    useEffect(() => {
-        getStudyProgramData()
-    }, [])
 
     useEffect(() => {
         getData()
@@ -146,7 +145,7 @@ const KoorprodiPage = () => {
                                         <SelectGroup>
                                             <SelectLabel>Program Studi</SelectLabel>
                                             <SelectItem value=" ">All</SelectItem>
-                                            {studyProgram?.map((option) => (
+                                            {studyPrograms?.map((option) => (
                                                 <SelectItem key={option.id} value={option.id.toString()}>{option.name}</SelectItem>
                                             ))}
                                         </SelectGroup>

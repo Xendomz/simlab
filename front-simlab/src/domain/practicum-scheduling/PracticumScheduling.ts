@@ -1,6 +1,6 @@
 import { AcademicYear } from "../academic-year/AcademicYear";
 import { LaboratoryRoom } from "../laboratory-room/LaboratoryRoom";
-import { PracticalWork } from "../practical-work/PracticalWork";
+import { PracticalWork } from "../practical-work/Practicum";
 import { Time } from "../time/Time";
 import { User } from "../User/User";
 import { PracticumApproval } from "./PracticumApproval";
