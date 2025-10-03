@@ -10,11 +10,13 @@ export interface IPracticumRepository {
         filter_study_program?: number
     }): Promise<PaginatedResponse<Practicum>>
     createData(data: {
+        code: string;
         name: string;
         study_program_id: number | null;
         sks: number
     }): Promise<ApiResponse<Practicum>>
     updateData(id: number, data: {
+        code: string;
         name: string;
         study_program_id: number | null;
         sks: number

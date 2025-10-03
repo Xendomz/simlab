@@ -9,6 +9,9 @@ export interface LaboratoryMaterialInputDTO {
     expiry_date: Date | undefined;
     description: string;
     refill_date: Date | undefined;
+    student_price: number | null,
+    lecturer_price: number | null,
+    external_price: number | null
 }
 
 export interface LaboratoryMaterialTableParams {

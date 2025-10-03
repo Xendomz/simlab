@@ -44,7 +44,10 @@ const LaboratoryEquipmentFormDialog: React.FC<LaboratoryEquipmentFormDialogProps
         origin: '',
         condition: '',
         condition_description: '',
-        asset_code: ''
+        asset_code: '',
+        student_price: null,
+        lecturer_price: null,
+        external_price: null
     }
 
     const [formData, setFormData] = useState<LaboratoryEquipmentInputDTO>(defaultFormData);
@@ -57,23 +60,28 @@ const LaboratoryEquipmentFormDialog: React.FC<LaboratoryEquipmentFormDialogProps
 
     useEffect(() => {
         if (dataId) {
-            const laboratoryEquipment = data.find((data: LaboratoryEquipmentView) => data.id == dataId)
+            const selectedLaboratoryEquipment = data.find((data: LaboratoryEquipmentView) => data.id == dataId)
 
             // reset photo state value to pass nullable validation
-            setFormData({
-                equipment_name: laboratoryEquipment?.equipmentName ?? '',
-                laboratory_room_id: laboratoryEquipment?.laboratoryRoom?.id ?? 0,
-                quantity: laboratoryEquipment?.quantity ?? 0,
-                unit: laboratoryEquipment?.unit ?? '',
-                function: laboratoryEquipment?.equipmentFunction ?? '',
-                photo: null,
-                brand: laboratoryEquipment?.brand ?? '',
-                equipment_type: laboratoryEquipment?.equipmentType ?? '',
-                origin: laboratoryEquipment?.origin ?? '',
-                condition: laboratoryEquipment?.condition ?? '',
-                condition_description: laboratoryEquipment?.conditionDescription ?? '',
-                asset_code: laboratoryEquipment?.assetCode ?? ''
-            });
+            if (selectedLaboratoryEquipment) {
+                setFormData({
+                    equipment_name: selectedLaboratoryEquipment.equipmentName,
+                    laboratory_room_id: selectedLaboratoryEquipment.laboratoryRoom?.id ?? 0,
+                    quantity: selectedLaboratoryEquipment.quantity,
+                    unit: selectedLaboratoryEquipment.unit,
+                    function: selectedLaboratoryEquipment.equipmentFunction,
+                    photo: null,
+                    brand: selectedLaboratoryEquipment.brand,
+                    equipment_type: selectedLaboratoryEquipment.equipmentType,
+                    origin: selectedLaboratoryEquipment.origin,
+                    condition: selectedLaboratoryEquipment.condition,
+                    condition_description: selectedLaboratoryEquipment.conditionDescription,
+                    asset_code: selectedLaboratoryEquipment.assetCode,
+                    student_price: selectedLaboratoryEquipment.studentPrice.amount,
+                    lecturer_price: selectedLaboratoryEquipment.lecturerPrice.amount,
+                    external_price: selectedLaboratoryEquipment.externalPrice.amount,
+                });
+            }
         } else {
             setFormData(defaultFormData)
         }
@@ -83,12 +91,19 @@ const LaboratoryEquipmentFormDialog: React.FC<LaboratoryEquipmentFormDialogProps
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
-        const { name, value } = e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-
+        const { type, name, value } = e.target;
+        let newValue = value;
+        
+        if (type === "number") {
+            if (newValue.length > 1 && newValue.startsWith('0')) {
+                newValue = newValue.replace(/^0+/, '');
+                if (newValue === '') newValue = '0';
+            }
+        }
         if (name === 'photo' && (e.target as HTMLInputElement).files) {
             setFormData((prev) => ({ ...prev, photo: (e.target as HTMLInputElement).files ? (e.target as HTMLInputElement).files![0] : null }));
         } else {
-            setFormData((prev) => ({ ...prev, [name]: value }));
+            setFormData((prev) => ({ ...prev, [name]: newValue }));
         }
     };
 
@@ -354,7 +369,60 @@ const LaboratoryEquipmentFormDialog: React.FC<LaboratoryEquipmentFormDialogProps
                                     )}
                                 </div>
                             </div>
-
+                            <div className="flex flex-col gap-2 md:col-span-2">
+                                <Label htmlFor='student_price'>
+                                    Harga Mahasiswa <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='number'
+                                        id='student_price'
+                                        name='student_price'
+                                        value={formData['student_price'] ?? ''}
+                                        onChange={handleChange}
+                                        placeholder='Harga mahasiswa'
+                                    />
+                                    {errors['student_price'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['student_price']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='lecturer_price'>
+                                    Harga Dosen <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='number'
+                                        id='lecturer_price'
+                                        name='lecturer_price'
+                                        value={formData['lecturer_price'] ?? ''}
+                                        onChange={handleChange}
+                                        placeholder='Harga Dosen'
+                                    />
+                                    {errors['lecturer_price'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['lecturer_price']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='external_price'>
+                                    Harga Pihak External <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='number'
+                                        id='external_price'
+                                        name='external_price'
+                                        value={formData['external_price'] ?? ''}
+                                        onChange={handleChange}
+                                        placeholder='Harga Pihak External'
+                                    />
+                                    {errors['external_price'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['external_price']}</p>
+                                    )}
+                                </div>
+                            </div>
                             <div className="flex flex-col gap-2 md:col-span-2">
                                 <Label htmlFor='testing_type'>
                                     Keterangan Kondisi Alat

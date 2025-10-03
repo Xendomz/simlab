@@ -34,7 +34,7 @@ const LaboratoryMaterialDetailDialog: React.FC<LaboratoryMaterialDetailDialogPro
                     </DialogHeader>
                     <ScrollArea className='h-full max-h-[70vh]'>
                         <div className='flex flex-col gap-5'>
-                            <div className='grid gap-x-5 gap-y-2 sm:grid-cols-2'>
+                            <div className='grid gap-x-5 gap-y-2'>
                                 <Item title='Kode Asset' value={laboratoryMaterial?.code} />
                                 <Item title='Nama Bahan' value={laboratoryMaterial?.materialName} />
                                 <Item title='Merek' value={laboratoryMaterial?.brand} />
@@ -43,6 +43,9 @@ const LaboratoryMaterialDetailDialog: React.FC<LaboratoryMaterialDetailDialogPro
                                 <Item title='Tanggal Pembelian ' value={`${laboratoryMaterial?.purchaseDate}`} />
                                 <Item title='Tanggal Kadaluarsa ' value={`${laboratoryMaterial?.expiryDate}`} />
                                 <Item title='Tanggal Restock Terakhir ' value={`${laboratoryMaterial?.refillDate}`} />
+                                <Item title='Harga Mahasiswa' value={laboratoryMaterial?.studentPrice.formatToIDR()} />
+                                <Item title='Harga Dosen' value={laboratoryMaterial?.lecturerPrice.formatToIDR()} />
+                                <Item className='sm:col-span-2' title='Harga External' value={laboratoryMaterial?.externalPrice.formatToIDR()} />
                                 <Item className='sm:col-span-2' title='Keterangan' value={laboratoryMaterial?.description} />
                             </div>
                         </div>

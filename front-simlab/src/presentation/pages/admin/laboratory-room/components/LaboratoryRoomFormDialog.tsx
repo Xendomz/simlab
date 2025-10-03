@@ -52,9 +52,9 @@ const LaboratoryRoomFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
                     name: selectedLaboratoryRoom.name,
                     floor: selectedLaboratoryRoom.floor,
                     user_id: selectedLaboratoryRoom.user?.id ?? null,
-                    student_price: selectedLaboratoryRoom.studentPrice.amount ?? null,
-                    lecturer_price: selectedLaboratoryRoom.lecturerPrice.amount ?? null,
-                    external_price: selectedLaboratoryRoom.externalPrice.amount ?? null,
+                    student_price: selectedLaboratoryRoom.studentPrice.amount,
+                    lecturer_price: selectedLaboratoryRoom.lecturerPrice.amount,
+                    external_price: selectedLaboratoryRoom.externalPrice.amount,
                 })
             }
         } else {
@@ -63,10 +63,17 @@ const LaboratoryRoomFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
     }, [open])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+        const { type, name, value } = e.target as HTMLInputElement;
+        let newValue = value;
+        if (type === "number") {
+            if (newValue.length > 1 && newValue.startsWith('0')) {
+                newValue = newValue.replace(/^0+/, '');
+                if (newValue === '') newValue = '0';
+            }
+        }
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: newValue
         }));
     };
 
@@ -88,81 +95,87 @@ const LaboratoryRoomFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="md:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription></DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
                     <ScrollArea className='h-full max-h-[70vh]'>
-                        <div className='flex flex-col gap-5'>
-                            <div className='flex flex-col gap-2'>
+                        <div className='grid md:grid-cols-2 gap-x-2 gap-y-5 p-1'>
+                            <div className='flex flex-col gap-2 md:col-span-2'>
                                 <Label htmlFor='name'>
                                     Nama Ruangan <span className="text-red-500">*</span>
                                 </Label>
-                                <Input
-                                    type='text'
-                                    id='name'
-                                    name='name'
-                                    value={formData['name'] || ''}
-                                    onChange={handleChange}
-                                    placeholder='Nama Ruangan'
-                                />
-                                {errors['name'] && (
-                                    <p className="mt-1 text-xs italic text-red-500">{errors['name']}</p>
-                                )}
+                                <div>
+                                    <Input
+                                        type='text'
+                                        id='name'
+                                        name='name'
+                                        value={formData['name'] || ''}
+                                        onChange={handleChange}
+                                        placeholder='Nama Ruangan'
+                                    />
+                                    {errors['name'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['name']}</p>
+                                    )}
+                                </div>
                             </div>
 
                             <div className='flex flex-col gap-2'>
                                 <Label htmlFor='floor'>
                                     Ruangan <span className="text-red-500">*</span>
                                 </Label>
-                                <Select name='floor' value={formData['floor']} onValueChange={(value) =>
-                                    handleChange({
-                                        target: {
-                                            name: 'floor',
-                                            value: value
-                                        }
-                                    } as React.ChangeEvent<HTMLInputElement>)}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Pilih Lantai" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Lantai</SelectLabel>
-                                            <SelectItem value="Lantai 1">Lantai 1</SelectItem>
-                                            <SelectItem value="Lantai 2">Lantai 2</SelectItem>
-                                            <SelectItem value="Lantai 3">Lantai 3</SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                                {errors['floor'] && (
-                                    <p className="mt-1 text-xs italic text-red-500">{errors['floor']}</p>
-                                )}
+                                <div>
+                                    <Select name='floor' value={formData['floor']} onValueChange={(value) =>
+                                        handleChange({
+                                            target: {
+                                                name: 'floor',
+                                                value: value
+                                            }
+                                        } as React.ChangeEvent<HTMLInputElement>)}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Pilih Lantai" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>Lantai</SelectLabel>
+                                                <SelectItem value="Lantai 1">Lantai 1</SelectItem>
+                                                <SelectItem value="Lantai 2">Lantai 2</SelectItem>
+                                                <SelectItem value="Lantai 3">Lantai 3</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                    {errors['floor'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['floor']}</p>
+                                    )}
+                                </div>
                             </div>
 
                             <div className='flex flex-col gap-2'>
                                 <Label htmlFor='user'>
                                     Petugas Laboran <span className="text-red-500">*</span>
                                 </Label>
-                                <Combobox
-                                    options={laboran}
-                                    value={formData.user_id?.toString() || ''}
-                                    onChange={(val) => {
-                                        setFormData((prev) => ({
-                                            ...prev,
-                                            user_id: val ? Number(val) : null
-                                        }))
-                                    }}
-                                    placeholder="Pilih Laboran"
-                                    optionLabelKey='name'
-                                    optionValueKey='id'
-                                />
-                                {errors['user_id'] && (
-                                    <p className="mt-1 text-xs italic text-red-500">{errors['user_id']}</p>
-                                )}
+                                <div>
+                                    <Combobox
+                                        options={laboran}
+                                        value={formData.user_id?.toString() || ''}
+                                        onChange={(val) => {
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                user_id: val ? Number(val) : null
+                                            }))
+                                        }}
+                                        placeholder="Pilih Laboran"
+                                        optionLabelKey='name'
+                                        optionValueKey='id'
+                                    />
+                                    {errors['user_id'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['user_id']}</p>
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2 md:col-span-2">
                                 <Label htmlFor='student_price'>
                                     Harga Mahasiswa <span className="text-red-500">*</span>
                                 </Label>

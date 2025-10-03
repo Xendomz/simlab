@@ -4,6 +4,7 @@ import { StudyProgramView } from "../study-program/StudyProgramView";
 export class PracticumView {
     private constructor(
         readonly id: number,
+        readonly code: string,
         readonly name: string,
         readonly studyProgramId: number,
         readonly sks: number,
@@ -15,6 +16,7 @@ export class PracticumView {
     static fromDomain(entity: Practicum): PracticumView {
         return new PracticumView(
             entity.id,
+            entity.code,
             entity.name,
             entity.studyProgramId,
             entity.sks,

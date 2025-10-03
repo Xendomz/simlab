@@ -42,26 +42,28 @@ const LaboratoryEquipmentDetailDialog: React.FC<LaboratoryEquipmentDetailDialogP
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-xl">
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Detail Alat Laboratorium</DialogTitle>
                 </DialogHeader>
                 <ScrollArea className='h-full max-h-[70vh] 2xl:max-h-[80vh]'>
-                    <div className='flex flex-col gap-5'>
-                        <div className="w-full">
-                            {!imageError && hasValidPhoto ? (
-                                <img
-                                    className='rounded-lg object-cover aspect-[4/3] w-full mb-5'
-                                    src={`${import.meta.env.VITE_REACT_APP_BACKEND_URL}/${laboratoryEquipment.photo}`}
-                                    onError={handleImageError}
-                                />
-                            ) : (
-                                <img
-                                    className='rounded-lg object-cover aspect-[4/3] w-full mb-5'
-                                    src={'/error-image.png'}
-                                />
-                            )}
-                            <div className='flex flex-col gap-5'>
+                    <div className='flex flex-col gap-5 p-1'>
+                        <div className="w-full grid sm:grid-cols-5 gap-5">
+                            <div className='sm:col-span-2'>
+                                {!imageError && hasValidPhoto ? (
+                                    <img
+                                        className='rounded-lg object-cover aspect-[4/3] sm:aspect-square w-full shadow-lg'
+                                        src={`${import.meta.env.VITE_REACT_APP_BACKEND_URL}/${laboratoryEquipment.photo}`}
+                                        onError={handleImageError}
+                                    />
+                                ) : (
+                                    <img
+                                        className='rounded-lg object-cover aspect-[4/3] sm:aspect-square w-full shadow-lg'
+                                        src={'/error-image.png'}
+                                    />
+                                )}
+                            </div>
+                            <div className='flex flex-col gap-5 sm:col-span-3'>
                                 <div className='flex flex-col gap-1'>
                                     <h1 className="text-2xl sm:text-xl font-bold">{laboratoryEquipment?.equipmentName}</h1>
                                     <p className="text-muted-foreground text-sm">{laboratoryEquipment?.equipmentFunction ?? 'Deskripsi tidak tersedia'}</p>
@@ -73,6 +75,9 @@ const LaboratoryEquipmentDetailDialog: React.FC<LaboratoryEquipmentDetailDialogP
                                     <Item title='Jumlah Alat' value={`${laboratoryEquipment?.quantity} ${laboratoryEquipment?.unit}`} />
                                     <Item title='Lokasi Alat' value={laboratoryEquipment?.laboratoryRoom?.name} />
                                     <Item title='Kondisi Alat' value={laboratoryEquipment?.condition} />
+                                    <Item title='Harga Mahasiswa' value={laboratoryEquipment?.studentPrice.formatToIDR()} />
+                                    <Item title='Harga Dosen' value={laboratoryEquipment?.lecturerPrice.formatToIDR()} />
+                                    <Item className='sm:col-span-2' title='Harga External' value={laboratoryEquipment?.externalPrice.formatToIDR()} />
                                     <Item className='sm:col-span-2' title='Keterangan' value={laboratoryEquipment?.conditionDescription} />
                                 </div>
                             </div>

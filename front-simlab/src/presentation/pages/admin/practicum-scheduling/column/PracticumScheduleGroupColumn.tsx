@@ -1,4 +1,4 @@
-import { PracticumGroupView } from "@/application/practicum-scheduling/PracticumGroupView";
+import { PracticumGroupView } from "@/application/practicum-scheduling/PracticumClassView";
 import { Badge } from "@/presentation/components/ui/badge";
 import { ColumnDef } from "@tanstack/react-table";
 

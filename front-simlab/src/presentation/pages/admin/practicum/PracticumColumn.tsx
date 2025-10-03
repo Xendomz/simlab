@@ -8,6 +8,7 @@ interface ColumnProps {
 }
 
 export const PracticumColumn = ({ openModal, openConfirm }: ColumnProps): ColumnDef<PracticumView>[] => [
+    { header: 'Kode Mata Kuliah', accessorKey: 'code' },
     { header: 'Nama Praktikum', accessorKey: 'name' },
     { header: 'Prodi', accessorKey: 'studyProgram', cell: ({ row }) => row.original.studyProgram?.name },
     { header: 'SKS', accessorKey: 'sks' },

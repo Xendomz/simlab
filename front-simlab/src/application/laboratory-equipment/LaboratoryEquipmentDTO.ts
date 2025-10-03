@@ -10,7 +10,10 @@ export interface LaboratoryEquipmentInputDTO {
     origin: string;
     condition: string;
     condition_description: string;
-    asset_code: string
+    asset_code: string,
+    student_price: number | null,
+    lecturer_price: number | null,
+    external_price: number | null
 }
 
 export interface LaboratoryEquipmentTableParams {

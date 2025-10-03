@@ -54,7 +54,7 @@ export const navItems: NavItem[] = [
     title: "Penjadwalan Praktikum",
     url: "/panel/penjadwalan-praktikum",
     icon: CalendarPlus,
-    roles: [userRole.Dosen],
+    roles: [userRole.KepalaLabJurusan],
   },
   {
     title: "Manajemen Peminjaman",
@@ -70,7 +70,7 @@ export const navItems: NavItem[] = [
     title: "Manajemen Penjadwalan Praktikum",
     url: "#",
     icon: CalendarPlus,
-    roles: [userRole.KepalaLabTerpadu, userRole.Laboran, userRole.Kooprodi],
+    roles: [userRole.KepalaLabTerpadu, userRole.Laboran, userRole.KepalaLabJurusan],
     items: [
       // { title: "Peminjaman", url: "/panel/peminjaman", roles: [userRole.KepalaLabTerpadu]},
       { title: "Verifikasi Penjadwalan Praktikum", url: "/panel/penjadwalan-praktikum/verif", roles: [userRole.KepalaLabTerpadu, userRole.Laboran, userRole.Kooprodi]},

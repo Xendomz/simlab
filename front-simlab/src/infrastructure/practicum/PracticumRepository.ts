@@ -30,6 +30,7 @@ export class PracticumRepository implements IPracticumRepository {
     }
 
     async createData(data: {
+        code: string;
         name: string;
         study_program_id: number | null;
         sks: number
@@ -47,6 +48,7 @@ export class PracticumRepository implements IPracticumRepository {
     }
 
     async updateData(id: number, data: {
+        code: string;
         name: string;
         study_program_id: number | null;
         sks: number

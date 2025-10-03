@@ -46,7 +46,10 @@ const LaboratoryMaterialFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
         purchase_date: undefined,
         expiry_date: undefined,
         description: '',
-        refill_date: undefined
+        refill_date: undefined,
+        student_price: null,
+        lecturer_price: null,
+        external_price: null
     }
     const [formData, setFormData] = useState<LaboratoryMaterialInputDTO>(defaultFormData);
 
@@ -56,19 +59,24 @@ const LaboratoryMaterialFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
     useEffect(() => {
         setErrors({})
         if (dataId) {
-            const laboratoryMaterial = data.find((data: LaboratoryMaterialView) => data.id == dataId)
-            setFormData({
-                code: laboratoryMaterial?.code ?? '',
-                laboratory_room_id: laboratoryMaterial?.laboratoryRoom?.id,
-                material_name: laboratoryMaterial?.materialName ?? '',
-                brand: laboratoryMaterial?.brand ?? '',
-                stock: laboratoryMaterial?.stock ?? 0,
-                unit: laboratoryMaterial?.unit ?? '',
-                purchase_date: laboratoryMaterial?.purchaseDate ?? undefined,
-                expiry_date: laboratoryMaterial?.expiryDate ?? undefined,
-                description: laboratoryMaterial?.description ?? '',
-                refill_date: laboratoryMaterial?.refillDate ?? undefined
-            })
+            const selectedLaboratoryMaterial = data.find((data: LaboratoryMaterialView) => data.id == dataId)
+            if (selectedLaboratoryMaterial) {
+                setFormData({
+                    code: selectedLaboratoryMaterial?.code ?? '',
+                    laboratory_room_id: selectedLaboratoryMaterial?.laboratoryRoom?.id,
+                    material_name: selectedLaboratoryMaterial?.materialName ?? '',
+                    brand: selectedLaboratoryMaterial?.brand ?? '',
+                    stock: selectedLaboratoryMaterial?.stock ?? 0,
+                    unit: selectedLaboratoryMaterial?.unit ?? '',
+                    purchase_date: selectedLaboratoryMaterial?.purchaseDate ?? undefined,
+                    expiry_date: selectedLaboratoryMaterial?.expiryDate ?? undefined,
+                    description: selectedLaboratoryMaterial?.description ?? '',
+                    refill_date: selectedLaboratoryMaterial?.refillDate ?? undefined,
+                    student_price: selectedLaboratoryMaterial.studentPrice.amount,
+                    lecturer_price: selectedLaboratoryMaterial.lecturerPrice.amount,
+                    external_price: selectedLaboratoryMaterial.externalPrice.amount,
+                })
+            }
 
         } else {
             setFormData(defaultFormData)
@@ -76,9 +84,16 @@ const LaboratoryMaterialFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
     }, [open])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+        const { type, name, value } = e.target as HTMLInputElement;
+        let newValue = value;
+        if (type === "number") {
+            if (newValue.length > 1 && newValue.startsWith('0')) {
+                newValue = newValue.replace(/^0+/, '');
+                if (newValue === '') newValue = '0';
+            }
+        }
 
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: newValue }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -275,7 +290,60 @@ const LaboratoryMaterialFormDialog: React.FC<LaboratoryRoomFormDialogProps> = ({
                                     )}
                                 </div>
                             </div>
-
+                            <div className="flex flex-col gap-2 md:col-span-2">
+                                <Label htmlFor='student_price'>
+                                    Harga Mahasiswa <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='number'
+                                        id='student_price'
+                                        name='student_price'
+                                        value={formData['student_price'] ?? ''}
+                                        onChange={handleChange}
+                                        placeholder='Harga mahasiswa'
+                                    />
+                                    {errors['student_price'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['student_price']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='lecturer_price'>
+                                    Harga Dosen <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='number'
+                                        id='lecturer_price'
+                                        name='lecturer_price'
+                                        value={formData['lecturer_price'] ?? ''}
+                                        onChange={handleChange}
+                                        placeholder='Harga Dosen'
+                                    />
+                                    {errors['lecturer_price'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['lecturer_price']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='external_price'>
+                                    Harga Pihak External <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='number'
+                                        id='external_price'
+                                        name='external_price'
+                                        value={formData['external_price'] ?? ''}
+                                        onChange={handleChange}
+                                        placeholder='Harga Pihak External'
+                                    />
+                                    {errors['external_price'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['external_price']}</p>
+                                    )}
+                                </div>
+                            </div>
                             <div className="flex flex-col gap-2 md:col-span-2">
                                 <Label htmlFor='testing_type'>
                                     Keterangan Bahan

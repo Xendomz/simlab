@@ -30,6 +30,7 @@ const PracticumFormDialog: React.FC<PracticumFormDialogProps> = ({
     handleSave
 }) => {
     const defaultFormData: PracticumInputDTO = {
+        code: '',
         name: '',
         study_program_id: null,
         sks: 0
@@ -44,12 +45,15 @@ const PracticumFormDialog: React.FC<PracticumFormDialogProps> = ({
 
     useEffect(() => {
         if (dataId) {
-            const practicum = data.find((data: PracticumView) => data.id == dataId)
-            setFormData({
-                name: practicum?.name ?? '',
-                study_program_id: practicum?.studyProgram?.id ?? null,
-                sks: practicum?.sks ?? 0
-            })
+            const selectedPracticum = data.find((practicum) => practicum.id == dataId)
+            if (selectedPracticum) {
+                setFormData({
+                    code: selectedPracticum.code,
+                    name: selectedPracticum.name ?? '',
+                    study_program_id: selectedPracticum.studyProgram?.id ?? null,
+                    sks: selectedPracticum.sks ?? 0
+                })
+            }
         } else {
             setFormData(defaultFormData)
         }
@@ -87,6 +91,24 @@ const PracticumFormDialog: React.FC<PracticumFormDialogProps> = ({
                     <DialogDescription></DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor='code'>
+                            Kode Mata Kuliah <span className="text-red-500">*</span>
+                        </Label>
+                        <div>
+                            <Input
+                                type='text'
+                                id='code'
+                                name='code'
+                                value={formData['code'] || ''}
+                                onChange={handleChange}
+                                placeholder='Kode Mata Kuliah'
+                            />
+                            {errors['code'] && (
+                                <p className="mt-1 text-xs italic text-red-500">{errors['code']}</p>
+                            )}
+                        </div>
+                    </div>
                     <div className="flex flex-col gap-2">
                         <Label htmlFor='name'>
                             Nama Praktikum <span className="text-red-500">*</span>

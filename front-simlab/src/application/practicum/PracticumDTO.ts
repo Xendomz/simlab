@@ -1,4 +1,5 @@
 export interface PracticumInputDTO {
+    code: string;
     name: string;
     study_program_id: number | null;
     sks: number
