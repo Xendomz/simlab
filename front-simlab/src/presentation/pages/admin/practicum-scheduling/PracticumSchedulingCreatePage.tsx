@@ -18,6 +18,11 @@ import { useValidationErrors } from '@/presentation/hooks/useValidationError';
 import { toast } from 'sonner';
 import { ApiResponse } from '@/shared/Types';
 import { Combobox } from '@/presentation/components/custom/combobox';
+import { LaboratoryRoomView } from '@/application/laboratory-room/LaboratoryRoomView';
+import { LaboratoryRoomService } from '@/application/laboratory-room/LaboratoryRoomService';
+import { LaboratoryRoomSelectView } from '@/application/laboratory-room/LaboratoryRoomSelectView';
+import { PracticumService } from '@/application/practicum/PracticumService';
+import { PracticumSelectView } from '@/application/practicum/PracticumSelectView';
 
 
 const PracticumSchedulingCreatePage = () => {
@@ -91,29 +96,24 @@ const PracticumSchedulingCreatePage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
 
-    const {
-        laboratoryRoom,
-        getData: getLaboratories
-    } = useLaboratoryRoom({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages() { },
-        setTotalItems() { }
-    });
+    const laboratoryRoomService = new LaboratoryRoomService()
+    const [laboratoryRooms, setLaboratoryRooms] = useState<LaboratoryRoomSelectView[]>([])
+    const getLaboratoryRooms = async () => {
+        const response = await laboratoryRoomService.getDataForSelect()
+        setLaboratoryRooms(response.data ?? [])
+    }
 
-    // Practical work (practicum) select data
-    // const {
-    //     practicalWork,
-    //     getData: getPracticalWorks
-    // } = usePracticalWork({
-    //     currentPage: 1,
-    //     perPage: 9999,
-    //     searchTerm: '',
-    //     filter_study_program: user?.studyProgramId,
-    //     setTotalPages() { },
-    //     setTotalItems() { }
-    // });
+    const practicumService = new PracticumService()
+    const [practicums, setPracticums] = useState<PracticumSelectView[]>([])
+    const getPracticums = async () => {
+        const response = await practicumService.getDataForSelect()
+        setPracticums(response.data ?? [])
+    }
+
+    useEffect(() => {
+        getPracticums()
+        getLaboratoryRooms()
+    }, [])
 
     const {
         create,
@@ -128,12 +128,6 @@ const PracticumSchedulingCreatePage = () => {
         }));
 
     };
-
-
-    useEffect(() => {
-        getLaboratories();
-        getPracticalWorks();
-    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -199,7 +193,7 @@ const PracticumSchedulingCreatePage = () => {
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor='praktikum_id'>Praktikum <span className="text-red-500">*</span></Label>
                                 <Combobox
-                                    options={practicalWork}
+                                    options={practicums}
                                     value={formData.praktikum_id?.toString() || ''}
                                     onChange={(val) => {
                                         setFormData((prev) => ({
@@ -218,7 +212,7 @@ const PracticumSchedulingCreatePage = () => {
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor='ruangan_laboratorium_id'>Ruangan Laboratorium <span className="text-red-500">*</span></Label>
                                 <Combobox
-                                    options={laboratoryRoom}
+                                    options={laboratoryRooms}
                                     value={formData.ruangan_laboratorium_id?.toString() || ''}
                                     onChange={(val) => {
                                         setFormData((prev) => ({
