@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { ApiResponse } from '../../../../../shared/Types'
 import { useValidationErrors } from '@/presentation/hooks/useValidationError'
-import { UserInputDTO } from '@/application/user/dto/UserDTO'
+import { UserInputDTO } from '@/application/user/UserDTO'
 import { UserView } from '@/application/user/UserView'
 
 interface FormProps {

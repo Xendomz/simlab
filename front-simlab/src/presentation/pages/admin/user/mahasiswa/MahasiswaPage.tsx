@@ -5,12 +5,14 @@ import Table from '../../../../components/Table'
 import { MahasiswaColumn } from './MahasiswaColumn'
 import useTable from '@/application/hooks/useTable'
 import { useUser } from '@/application/user/hooks/useUser'
-import { useStudyProgram } from '@/application/study-program/hooks/useStudyProgram'
+// import { useStudyProgram } from '@/application/study-program/hooks/useStudyProgram'
 import { toast } from 'sonner'
 import Header from '@/presentation/components/Header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
+import { StudyProgramService } from '@/application/study-program/StudyProgramService'
+import { StudyProgramSelectView } from '@/application/study-program/StudyProgramSelectView'
 
 const MahasiswaPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -32,6 +34,19 @@ const MahasiswaPage = () => {
         )
     }, [])
 
+    const studyProgramService = new StudyProgramService()
+    const [studyPrograms, setStudyPrograms] = useState<StudyProgramSelectView[]>([])
+    const [selectedStudyProgram, setSelectedStudyProgram] = useState<number>(0)
+
+    useEffect(() => {
+        const getStudyPrograms = async () => {
+            const response = await studyProgramService.getDataForSelect()
+            setStudyPrograms(response.data ?? [])
+        }
+
+        getStudyPrograms()
+    }, [])
+
     const {
         currentPage,
         perPage,
@@ -47,19 +62,6 @@ const MahasiswaPage = () => {
         handlePerPageChange,
         handlePageChange,
     } = useTable()
-
-    const {
-        studyProgram,
-        getData: getStudyProgramData,
-    } = useStudyProgram({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages() { },
-        setTotalItems() { }
-    })
-
-    const [selectedStudyProgram, setSelectedStudyProgram] = useState<number>(0)
 
     const handleFilterStudyProgram = (e: ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -85,10 +87,6 @@ const MahasiswaPage = () => {
 
     const [id, setId] = useState<number | null>(null)
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
-
-    useEffect(() => {
-        getStudyProgramData()
-    }, [])
 
     useEffect(() => {
         getData()
@@ -145,7 +143,7 @@ const MahasiswaPage = () => {
                                         <SelectGroup>
                                             <SelectLabel>Program Studi</SelectLabel>
                                             <SelectItem value=" ">All</SelectItem>
-                                            {studyProgram?.map((option) => (
+                                            {studyPrograms?.map((option) => (
                                                 <SelectItem key={option.id} value={option.id.toString()}>{option.name}</SelectItem>
                                             ))}
                                         </SelectGroup>

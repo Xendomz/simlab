@@ -10,11 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 class Booking extends Model
 {
     use HasFactory;
-    protected $fillable = ['academic_year_id', 'user_id', 'phone_number', 'purpose', 'supporting_file', 'activity_name', 'supervisor', 'supervisor_email', 'start_time', 'end_time', 'status', 'booking_type', 'total_participant', 'participant_list', 'ruangan_laboratorium_id', 'laboran_id'];
+    protected $fillable = ['academic_year_id', 'user_id', 'phone_number', 'purpose', 'supporting_file', 'activity_name', 'supervisor', 'supervisor_email', 'start_time', 'end_time', 'status', 'booking_type', 'total_participant', 'participant_list', 'laboratory_room_id', 'laboran_id'];
 
     public function academicYear()
     {
-        return $this->belongsTo(TahunAkademik::class, 'academic_year_id');
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
 
     public function user()
@@ -24,7 +24,7 @@ class Booking extends Model
 
     public function laboratoryRoom()
     {
-        return $this->belongsTo(RuanganLaboratorium::class, 'ruangan_laboratorium_id');
+        return $this->belongsTo(LaboratoryRoom::class, 'laboratory_room_id');
     }
 
     public function equipments()
@@ -74,5 +74,14 @@ class Booking extends Model
             ->where('role', 'Laboran')
             ->first();
         return $approval ?: null;
+    }
+
+    public function getLaboranOffsiteApprovedAttribute()
+    {
+        return $this->approvals()
+            ->where('role', 'Laboran')
+            ->where('approved', 1)
+            ->where('is_allowed_offsite', 1)
+            ->exists();
     }
 }

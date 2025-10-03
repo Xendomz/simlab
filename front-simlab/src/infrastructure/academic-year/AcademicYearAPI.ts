@@ -2,7 +2,7 @@ import { AcademicYear } from "../../domain/academic-year/AcademicYear";
 
 export type AcademicYearAPI = {
     id: number;
-    academic_year: string;
+    name: string;
     status: 'Active' | 'Deactive';
     created_at: Date | null;
     updated_at: Date | null;
@@ -11,7 +11,7 @@ export type AcademicYearAPI = {
 export function toDomain(api: AcademicYearAPI): AcademicYear  {
     return new AcademicYear(
         api.id,
-        api.academic_year,
+        api.name,
         api.status,
         api.created_at,
         api.updated_at

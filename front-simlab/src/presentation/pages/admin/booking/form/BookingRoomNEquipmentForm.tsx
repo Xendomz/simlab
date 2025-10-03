@@ -8,7 +8,7 @@ import { Skeleton } from '@/presentation/components/ui/skeleton'
 import { Input } from '@/presentation/components/ui/input'
 import { Button } from '@/presentation/components/ui/button'
 import Table from '@/presentation/components/Table'
-import { useLaboratoryEquipment } from '@/application/laboratory-equipment/hooks/useLaboratoryEquipment'
+// import { useLaboratoryEquipment } from '@/application/laboratory-equipment/hooks/useLaboratoryEquipment'
 import useTable from '@/application/hooks/useTable'
 import { LaboratoryEquipmentColumn } from '../column/LaboratoryEquipmentColumn'
 import { LaboratoryMaterialColumn } from '../column/LaboratoryMaterialColumn'
@@ -17,7 +17,7 @@ import { LaboratoryMaterialView } from '@/application/laboratory-material/Labora
 import { useBooking } from '@/application/booking/hooks/useBooking'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { useLaboratoryMaterial } from '@/application/laboratory-material/hooks/useLaboratoryMaterial'
+// import { useLaboratoryMaterial } from '@/application/laboratory-material/hooks/useLaboratoryMaterial'
 
 const BookingRoomNEquipmentForm: React.FC = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)

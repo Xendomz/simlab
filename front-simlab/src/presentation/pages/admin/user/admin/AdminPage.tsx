@@ -7,10 +7,12 @@ import Header from '@/presentation/components/Header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import AdminFormDialog from './components/AdminFormDialog'
 import useTable from '@/application/hooks/useTable'
-import { useUser } from '@/application/user/hooks/useUser'
-import { UserInputDTO } from '@/application/user/dto/UserDTO'
+import { UserInputDTO } from '@/application/user/UserDTO'
 import { toast } from 'sonner'
 import { ModalType } from '@/shared/Types'
+import { UserView } from '@/application/user/UserView'
+import { UserService } from '@/application/user/UserService'
+import { userRole } from '@/domain/User/UserRole'
 
 const AdminPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -48,29 +50,23 @@ const AdminPage = () => {
         handlePageChange,
     } = useTable()
 
-    const {
-        user,
-        isLoading,
-        getData,
-        update,
-    } = useUser({
-        currentPage,
-        perPage,
-        role: 'Admin',
-        filter_study_program: 0,
-        searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
-    const [isOpen, setIsOpen] = useState(false)
-    const [id, setId] = useState<number | null>(null)
-    const [type, setType] = useState<ModalType>('Add')
+    const userService = new UserService()
+    const [users, setUsers] = useState<UserView[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
-        setType(modalType)
-        setId(id)
-        setIsOpen(true)
+    const getData = async () => {
+        setIsLoading(true)
+        const response = await userService.getUserData({
+            page: currentPage,
+            per_page: perPage,
+            search: searchTerm,
+            filter_study_program: 0,
+            role: userRole.Admin
+        })
+        setUsers(response.data ?? [])
+        setTotalPages(response.last_page ?? 0)
+        setTotalItems(response.total ?? 0)
+        setIsLoading(false)
     }
 
     useEffect(() => {
@@ -89,9 +85,19 @@ const AdminPage = () => {
         return () => clearTimeout(timer)
     }, [searchTerm])
 
+    const [isOpen, setIsOpen] = useState(false)
+    const [id, setId] = useState<number | null>(null)
+    const [type, setType] = useState<ModalType>('Add')
+
+    const openModal = (modalType: ModalType, id: number | null = null) => {
+        setType(modalType)
+        setId(id)
+        setIsOpen(true)
+    }
+
     const handleSave = async (formData: UserInputDTO): Promise<void> => {
         if (id) {
-            const res = await update(id, formData)
+            const res = await userService.updateData(id, formData)
             toast.success(res.message)
         }
         getData()
@@ -108,7 +114,7 @@ const AdminPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={user}
+                            data={users}
                             columns={AdminColumn({ openModal })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -126,7 +132,7 @@ const AdminPage = () => {
             <AdminFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={user}
+                data={users}
                 dataId={id}
                 handleSave={handleSave}
                 title={type == 'Add' ? 'Tambah Petugas Laboran' : 'Edit Petugas Laboran'}

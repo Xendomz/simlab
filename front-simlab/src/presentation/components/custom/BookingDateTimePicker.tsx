@@ -64,7 +64,7 @@ export default function BookingDateTimeRangePicker({
 
   return (
     <div className="flex flex-col gap-4">
-      <Label className="px-1">Date Range</Label>
+      <Label className="px-1">Tanggal</Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="justify-between font-normal">
@@ -93,13 +93,13 @@ export default function BookingDateTimeRangePicker({
       <div className="grid grid-cols-2 gap-4">
         <TimePicker
           id="start_time"
-          label="Start Time"
+          label="Jam Mulai"
           value={startTime}
           onChange={(v) => setStartTime(v)}
         />
         <TimePicker
           id="end_time"
-          label="End Time"
+          label="Jam Selesai"
           value={endTime}
           onChange={(v) => setEndTime(v)}
         />

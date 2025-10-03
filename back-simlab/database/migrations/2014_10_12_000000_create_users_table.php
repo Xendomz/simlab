@@ -18,9 +18,11 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            $table->enum('role', ['Admin', 'Kepala Lab Terpadu', 'Dosen', 'Koorprodi', 'Kepala Lab Unit', 'Laboran', 'Mahasiswa', 'Pihak Luar']);
-            $table->foreignId('prodi_id')->nullable()->constrained()->onDelete('cascade');
+            $table->enum('role', ['admin', 'admin_keuangan', 'kepala_lab_terpadu', 'dosen', 'koorprodi', 'kepala_lab_jurusan', 'laboran', 'mahasiswa', 'pihak_luar']);
+            $table->foreignId('study_program_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('institution_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('identity_num')->nullable();
+            $table->enum('is_active', ['Active', 'Deactive']);
             $table->timestamps();
         });
     }

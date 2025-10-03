@@ -18,6 +18,7 @@ export const usePracticumScheduling = ({
 }) => {
     const [practicumScheduling, setPracticumScheduling] = useState<PracticumSchedulingView[]>([])
     const [isLoading, setIsLoading] = useState(false)
+    const [isHasDraftPracticum, setIsHasDraftPracticum] = useState(false)
 
     const service = useMemo(() => new PracticumSchedulingService(), [])
 
@@ -69,6 +70,13 @@ export const usePracticumScheduling = ({
         return await service.getPracticumSchedulingDetail(id)
     }
     const storePracticumSchedulingEquipmentMaterial = (id: number, dto: PracticumSchedulingEquipmentNMaterialInputDTO) => service.storePracticumSchedulingEquipmentMaterial(id, dto)
+    const isStillHaveDraftPracticum = async () => {
+        const res = await service.isStillHaveDraftPracticum()
+        if (res.data) {
+            setIsHasDraftPracticum(true)
+        }
+    }
+    const getPracticumSteps = async (id: number) => service.getPracticumSteps(id)
     // const getReportData = useCallback(async () => {
     //     setIsLoading(true)
     //     const response = await service.getBookingsReport({
@@ -110,6 +118,9 @@ export const usePracticumScheduling = ({
         getPracticumSchedulingDetail,
         storePracticumSchedulingEquipmentMaterial,
         getDataForVerification,
-        verify
+        verify,
+        isHasDraftPracticum,
+        isStillHaveDraftPracticum,
+        getPracticumSteps
     }
 }

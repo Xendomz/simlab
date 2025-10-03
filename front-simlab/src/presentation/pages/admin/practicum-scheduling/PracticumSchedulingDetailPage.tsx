@@ -14,6 +14,7 @@ import { DataTable } from '@/presentation/components/custom/Datatable';
 import { PracticumScheduleGroupColumn } from './column/PracticumScheduleGroupColumn';
 import { PracticumScheduleEquipmentColumn } from './column/PracticumScheduleEquipmentColumn';
 import { PracticumScheduleMaterialColumn } from './column/PracticumScheduleMaterialColumn';
+import PracticumStepper from './PracticumStepper';
 
 const PracticumSchedulingDetailPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null);
@@ -68,7 +69,6 @@ const PracticumSchedulingDetailPage = () => {
 
     if (error) return <div className="text-red-500">{error}</div>;
     if (!practicumScheduling) return <div>Data tidak ditemukan</div>;
-    console.log(practicumScheduling);
     
     const equipments = practicumScheduling.practicumSchedulingEquipments || [];
     const materials = practicumScheduling.practicumSchedulingMaterials || [];
@@ -94,7 +94,7 @@ const PracticumSchedulingDetailPage = () => {
                         </NavLink>
                     </div>
 
-                    {/* <BookingApproval bookingId={bookingId} /> */}
+                    <PracticumStepper practicumId={practicumSchedulingId}/>
 
                     <TabsContent value="general">
                         <div className='grid gap-5'>

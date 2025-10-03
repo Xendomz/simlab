@@ -7,9 +7,11 @@ import { Button } from '@/presentation/components/ui/button';
 import { Plus } from 'lucide-react';
 import Table from '@/presentation/components/Table';
 import { NavLink } from 'react-router-dom';
-import { usePracticumScheduling } from '@/application/practicum-scheduling/hooks/usePracticumScheduling';
 import { PracticumSchedulingColumn } from './column/PracticumSchedulingColumn';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/presentation/components/ui/tooltip';
+import { PracticumSchedulingService } from '@/application/practicum-scheduling/PracticumSchedulingService';
+import { PracticumSchedulingView } from '@/application/practicum-scheduling/PracticumSchedulingView';
 
 const PracticumSchedulingPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -47,21 +49,39 @@ const PracticumSchedulingPage = () => {
         handlePageChange,
     } = useTable()
 
-    const {
-        practicumScheduling,
-        isLoading,
-        getData,
-    } = usePracticumScheduling({
-        currentPage,
-        perPage,
-        searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
+    const practicumSchedulingService = new PracticumSchedulingService()
+    const [practicumSchedulings, setPracticumScheduling] = useState<PracticumSchedulingView[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+    const [isHasDraftPracticum, setIsHasDraftPracticum] = useState<boolean>(false)
+
+    const getData = async () => {
+        setIsLoading(true)
+        const response = await practicumSchedulingService.getPracticumSchedulingData({
+            page: currentPage ?? 1,
+            per_page: perPage ?? 10,
+            search: searchTerm ?? ""
+        })
+
+        setPracticumScheduling(response.data ?? [])
+        setTotalPages(response.last_page ?? 0)
+        setTotalItems(response.total ?? 0)
+        setIsLoading(false)
+    }
 
     useEffect(() => {
         getData()
     }, [currentPage, perPage])
+
+    useEffect(() => {
+        const isStillHaveDraftPracticum = async () => {
+            const res = await practicumSchedulingService.isStillHaveDraftPracticum()
+            if (res.data) {
+                setIsHasDraftPracticum(true)
+            }
+        }
+
+        isStillHaveDraftPracticum()
+    }, [])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -83,20 +103,34 @@ const PracticumSchedulingPage = () => {
                     <CardHeader>
                         <CardTitle>Menu Penjadwalan Praktikum</CardTitle>
                         <CardAction>
-                            <>
-                                <NavLink to={'/panel/penjadwalan-praktikum/create'}>
-                                    <Button>
-                                        Tambah
-                                        <Plus />
-                                    </Button>
-                                </NavLink>
-                            </>
+                            {isHasDraftPracticum ? (
+                                <Tooltip>
+                                    <TooltipTrigger className='cursor-not-allowed' asChild>
+                                        <Button className={'opacity-50'}>
+                                            Tambah
+                                            <Plus />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Harap Selesaikan Pengajuan Sebelumnya</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            ) : (
+                                <>
+                                    <NavLink to={'/panel/penjadwalan-praktikum/create'}>
+                                        <Button>
+                                            Tambah
+                                            <Plus />
+                                        </Button>
+                                    </NavLink>
+                                </>
+                            )}
 
                         </CardAction>
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={practicumScheduling}
+                            data={practicumSchedulings}
                             columns={PracticumSchedulingColumn()}
                             loading={isLoading}
                             searchTerm={searchTerm}

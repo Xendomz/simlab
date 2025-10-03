@@ -4,7 +4,6 @@ import { LaboratoryRoomAPI, toDomain as toLaboratoryRoom } from "../laboratory-r
 export type LaboratoryEquipmentAPI = {
     id: number;
     equipment_name: string;
-    ruangan_laboratorium_id: number;
     quantity: number;
     unit: string;
     function: string;
@@ -14,17 +13,19 @@ export type LaboratoryEquipmentAPI = {
     origin: string;
     condition: string;
     condition_description: string;
-    asset_code: string
+    asset_code: string;
+    student_price: number;
+    lecturer_price: number;
+    external_price: number;
     created_at: Date | null;
     updated_at: Date | null;
-    ruangan_laboratorium?: LaboratoryRoomAPI
+    laboratory_room?: LaboratoryRoomAPI
 }
 
 export function toDomain(api: LaboratoryEquipmentAPI): LaboratoryEquipment {
     return new LaboratoryEquipment(
         api.id,
         api.equipment_name,
-        api.ruangan_laboratorium_id,
         api.quantity,
         api.unit,
         api.function,
@@ -35,8 +36,11 @@ export function toDomain(api: LaboratoryEquipmentAPI): LaboratoryEquipment {
         api.condition,
         api.condition_description,
         api.asset_code,
+        api.student_price,
+        api.lecturer_price,
+        api.external_price,
         api.created_at,
         api.updated_at,
-        api.ruangan_laboratorium ? toLaboratoryRoom(api.ruangan_laboratorium) : undefined
+        api.laboratory_room ? toLaboratoryRoom(api.laboratory_room) : undefined
     );
 }

@@ -1,4 +1,4 @@
-import Header from '@/presentation/components/Header'
+  import Header from '@/presentation/components/Header'
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react'
 import React, { useEffect, useRef, useState } from 'react'
@@ -17,7 +17,7 @@ import BookingDateTimeRangePicker from '@/presentation/components/custom/Booking
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select';
 import { toast } from 'sonner';
 import { Textarea } from '@/presentation/components/ui/textarea';
-import { useLaboratoryRoom } from '@/application/laboratory-room/hooks/useLaboratoryRoom';
+// import { useLaboratoryRoom } from '@/application/laboratory-room/hooks/useLaboratoryRoom';
 import { BookingType } from '@/domain/booking/BookingType';
 import { Combobox } from '@/presentation/components/custom/combobox';
 
@@ -42,6 +42,8 @@ const BookingCreatePage = () => {
   }, [])
 
   const { user } = useAuth()
+  console.log(user);
+  
 
   const {
     laboratoryRoom,

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('practicum_scheduling_materials', function (Blueprint $table) {
             $table->id();
             $table->foreignId('practicum_scheduling_id')->constrained()->onDelete('cascade');
-            $table->foreignId('bahan_laboratorium_id')->constrained()->onDelete('cascade');
+            $table->foreignId('laboratory_material_id')->constrained()->onDelete('cascade');
             $table->integer('quantity');
             $table->timestamps();
         });

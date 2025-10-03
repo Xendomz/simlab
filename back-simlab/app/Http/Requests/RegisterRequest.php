@@ -29,8 +29,8 @@ class RegisterRequest extends ApiRequest
         ];
 
         // Conditional rule: if role is not "Pihak Luar", require prodi_id
-        if ($this->input('role') !== 'Pihak Luar') {
-            $rules['prodi_id'] = 'required';
+        if ($this->input('role') !== 'pihak_luar') {
+            $rules['study_program_id'] = 'required';
         }
 
         return $rules;
@@ -58,7 +58,7 @@ class RegisterRequest extends ApiRequest
             'c_password.required' => 'Konfirmasi password tidak boleh kosong!',
             'c_password.same' => 'Konfirmasi password tidak cocok dengan password!',
 
-            'prodi_id.required' => 'Program Studi harus diisi jika bukan pihak eksternal!',
+            'study_program_id.required' => 'Program Studi harus diisi jika bukan pihak eksternal!',
         ];
     }
 }

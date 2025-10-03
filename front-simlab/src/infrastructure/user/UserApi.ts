@@ -1,6 +1,7 @@
-import { StudyProgram } from "../../domain/study-program/StudyProgram";
+import { userRole } from "@/domain/User/UserRole";
 import { User } from "../../domain/User/User";
-import { StudyProgramAPI } from "../study-program/StudyProgramAPI";
+import { StudyProgramAPI, toDomain as toStudyProgram } from "../study-program/StudyProgramAPI";
+import { InstitutionAPI, toDomain as toInstitution } from "../institution/InstitutionAPI";
 
 export type UserApi = {
     id: number,
@@ -11,7 +12,8 @@ export type UserApi = {
     identity_num: string,
     created_at: Date,
     updated_at: Date
-    study_program?: StudyProgramAPI
+    study_program?: StudyProgramAPI,
+    institution?: InstitutionAPI
 }
 
 export function toDomain(api: UserApi): User {
@@ -19,18 +21,12 @@ export function toDomain(api: UserApi): User {
         api.id,
         api.name,
         api.email,
-        api.role,
+        api.role as userRole,
         api.prodi_id,
         api.identity_num,
         api.created_at,
         api.updated_at,
-        api.study_program ?
-        new StudyProgram(
-            api.study_program.id,
-            api.study_program.jurusan_id,
-            api.study_program.name,
-            api.study_program.created_at,
-            api.study_program.updated_at
-        ) : undefined
+        api.study_program ? toStudyProgram(api.study_program) : undefined,
+        api.institution ? toInstitution(api.institution) : undefined
     )
 }

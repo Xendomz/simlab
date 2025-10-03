@@ -4,17 +4,17 @@ import { useValidationErrors } from '@/presentation/hooks/useValidationError'
 import { ApiResponse } from '@/shared/Types'
 import { Button } from '@/presentation/components/ui/button'
 import { AcademicYearView } from '@/application/academic-year/AcademicYearView'
-import { AcademicYearInputDTO } from '@/application/academic-year/dtos/AcademicYearDTO'
+import { AcademicYearInputDTO } from '@/application/academic-year/AcademicYearDTO'
 import { Label } from '@/presentation/components/ui/label'
 import { Input } from '@/presentation/components/ui/input'
 
 interface AcademicYearFormDialogProps {
     title: string,
     open: boolean,
-    data: any
+    data: AcademicYearView[]
     dataId: number | null,
     onOpenChange: (open: boolean) => void,
-    handleSave: (data: any) => Promise<void>
+    handleSave: (data: AcademicYearInputDTO) => Promise<void>
 }
 
 const AcademicYearFormDialog: React.FC<AcademicYearFormDialogProps> = ({
@@ -25,23 +25,25 @@ const AcademicYearFormDialog: React.FC<AcademicYearFormDialogProps> = ({
     onOpenChange,
     handleSave
 }) => {
-    const [formData, setFormData] = useState<AcademicYearInputDTO>({
-        academic_year: '', // Add other required fields with default values here
-    });
+    const defaultFormData = {
+        name: ''
+    }
+    const [formData, setFormData] = useState<AcademicYearInputDTO>(defaultFormData);
     const { errors, setErrors, processErrors } = useValidationErrors()
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         setErrors({})
     }, [open])
-    
+
     useEffect(() => {
         if (dataId) {
-            setFormData({ academic_year: data.find((data: AcademicYearView) => data.id == dataId).academicYear })
+            const academicYear = data.find((data: AcademicYearView) => data.id == dataId)
+            setFormData({ name: academicYear?.name ?? '' })
         } else {
-            setFormData({ academic_year: '' }) // Add other required fields with default values here
+            setFormData(defaultFormData) // Add other required fields with default values here
         }
-    }, [dataId])
+    }, [open])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -73,35 +75,36 @@ const AcademicYearFormDialog: React.FC<AcademicYearFormDialogProps> = ({
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription></DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} encType='multipart/form-data'>
+                <form onSubmit={handleSubmit} className='flex flex-col gap-5' encType='multipart/form-data'>
                     <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
+                        <Label htmlFor='name'>
                             Tahun Akademik <span className="text-red-500">*</span>
                         </Label>
-                        <Input
-                            type='text'
-                            id='academic_year'
-                            name='academic_year'
-                            value={formData['academic_year'] || ''}
-                            onChange={handleChange}
-                            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                            placeholder='Tahun Akademik'
-                        />
-                        {errors['academic_year'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['academic_year']}</p>
-                        )}
+                        <div>
+                            <Input
+                                type='text'
+                                id='name'
+                                name='name'
+                                value={formData['name'] || ''}
+                                onChange={handleChange}
+                                placeholder='Tahun Akademik'
+                            />
+                            {errors['name'] && (
+                                <p className="mt-1 text-xs italic text-red-500">{errors['name']}</p>
+                            )}
+                        </div>
                     </div>
-                </form>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">
-                            Close
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                                Tutup
+                            </Button>
+                        </DialogClose>
+                        <Button type="submit" onClick={handleSubmit} disabled={isSubmitting}>
+                            {isSubmitting ? 'Menyimpan...' : 'Simpan'}
                         </Button>
-                    </DialogClose>
-                    <Button type="button" onClick={handleSubmit}>
-                        {isSubmitting ? 'Saving...' : 'Save'}
-                    </Button>
-                </DialogFooter>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     )

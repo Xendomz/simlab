@@ -6,7 +6,7 @@ export class BookingStepperView {
     constructor(
         readonly id: number,
         readonly role: string,
-        readonly status: "approved" | "rejected" | "pending",
+        readonly status: "approved" | "rejected" | "pending" | "revision",
         readonly information: string,
         readonly approved_at?: TimeView,
         readonly approver?: string

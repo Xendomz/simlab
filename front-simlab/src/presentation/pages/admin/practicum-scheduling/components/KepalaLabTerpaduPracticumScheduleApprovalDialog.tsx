@@ -11,7 +11,7 @@ import {
     DialogDescription
 } from '@/presentation/components/ui/dialog'
 import { Button } from '@/presentation/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/components/ui/select'
+import { Combobox } from '@/presentation/components/custom/combobox';
 
 interface KepalaLabTerpaduPracticumScheduleApprovalDialogProps {
     open: boolean,
@@ -62,22 +62,14 @@ const KepalaLabTerpaduPracticumScheduleApprovalDialog: React.FC<KepalaLabTerpadu
                     <DialogDescription>Verifikasi peminjaman ruangan laboratorium dan berikan tugas kepada petugas laboran terkait untuk membantu menggunakan ruangan laboratorium tersebut. Silahkan pilih salah satu dari daftar laboran yang ada dibawah ini:</DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col gap-3">
-                    <Select value={selectedLaboran} onValueChange={setSelectedLaboran}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Pilih Laboran" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {laboran.length === 0 ? (
-                                <SelectItem value="''" disabled>Tidak ada laboran tersedia</SelectItem>
-                            ) : (
-                                laboran.map(l => (
-                                    <SelectItem key={l.id} value={String(l.id)}>
-                                        {l.name} <span className="text-xs text-muted-foreground">({l.email})</span>
-                                    </SelectItem>
-                                ))
-                            )}
-                        </SelectContent>
-                    </Select>
+                    <Combobox
+                        options={laboran}
+                        value={selectedLaboran}
+                        onChange={(val) => setSelectedLaboran(String(val))}
+                        placeholder="Pilih Laboran"
+                        optionLabelKey='name'
+                        optionValueKey='id'
+                    />
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>

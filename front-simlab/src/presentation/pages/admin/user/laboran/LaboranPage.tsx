@@ -4,16 +4,18 @@ import { useEffect, useRef, useState } from 'react'
 import Table from '../../../../components/Table'
 import { LaboranColumn } from './LaboranColumn'
 import useTable from '@/application/hooks/useTable'
-import { useUser } from '@/application/user/hooks/useUser'
 import { toast } from 'sonner'
 import { ModalType } from '@/shared/Types'
-import { UserInputDTO } from '@/application/user/dto/UserDTO'
+import { UserInputDTO } from '@/application/user/UserDTO'
 import Header from '@/presentation/components/Header'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Button } from '@/presentation/components/ui/button'
 import { Plus } from 'lucide-react'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
 import LaboranFormDialog from './components/LaboranFormDialog'
+import { UserService } from '@/application/user/UserService'
+import { UserView } from '@/application/user/UserView'
+import { userRole } from '@/domain/User/UserRole'
 
 const LaboranPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -51,22 +53,24 @@ const LaboranPage = () => {
         handlePageChange,
     } = useTable()
 
-    const {
-        user,
-        isLoading,
-        getData,
-        create,
-        update,
-        remove
-    } = useUser({
-        currentPage,
-        perPage,
-        role: 'Laboran',
-        filter_study_program: 0,
-        searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
+    const userService = new UserService()
+    const [users, setUsers] = useState<UserView[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+
+    const getData = async () => {
+            setIsLoading(true)
+            const response = await userService.getUserData({
+                page: currentPage,
+                per_page: perPage,
+                search: searchTerm,
+                filter_study_program: 0,
+                role: userRole.Laboran
+            })
+            setUsers(response.data ?? [])
+            setTotalPages(response.last_page ?? 0)
+            setTotalItems(response.total ?? 0)
+            setIsLoading(false)
+        }
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
@@ -103,10 +107,10 @@ const LaboranPage = () => {
 
     const handleSave = async (formData: UserInputDTO): Promise<void> => {
         if (id) {
-            const res = await update(id, formData)
+            const res = await userService.updateData(id, formData)
             toast.success(res.message)
         } else {
-            const res = await create(formData)
+            const res = await userService.createData(formData)
             toast.success(res.message)
         }
         getData()
@@ -115,7 +119,7 @@ const LaboranPage = () => {
 
     const handleDelete = async () => {
         if (!id) return
-        const res = await remove(id)
+        const res = await userService.deleteData(id)
         toast.success(res.message)
 
         getData()
@@ -138,7 +142,7 @@ const LaboranPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={user}
+                            data={users}
                             columns={LaboranColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -155,7 +159,7 @@ const LaboranPage = () => {
                 <LaboranFormDialog
                     open={isOpen}
                     onOpenChange={setIsOpen}
-                    data={user}
+                    data={users}
                     dataId={id}
                     handleSave={handleSave}
                     title={type == 'Add' ? 'Tambah Laboran' : 'Edit Laboran'}

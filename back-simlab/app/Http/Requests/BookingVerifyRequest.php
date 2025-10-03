@@ -23,9 +23,9 @@ class BookingVerifyRequest extends ApiRequest
         }
 
         $rules = [
-            'action' => 'required|in:approve,reject',
+            'action' => 'required|in:approve,reject,revision',
             'laboran_id' => $laboranIdRule,
-            'information' => 'required_if:action,reject|string|filled',
+            'information' => 'required_if:action,reject,revision',
         ];
 
         // Ambil booking_type dari payload, jika tidak ada ambil dari database
@@ -41,7 +41,7 @@ class BookingVerifyRequest extends ApiRequest
             && $user && $user->role === 'Laboran'
             && $bookingType === 'equipment'
         ) {
-            $rules['ruangan_laboratorium_id'] = 'required|exists:ruangan_laboratoria,id';
+            $rules['laboratory_room_id'] = 'required|exists:laboratory_rooms,id';
             $rules['is_allowed_offsite'] = 'nullable|boolean';
         }
 
@@ -51,11 +51,15 @@ class BookingVerifyRequest extends ApiRequest
     public function messages()
     {
         return [
+            'action.required' => 'Aksi verifikasi wajib dipilih.',
+            'action.in' => 'Aksi verifikasi tidak valid.',
             'laboran_id.required_if' => 'Pilih laboran terlebih dahulu untuk melakukan persetujuan.',
             'laboran_id.exists' => 'Laboran yang dipilih tidak ditemukan.',
-            'information.required_if' => 'Alasan penolakan wajib diisi.',
-            'ruangan_laboratorium_id.required' => 'Ruangan laboratorium wajib dipilih.',
-            'ruangan_laboratorium_id.exists' => 'Ruangan laboratorium tidak valid.',
+            'laboran_id.nullable' => 'Laboran boleh dikosongkan.',
+            'information.required_if' => 'Alasan penolakan atau revisi wajib diisi.',
+            'information.filled' => 'Alasan wajib diisi.',
+            'laboratory_room_id.required' => 'Ruangan laboratorium wajib dipilih.',
+            'laboratory_room_id.exists' => 'Ruangan laboratorium tidak valid.',
             'is_allowed_offsite.boolean' => 'Status boleh dibawa keluar harus berupa true/false.',
         ];
     }

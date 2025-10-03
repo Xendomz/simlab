@@ -1,4 +1,6 @@
 import { PracticumSchedulingView } from "@/application/practicum-scheduling/PracticumSchedulingView";
+import { PracticumSchedulingStatus } from "@/domain/practicum-scheduling/PracticumSchedulingStatus";
+import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { NavLink } from "react-router-dom";
@@ -24,6 +26,32 @@ export const PracticumSchedulingColumn = (): ColumnDef<PracticumSchedulingView>[
         cell: ({ row }) => (
             `${row.original.createdAt.formatForInformation()}`
         )
+    },
+    {
+        header: "Status Pengajuan",
+        accessorKey: 'PracticumSchedulingStatus',
+        cell: ({ row }) => {
+            switch (row.original.status) {
+                case PracticumSchedulingStatus.Draft:
+                    return (
+                        <Badge className="bg-slate-500">Draft</Badge>
+                    )
+                case PracticumSchedulingStatus.Pending:
+                    return (
+                        <Badge className="bg-sky-500">Pending</Badge>
+                    )
+
+                case PracticumSchedulingStatus.Approved:
+                    return (
+                        <Badge className="bg-emerald-500">Disetujui</Badge>
+                    )
+
+                case PracticumSchedulingStatus.Rejected:
+                    return (
+                        <Badge className="bg-red-500">Ditolak</Badge>
+                    )
+            }
+        }
     },
     {
         header: "Action",

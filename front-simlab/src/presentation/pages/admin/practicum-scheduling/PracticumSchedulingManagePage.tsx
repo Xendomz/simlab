@@ -64,7 +64,7 @@ const PracticumSchedulingManagePage = () => {
                         {loading ? 'Loading...' : 'Informasi Penjadwalan'}
                     </Button>
                     <PracticumScheduleDetailDialog open={isOpenDetail} onOpenChange={setIsOpenDetail} practicumScheduling={practicumScheduling} />
-                    <NavLink to={'/panel/peminjaman'} className='order-1 sm:order-2 ml-auto sm:ml-0'>
+                    <NavLink to={'/panel/penjadwalan-praktikum'} className='order-1 sm:order-2 ml-auto sm:ml-0'>
                         <Button>
                             Kembali
                             <ArrowLeft />

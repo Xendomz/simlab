@@ -11,12 +11,10 @@ interface ColumnProps {
 export const LaboratoryEquipmentColumn = ({ openModal, openConfirm, openModalDetail }: ColumnProps): ColumnDef<LaboratoryEquipmentView>[] => [
     { header: 'Kode Asset', accessorKey: 'assetCode' as keyof LaboratoryEquipmentView},
     { header: 'Nama Alat', accessorKey: 'equipmentName' as keyof LaboratoryEquipmentView},
-    { header: 'Merek', accessorKey: 'brand' as keyof LaboratoryEquipmentView},
-    { header: 'Jumlah', accessorKey: 'quantity' as keyof LaboratoryEquipmentView, cell: ({ row }) => (<span>{row.original.quantity} - {row.original.unit}</span>)},
-    { header: 'Lokasi', accessorKey: 'ruanganLaboratorium' as keyof LaboratoryEquipmentView, cell: ({ row }) => row.original.ruanganLaboratorium?.name },
+    { header: 'Jumlah', accessorKey: 'quantity' as keyof LaboratoryEquipmentView, cell: ({ row }) => (<span>{row.original.quantity} {row.original.unit}</span>)},
+    { header: 'Lokasi', accessorKey: 'laboratoryRoom' as keyof LaboratoryEquipmentView, cell: ({ row }) => row.original.laboratoryRoom?.name },
     { header: 'Jenis Alat', accessorKey: 'equipmentType' as keyof LaboratoryEquipmentView},
     { header: 'Asal Alat', accessorKey: 'origin' as keyof LaboratoryEquipmentView},
-    { header: 'Kondisi Alat', accessorKey: 'condition' as keyof LaboratoryEquipmentView},
     {
         header: 'Action',
         accessorKey: 'id' as keyof LaboratoryEquipmentView,

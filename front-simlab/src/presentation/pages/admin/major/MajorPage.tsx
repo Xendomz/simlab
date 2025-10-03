@@ -9,11 +9,15 @@ import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Button } from "@/presentation/components/ui/button";
 import { Plus } from "lucide-react";
-import { useMajor } from "@/application/major/hooks/useMajor";
 import { toast } from "sonner";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import MajorFormDialog from "./components/MajorFormDialog";
-import { MajorInputDTO } from "@/application/dto/MajorDTO";
+import { MajorInputDTO } from "@/application/major/MajorDTO";
+import { MajorView } from "@/application/major/MajorView";
+import { MajorService } from "@/application/major/MajorService";
+import { FacultyView } from "@/application/faculty/FacultyView";
+import { FacultyService } from "@/application/faculty/FacultyService";
+import { Combobox } from "@/presentation/components/custom/combobox";
 
 const MajorPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -35,6 +39,19 @@ const MajorPage = () => {
         )
     }, [])
 
+    const facultyService = new FacultyService()
+    const [faculties, setFaculties] = useState<FacultyView[]>([])
+    const [selectedFaculty, setSelectedFaculty] = useState<number>(0)
+
+    useEffect(() => {
+        const getFaculties = async () => {
+            const response = await facultyService.getDataForSelect();
+            setFaculties(response.data ?? [])
+        }
+
+        getFaculties()
+    }, [])
+
     const {
         currentPage,
         perPage,
@@ -51,25 +68,43 @@ const MajorPage = () => {
         handlePageChange,
     } = useTable()
 
-    const {
-        major,
-        isLoading,
-        getData,
-        create,
-        update,
-        remove,
-    } = useMajor({
-        currentPage,
-        perPage,
-        searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
+    const majorService = new MajorService()
+    const [majors, setMajors] = useState<MajorView[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+
+    const getData = async () => {
+        setIsLoading(true)
+        const response = await majorService.getMajorData({
+            page: currentPage,
+            per_page: perPage,
+            search: searchTerm,
+            filter_faculty: selectedFaculty
+        });
+        setMajors(response.data ?? [])
+        setTotalItems(response.total ?? 0)
+        setTotalPages(response.last_page ?? 0)
+        setIsLoading(false)
+    }
+
+    useEffect(() => {
+        getData()
+    }, [currentPage, perPage, selectedFaculty])
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (currentPage === 1) {
+                getData()
+            } else {
+                setCurrentPage(1)
+            }
+        }, 500)
+
+        return () => clearTimeout(timer)
+    }, [searchTerm])
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
     const [type, setType] = useState<ModalType>('Add')
-
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
 
@@ -90,7 +125,6 @@ const MajorPage = () => {
     }, [searchTerm])
 
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -103,10 +137,10 @@ const MajorPage = () => {
 
     const handleSave = async (formData: MajorInputDTO): Promise<void> => {
         if (id) {
-            const res = await update(id, formData)
+            const res = await majorService.updateData(id, formData)
             toast.success(res.message)
         } else {
-            const res = await create(formData)
+            const res = await majorService.createData(formData)
             toast.success(res.message)
         }
         getData()
@@ -115,7 +149,7 @@ const MajorPage = () => {
 
     const handleDelete = async () => {
         if (!id) return
-        const res = await remove(id)
+        const res = await majorService.deleteData(id)
         toast.success(res.message)
 
         getData()
@@ -137,8 +171,24 @@ const MajorPage = () => {
                         </CardAction>
                     </CardHeader>
                     <CardContent>
+                        <div className="w-full mb-3 md:w-1/3">
+                            <div className="relative">
+                                <Combobox
+                                    options={faculties}
+                                    value={selectedFaculty?.toString() || ''}
+                                    onChange={(val) => {
+                                        setSelectedFaculty(val ? Number(val) : 0)
+                                        setCurrentPage(1)
+                                    }}
+                                    placeholder="Pilih Fakultas"
+                                    optionLabelKey='name'
+                                    optionValueKey='id'
+                                    isFilter
+                                />
+                            </div>
+                        </div>
                         <Table
-                            data={major}
+                            data={majors}
                             columns={MajorColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -156,10 +206,11 @@ const MajorPage = () => {
             <MajorFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={major}
+                data={majors}
                 dataId={id}
+                faculties={faculties}
                 handleSave={handleSave}
-                title={type == 'Add' ? 'Tambah tahun akademik' : 'Edit tahun akademik'}
+                title={type == 'Add' ? 'Tambah Jurusan' : 'Edit Jurusan'}
             />
         </>
     )

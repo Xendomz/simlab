@@ -1,9 +1,12 @@
+import { Faculty } from "../faculty/Faculty";
+
 export class Major {
     constructor(
         readonly id: number,
-        readonly majorCode: string,
+        readonly code: string,
         readonly name: string,
         readonly createdAt: Date | null,
-        readonly updatedAt: Date | null
+        readonly updatedAt: Date | null,
+        readonly faculty?: Faculty
     ){}
 }

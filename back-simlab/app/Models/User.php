@@ -22,8 +22,10 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'prodi_id',
-        'identity_num'
+        'study_program_id',
+        'institution_id',
+        'identity_num',
+        'is_active'
     ];
 
     /**
@@ -46,13 +48,18 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public function institution()
+    {
+        return $this->belongsTo(Institution::class, 'institution_id');
+    }
+
     public function studyProgram()
     {
-        return $this->belongsTo(Prodi::class, 'prodi_id');
+        return $this->belongsTo(StudyProgram::class, 'study_program_id');
     }
 
     public function ruanganLaboratorium()
     {
-        return $this->hasMany(RuanganLaboratorium::class, 'user_id');
+        return $this->hasMany(LaboratoryRoom::class, 'user_id');
     }
 }

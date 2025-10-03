@@ -1,10 +1,25 @@
-import { TestingTypeInputDTO, TestingTypeTableParam } from "../../application/testing-type/dtos/TestingTypeDTO"
 import { ApiResponse, PaginatedResponse } from "../../shared/Types"
 import { TestingType } from "./TestingType"
 
 export interface ITestingTypeRepository {
-    getAll(params: TestingTypeTableParam): Promise<PaginatedResponse<TestingType>>
-    createData(data: TestingTypeInputDTO): Promise<ApiResponse>
-    updateData(id: number, data: TestingTypeInputDTO): Promise<ApiResponse>
+    getAll(params: {
+        page: number,
+        per_page: number,
+        search: string,
+    }): Promise<PaginatedResponse<TestingType>>
+    createData(data: {
+        name: string,
+        unit: string,
+        student_price: number | null,
+        lecturer_price: number | null,
+        external_price: number | null
+    }): Promise<ApiResponse>
+    updateData(id: number, data: {
+        name: string,
+        unit: string,
+        student_price: number | null,
+        lecturer_price: number | null,
+        external_price: number | null
+    }): Promise<ApiResponse>
     deleteData(id: number): Promise<ApiResponse>
 }

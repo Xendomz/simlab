@@ -50,7 +50,7 @@ const PracticumSchedulingRejectDialog: React.FC<PracticumSchedulingRejectDialogP
                     <DialogHeader>
                         <DialogTitle>Konfirmasi Penolakan</DialogTitle>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
+                    <div className="grid gap-2 py-4">
                         <Label htmlFor="rejection-reason">Alasan Penolakan</Label>
                         <div className="flex flex-col gap-1">
                             <Textarea
@@ -68,7 +68,7 @@ const PracticumSchedulingRejectDialog: React.FC<PracticumSchedulingRejectDialogP
                     <DialogFooter>
                         <Button type="button" variant="secondary" onClick={() => onOpenChange(false)} disabled={isSubmitting}>Batal</Button>
                         <Button type="submit" variant="destructive" disabled={isSubmitting}>
-                            {isSubmitting ? 'Memproses...' : 'Tolak Peminjaman'}
+                            {isSubmitting ? 'Memproses...' : 'Tolak Pengajuan Praktikum'}
                         </Button>
                     </DialogFooter>
                 </form>

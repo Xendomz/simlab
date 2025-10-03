@@ -1,6 +1,5 @@
 import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { Booking } from "./Booking";
-import { BookingApproval } from "./BookingApproval";
 import { BookingType } from "./BookingType";
 import { BookingStepper } from "./BookingStepper";
 
@@ -9,12 +8,14 @@ export interface IBookingRepository {
         page: number,
         per_page: number,
         search: string,
+        filter_status?: string
     }): Promise<PaginatedResponse<Booking>>
 
     getBookingsForVerification(params: {
         page: number,
         per_page: number,
         search: string,
+        filter_status?: string
     }): Promise<PaginatedResponse<Booking>>
 
     getBookingsReport(params: {
@@ -53,10 +54,10 @@ export interface IBookingRepository {
     verifyBooking(
         booking_id: number,
         data: {
-            action: 'approve' | 'reject',
+            action: 'approve' | 'reject' | 'revision',
             laboran_id?: number,
             information?: string,
-            ruangan_laboratorium_id?: number,
+            laboratory_room_id?: number,
             is_allowed_offsite?: boolean | null
         }
     ): Promise<ApiResponse>;

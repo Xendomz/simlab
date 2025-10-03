@@ -4,6 +4,8 @@ import { PracticumSchedulingAPI, toDomain } from "./PracticumSchedulingAPI";
 import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { PracticumScheduling } from "@/domain/practicum-scheduling/PracticumScheduling";
 import { fetchApi } from "../ApiClient";
+import { PracticumStepper } from "@/domain/practicum-scheduling/PracticumStepper";
+import { PracticumStepperAPI, toDomain as toPracticumStepper } from "./PracticumStepperAPI";
 
 export class PracticumSchedulingRepository implements IPracticumSchedulingRepository {
     async getAll(params: { page: number; per_page: number; search: string; }): Promise<PaginatedResponse<PracticumScheduling>> {
@@ -103,6 +105,32 @@ export class PracticumSchedulingRepository implements IPracticumSchedulingReposi
         const json = await response.json();
         if (response.ok) {
             return json;
+        }
+        throw json;
+    }
+
+    async isStillHaveDraftPracticum(): Promise<ApiResponse<boolean>> {
+        const response = await fetchApi(`/practicum-schedule/have-draft`, {
+            method: 'GET',
+        });
+
+        const json = await response.json()
+        if (response.ok) {
+            return json
+        }
+
+        throw json
+    }
+
+    async getPracticumSteps(id: number): Promise<ApiResponse<PracticumStepper[]>> {
+        const response = await fetchApi(`/practicum-schedule/${id}/steps`, { method: 'GET' });
+        const json = await response.json();
+        if (response.ok) {
+            const list = json['data'] as PracticumStepperAPI[];
+            return {
+                ...json,
+                data: list?.map(toPracticumStepper) || []
+            }
         }
         throw json;
     }

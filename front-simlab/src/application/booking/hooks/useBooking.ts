@@ -11,7 +11,8 @@ export const useBooking = ({
     searchTerm,
     setTotalPages,
     setTotalItems,
-    bookingType
+    bookingType,
+    status
 }: {
     currentPage?: number
     perPage?: number
@@ -19,6 +20,7 @@ export const useBooking = ({
     setTotalPages?: (v: number) => void
     setTotalItems?: (v: number) => void
     bookingType?: BookingType
+    status?: string
 }) => {
     const [booking, setBooking] = useState<BookingView[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -28,31 +30,34 @@ export const useBooking = ({
 
     const getDataForVerification = useCallback(async () => {
         setIsLoading(true)
+        
         const response = await service.getBookingsForVerification({
             page: currentPage ?? 1,
             per_page: perPage ?? 10,
-            search: searchTerm ?? ""
+            search: searchTerm ?? "",
+            filter_status: status
         })
 
         setBooking(response.data ?? [])
         if (setTotalPages) setTotalPages(response.last_page ?? 0)
         if (setTotalItems) setTotalItems(response.total ?? 0)
         setIsLoading(false)
-    }, [currentPage, perPage, searchTerm, service, setTotalPages, setTotalItems])
+    }, [currentPage, perPage, searchTerm, service, setTotalPages, setTotalItems, status])
 
     const getData = useCallback(async () => {
         setIsLoading(true)
         const response = await service.getBookingData({
             page: currentPage ?? 1,
             per_page: perPage ?? 10,
-            search: searchTerm ?? ""
+            search: searchTerm ?? "",
+            filter_status: status
         })
 
         setBooking(response.data ?? [])
         if (setTotalPages) setTotalPages(response.last_page ?? 0)
         if (setTotalItems) setTotalItems(response.total ?? 0)
         setIsLoading(false)
-    }, [currentPage, perPage, searchTerm, service, setTotalPages, setTotalItems])
+    }, [currentPage, perPage, searchTerm, service, setTotalPages, setTotalItems, status])
 
     const getReportData = useCallback(async () => {
         setIsLoading(true)

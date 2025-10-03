@@ -1,6 +1,5 @@
 import useTable from '@/application/hooks/useTable'
-import { UserInputDTO } from '@/application/user/dto/UserDTO'
-import { useUser } from '@/application/user/hooks/useUser'
+import { UserInputDTO } from '@/application/user/UserDTO'
 import Header from '@/presentation/components/Header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { ModalType } from '@/shared/Types'
@@ -10,9 +9,13 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
 import Table from '@/presentation/components/Table'
-import { useStudyProgram } from '@/application/study-program/hooks/useStudyProgram'
 import { KepalaLabColumn } from './KepalaLabColumn'
 import KepalaLabFormDialog from './components/KepalaLabFormDialog'
+import { StudyProgramService } from '@/application/study-program/StudyProgramService'
+import { StudyProgramSelectView } from '@/application/study-program/StudyProgramSelectView'
+import { UserService } from '@/application/user/UserService'
+import { UserView } from '@/application/user/UserView'
+import { userRole } from '@/domain/User/UserRole'
 
 const KepalaLabPage = () => {
     const sectionRef = useRef(null)
@@ -34,6 +37,18 @@ const KepalaLabPage = () => {
         )
     }, [])
 
+    const studyProgramService = new StudyProgramService()
+    const [studyPrograms, setStudyPrograms] = useState<StudyProgramSelectView[]>([])
+
+    useEffect(() => {
+        const getStudyPrograms = async () => {
+            const response = await studyProgramService.getDataForSelect()
+            setStudyPrograms(response.data ?? [])
+        }
+
+        getStudyPrograms()
+    }, [])
+
     const {
         currentPage,
         perPage,
@@ -50,41 +65,24 @@ const KepalaLabPage = () => {
         handlePageChange,
     } = useTable()
 
-    const {
-        studyProgram,
-        getData: getStudyProgramData,
-    } = useStudyProgram({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages() { },
-        setTotalItems() { }
-    })
-
-    const [isOpen, setIsOpen] = useState<boolean>(false)
-    const [id, setId] = useState<number | null>(null)
-    const [type, setType] = useState<ModalType>('Add')
-    const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
-
-    const {
-        user,
-        isLoading,
-        getData,
-        update,
-        restoreToDosen
-    } = useUser({
-        currentPage,
-        perPage,
-        role: 'Kepala Lab Terpadu',
-        filter_study_program: 0,
-        searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
-
-    useEffect(() => {
-        getStudyProgramData()
-    }, [])
+    const userService = new UserService()
+    const [users, setUsers] = useState<UserView[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
+    
+    const getData = async () => {
+        setIsLoading(true)
+        const response = await userService.getUserData({
+            page: currentPage,
+            per_page: perPage,
+            search: searchTerm,
+            filter_study_program: 0,
+            role: userRole.KepalaLabTerpadu
+        })
+        setUsers(response.data ?? [])
+        setTotalPages(response.last_page ?? 0)
+        setTotalItems(response.total ?? 0)
+        setIsLoading(false)
+    }
 
     useEffect(() => {
         getData()
@@ -102,8 +100,12 @@ const KepalaLabPage = () => {
         return () => clearTimeout(timer)
     }, [searchTerm])
 
+    const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [id, setId] = useState<number | null>(null)
+    const [type, setType] = useState<ModalType>('Add')
+    const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
+
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -116,7 +118,7 @@ const KepalaLabPage = () => {
 
     const handleSave = async (formData: UserInputDTO): Promise<void> => {
         if (!id) return
-        const res = await update(id, formData)
+        const res = await userService.updateData(id, formData)
         toast.success(res.message)
         getData()
         setIsOpen(false)
@@ -124,7 +126,7 @@ const KepalaLabPage = () => {
 
     const handleRestoreDosen = async () => {
         if (!id) return
-        const res = await restoreToDosen(id)
+        const res = await userService.restoreToDosen(id)
         toast.success(res.message)
 
         getData()
@@ -141,7 +143,7 @@ const KepalaLabPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={user}
+                            data={users}
                             columns={KepalaLabColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -158,8 +160,8 @@ const KepalaLabPage = () => {
                 <KepalaLabFormDialog
                     open={isOpen}
                     onOpenChange={setIsOpen}
-                    data={user}
-                    studyProgram={studyProgram}
+                    data={users}
+                    studyPrograms={studyPrograms}
                     dataId={id}
                     handleSave={handleSave}
                     title={type == 'Add' ? 'Tambah Dosen' : 'Edit Dosen'}

@@ -31,12 +31,15 @@ class AuthController extends BaseController
             return $this->sendResponse($success, 'Berhasil login');
         }
 
-        return $this->sendError('Unauthorized', ['error'=>'Unauthorized']);
+        return $this->sendError('Unauthorized', ['error'=>'Unauthorized'], 401);
     }
 
     public function getCurrentUser()
     {
         $user = User::with('studyProgram')->find(auth('sanctum')->id());
+        if (!$user) {
+            return $this->sendError('Unauthorized', ['error'=>'Unauthorized'], 401);
+        }
         return $this->sendResponse($user, "User Retreive Successfully");
     }
 

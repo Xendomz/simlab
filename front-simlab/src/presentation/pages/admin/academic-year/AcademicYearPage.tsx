@@ -9,11 +9,12 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presenta
 import Header from "@/presentation/components/Header";
 import { Plus } from "lucide-react";
 import { Button } from "@/presentation/components/ui/button";
-import { useAcademicYear } from "@/application/academic-year/hooks/useAcademicYear";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import { toast } from "sonner";
-import { AcademicYearInputDTO } from "@/application/academic-year/dtos/AcademicYearDTO";
+import { AcademicYearInputDTO } from "@/application/academic-year/AcademicYearDTO";
 import AcademicYearFormDialog from "./components/AcademicYearFormDialog";
+import { AcademicYearService } from "@/application/academic-year/AcademicYearService";
+import { AcademicYearView } from "@/application/academic-year/AcademicYearView";
 
 const AcademicYearPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -51,28 +52,22 @@ const AcademicYearPage = () => {
         handlePageChange,
     } = useTable()
 
-    const {
-        academicYear,
-        isLoading,
-        getData,
-        create,
-        update,
-        remove,
-        toggleStatus,
-    } = useAcademicYear({
-        currentPage,
-        perPage,
-        searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
+    const academicYearService = new AcademicYearService()
+    const [academicYears, setAcademicYears] = useState<AcademicYearView[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    const [isOpen, setIsOpen] = useState(false)
-    const [id, setId] = useState<number | null>(null)
-    const [type, setType] = useState<ModalType>('Add')
-
-    const [confirmOpen, setConfirmOpen] = useState(false)
-    const [confirmType, setConfirmType] = useState<"delete" | "status" | null>(null)
+    const getData = async () => {
+        setIsLoading(true)
+        const response = await academicYearService.getAcademicYearData({
+            page: currentPage,
+            per_page: perPage,
+            search: searchTerm
+        })
+        setAcademicYears(response.data ?? [])
+        setTotalItems(response.total ?? 0)
+        setTotalPages(response.last_page ?? 0)
+        setIsLoading(false)
+    }
 
     useEffect(() => {
         getData()
@@ -90,8 +85,14 @@ const AcademicYearPage = () => {
         return () => clearTimeout(timer)
     }, [searchTerm])
 
+    const [isOpen, setIsOpen] = useState(false)
+    const [id, setId] = useState<number | null>(null)
+    const [type, setType] = useState<ModalType>('Add')
+
+    const [confirmOpen, setConfirmOpen] = useState(false)
+    const [confirmType, setConfirmType] = useState<"delete" | "status" | null>(null)
+
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -105,23 +106,24 @@ const AcademicYearPage = () => {
 
     const handleSave = async (formData: AcademicYearInputDTO): Promise<void> => {
         if (id) {
-            const res = await update(id, formData)
+            const res = await academicYearService.updateData(id, formData)
             toast.success(res.message)
         } else {
-            const res = await create(formData)
+            const res = await academicYearService.createData(formData)
             toast.success(res.message)
         }
         getData()
+        setId(null)
         setIsOpen(false)
     }
 
     const handleConfirm = async() => {
         if (!id) return 
         if (confirmType == 'delete') {
-            const res = await remove(id)
+            const res = await academicYearService.deleteData(id)
             toast.success(res.message)
         } else {
-            const res = await toggleStatus(id)
+            const res = await academicYearService.toggleStatus(id)            
             toast.success(res.message)
         }
         getData()
@@ -145,7 +147,7 @@ const AcademicYearPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={academicYear}
+                            data={academicYears}
                             columns={AcademicYearColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -163,10 +165,10 @@ const AcademicYearPage = () => {
             <AcademicYearFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={academicYear}
+                data={academicYears}
                 dataId={id}
                 handleSave={handleSave}
-                title={type == 'Add' ? 'Tambah tahun akademik' : 'Edit tahun akademik'}
+                title={type == 'Add' ? 'Tambah Tahun Akademik' : 'Edit Tahun Akademik'}
             />
         </>
     )

@@ -13,7 +13,6 @@ class PracticumScheduling extends Model
     protected $fillable = [
         'academic_year_id',
         'user_id',
-        'ruangan_laboratorium_id',
         'laboran_id',
         'praktikum_id',
         'phone_number',
@@ -25,31 +24,27 @@ class PracticumScheduling extends Model
         'updated_at' => 'datetime',
     ];
 
-    protected function serializeDate(\DateTimeInterface $date): string
-    {
-        // Convert stored (likely UTC) datetime into application timezone for output
-        return Carbon::instance($date)->setTimezone(config('app.timezone'))
-            ->format(\DateTimeInterface::ATOM); // Y-m-d\TH:i:sP
-    }
+    // protected function serializeDate(\DateTimeInterface $date): string
+    // {
+    //     // Convert stored (likely UTC) datetime into application timezone for output
+    //     return Carbon::instance($date)->setTimezone(config('app.timezone'))
+    //         ->format(\DateTimeInterface::ATOM); // Y-m-d\TH:i:sP
+    // }
 
     public function practicum() {
-        return $this->belongsTo(Praktikum::class, 'praktikum_id');
+        return $this->belongsTo(Practicum::class, 'practicum_id');
     }
 
     public function academicYear() {
-        return $this->belongsTo(TahunAkademik::class, 'academic_year_id');
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
 
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function laboratoryRoom() {
-        return $this->belongsTo(RuanganLaboratorium::class, 'ruangan_laboratorium_id');
-    }
-
-    public function practicumGroups() {
-        return $this->hasMany(PracticumGroup::class, 'practicum_scheduling_id');
+    public function practicumClasses() {
+        return $this->hasMany(PracticumClass::class, 'practicum_scheduling_id');
     }
 
     public function practicumSchedulingEquipments() {
@@ -62,6 +57,12 @@ class PracticumScheduling extends Model
 
     public function practicumApprovals() {
         return $this->hasMany(PracticumApproval::class, 'practicum_scheduling_id');
+    }
+
+    public function getKepalaLabApprovalStatusAttribute() {
+        return $this->practicumApprovals()
+            ->where('role', 'Kepala Lab Terpadu')
+            ->exists();
     }
 
     public function getKooprodiApprovalAttribute() {
