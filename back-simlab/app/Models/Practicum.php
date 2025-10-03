@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Practicum extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'study_program_id', 'sks'];
+    protected $fillable = ['code', 'name', 'study_program_id', 'sks'];
 
     public function studyProgram()
     {

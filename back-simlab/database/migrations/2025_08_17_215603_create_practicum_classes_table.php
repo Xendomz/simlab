@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('practicum_groups', function (Blueprint $table) {
+        Schema::create('practicum_classes', function (Blueprint $table) {
             $table->id();
-            $table->string('group_name');
-            $table->string('practicum_assistant');
-            $table->string('practicum_session');
-            $table->dateTime('start_time');
-            $table->dateTime('end_time');
             $table->foreignId('practicum_scheduling_id')->constrained()->onDelete('cascade');
+            $table->foreignId('lecturer_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('laboratory_room_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->string('practicum_assistant');
             $table->integer('total_participant');
+            $table->integer('total_group');
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('practicum_groups');
+        Schema::dropIfExists('practicum_classes');
     }
 };

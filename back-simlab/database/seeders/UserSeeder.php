@@ -29,6 +29,14 @@ class UserSeeder extends Seeder
                 'role' => 'kepala_lab_terpadu',
                 'identity_num' => '2313321',
                 'study_program_id' => 10,
+            ],
+            [
+                'name' => 'laboran',
+                'email' => 'laboran@gmail.com',
+                'password' => bcrypt('123123'),
+                'role' => 'laboran',
+                'identity_num' => null,
+                'study_program_id' => null,
             ]
         ]);
     }

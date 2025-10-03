@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -23,6 +24,11 @@ class DatabaseSeeder extends Seeder
             MajorSeeder::class,
             StudyProgramSeeder::class,
             UserSeeder::class,
+            LaboratoryRoomSeeder::class,
+            LaboratoryEquipmentSeeder::class,
+            LaboratoryMaterialSeeder::class,
+            PracticumSeeder::class,
+            PracticumModuleSeeder::class
         ]);
     }
 }

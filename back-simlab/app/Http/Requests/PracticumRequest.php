@@ -21,7 +21,9 @@ class PracticumRequest extends ApiRequest
      */
     public function rules(): array
     {
+        $id = $this->route('practicum');
         return [
+            'code' => 'required|string|max:50|unique:practicums,code' . ($id ? ',' . $id : ''),
             'name' => 'required|string|max:255|min:4',
             'study_program_id' => 'required',
             'sks' => 'required|numeric|min:1'
@@ -31,6 +33,10 @@ class PracticumRequest extends ApiRequest
     public function messages(): array
     {
         return [
+            'code.required' => 'Kode mata kuliah wajib diisi',
+            'code.string' => 'Kode mata kuliah harus berupa teks',
+            'code.max' => 'Kode mata kuliah maksimal 50 karakter',
+            'code.unique' => 'Kode mata kuliah sudah digunakan',
             'name.required' => 'Nama praktikum wajib diisi',
             'name.string' => 'Nama praktikum harus berupa teks',
             'name.max' => 'Nama praktikum maksimal 255 karakter',

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('practicums', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->unique();
             $table->string('name');
             $table->foreignId('study_program_id')->constrained()->onDelete('cascade');
             $table->enum('type', ['compulsory', 'pbl', 'pjbl']);

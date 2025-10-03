@@ -16,10 +16,9 @@ return new class extends Migration
             $table->foreignId('academic_year_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('laboran_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->foreignId('laboratory_room_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('practicum_id')->nullable()->constrained()->onDelete('cascade');
             $table->char('phone_number', 14);
-            $table->enum('status', ['draft', 'pending', 'rejected', 'approved']);
+            $table->enum('status', ['draft', 'pending', 'rejected', 'approved', 'revision']);
             $table->timestamps();
         });
     }

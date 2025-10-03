@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class PracticumSchedulingController extends BaseController
 {
     private $activeAcademicYear;
-    private array $restrictedRoles = ['dosen', 'Kepala Lab Terpadu'];
 
     public function __construct()
     {
@@ -32,7 +31,7 @@ class PracticumSchedulingController extends BaseController
         }
 
         // Hanya Mahasiswa, Dosen, Pihak Luar yang dibatasi aksesnya
-        if (in_array($user->role, ['Dosen'])) {
+        if (in_array($user->role, ['kepala_lab_jurusan'])) {
             // Hanya boleh akses booking milik sendiri
             if ($practicumData) {
                 return $practicumData->user_id === $user->id;
@@ -46,7 +45,7 @@ class PracticumSchedulingController extends BaseController
     {
         try {
             // Start with a base query
-            $query = PracticumScheduling::query()->with(['user', 'practicum', 'laboratoryRoom']);
+            $query = PracticumScheduling::query()->with(['user', 'practicum']);
 
             $user = auth()->user();
             $query->where('user_id', $user->id);
@@ -62,15 +61,6 @@ class PracticumSchedulingController extends BaseController
                         $practicumQ->where('name', 'LIKE', "%{$searchTerm}%");
                     });
                 });
-            }
-
-            // Sorting functionality
-            $sortField = $request->input('sort_by', 'created_at');
-            $sortDirection = $request->input('sort_direction', 'desc');
-            $allowedSortFields = ['id', 'user_id', 'created_at', 'updated_at'];
-
-            if (in_array($sortField, $allowedSortFields)) {
-                $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');
             }
 
             // Pagination parameters

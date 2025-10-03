@@ -6,18 +6,18 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PracticumGroup extends Model
+class PracticumClass extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'group_name',
-        'practicum_assistant',
-        'practicum_session',
-        'start_time',
-        'end_time',
         'practicum_scheduling_id',
-        'total_participant'
+        'lecturer_id',
+        'laboratory_room_id',
+        'name',
+        'practicum_assistant',
+        'total_participant',
+        'total_group',
     ];
 
     protected $casts = [
@@ -34,7 +34,18 @@ class PracticumGroup extends Model
             ->format(\DateTimeInterface::ATOM); // Y-m-d\TH:i:sP
     }
 
-    public function practicumScheduling() {
+    public function laboratoryRoom()
+    {
+        return $this->belongsTo(LaboratoryRoom::class, 'laboratory_room_id');
+    }
+
+    public function practicumScheduling()
+    {
         return $this->belongsTo(PracticumScheduling::class, 'practicum_scheduling_id');
+    }
+
+    public function practicumSessions()
+    {
+        return $this->hasMany(PracticumSession::class, 'practicum_class_id');
     }
 }
