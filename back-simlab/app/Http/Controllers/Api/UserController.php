@@ -144,4 +144,16 @@ class UserController extends BaseController
             return $this->sendError('Terjadi kesalahan ketika menghapus data pengguna', [$e->getMessage()], 500);
         }
     }
+
+    public function getDataForSelect(Request $request)
+    {
+        try {
+            $query = User::query()->select('id', 'name');
+            $query->where('role', $request->role);
+            $users = $query->get();
+            return $this->sendResponse($users, 'Data pengguna berhasil diambil');
+        } catch (\Exception $e) {
+            return $this->sendError("Gagal mengambil data pengguna", [$e->getMessage()], 500);
+        }
+    }
 }

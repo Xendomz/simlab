@@ -93,7 +93,9 @@ class PracticumController extends BaseController
     public function getDataForSelect()
     {
         try {
-            $practicum = Practicum::select('id', 'name')->get();
+            $practicum = Practicum::with(['practicumModules' => function($q) {
+                $q->where('status', 'Active')->select('id', 'name', 'practicum_id');
+            }])->select('id', 'name')->get();
             return $this->sendResponse($practicum, 'Data Praktikum berhasil diambil');
         } catch (\Exception $e) {
             return $this->sendError("Gagal mengambil data praktikum", [$e->getMessage()], 500);

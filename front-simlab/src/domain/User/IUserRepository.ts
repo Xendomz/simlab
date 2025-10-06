@@ -1,6 +1,7 @@
 import { User } from "./User"
 import { ApiResponse, PaginatedResponse } from "../../shared/Types"
 import { userRole } from "./UserRole"
+import { UserSelect } from "./UserSelect"
 
 export interface IUserRepository {
     getAll(params: {
@@ -11,21 +12,22 @@ export interface IUserRepository {
         role: userRole
     }): Promise<PaginatedResponse<User>>
     createData(data: {
-        name: string,
-        email: string,
-        role: string,
+        name: string | null,
+        email: string | null,
+        role: string | null,
         study_program_id: number | null,
-        identity_num: string,
-        password: string
+        identity_num: string | null,
+        password: string | null
     }): Promise<ApiResponse>
     updateData(id: number, data: {
-        name: string,
-        email: string,
-        role: string,
+        name: string | null,
+        email: string | null,
+        role: string | null,
         study_program_id: number | null,
-        identity_num: string,
-        password: string
+        identity_num: string | null,
+        password: string | null
     }): Promise<ApiResponse>
     deleteData(id: number): Promise<ApiResponse>
     restoreToDosen(id: number): Promise<ApiResponse>
+    getDataForSelect(role: userRole): Promise<ApiResponse<UserSelect[]>>
 }

@@ -5,6 +5,8 @@ import { fetchApi } from "../ApiClient";
 import { toDomain, UserApi } from "./UserApi";
 import { userRole } from "@/domain/User/UserRole";
 import { generateQueryStringFromObject } from "../Helper";
+import { UserSelect } from "@/domain/User/UserSelect";
+import { UserSelectAPI, toDomain as toUserSelect } from "./UserSelectAPI";
 
 export class UserRepository implements IUserRepository {
     async getAll(params: {
@@ -30,12 +32,12 @@ export class UserRepository implements IUserRepository {
     }
 
     async createData(data: {
-        name: string,
-        email: string,
-        role: string,
+        name: string | null,
+        email: string | null,
+        role: string | null,
         study_program_id: number | null,
-        identity_num: string,
-        password: string
+        identity_num: string | null,
+        password: string | null
     }): Promise<ApiResponse> {
         const response = await fetchApi('/users', {
             method: 'POST',
@@ -50,12 +52,12 @@ export class UserRepository implements IUserRepository {
     }
 
     async updateData(id: number, data: {
-        name: string,
-        email: string,
-        role: string,
+        name: string | null,
+        email: string | null,
+        role: string | null,
         study_program_id: number | null,
-        identity_num: string,
-        password: string
+        identity_num: string | null,
+        password: string | null
     }): Promise<ApiResponse> {
         const response = await fetchApi(`/users/${id}`, {
             method: 'PUT',
@@ -92,6 +94,20 @@ export class UserRepository implements IUserRepository {
             return json
         }
 
+        throw json
+    }
+
+    async getDataForSelect(role: userRole): Promise<ApiResponse<UserSelect[]>> {
+        const response = await fetchApi(`/users/select?role=${role}`, { method: 'GET' })
+
+        const json = await response.json() as ApiResponse
+        if (response.ok) {
+            const data = json.data as UserSelectAPI[]
+            return {
+                ...json,
+                data: data.map(toUserSelect)
+            }
+        }
         throw json
     }
 }

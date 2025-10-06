@@ -19,6 +19,8 @@ import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
 import { LaboratoryEquipmentView } from '@/application/laboratory-equipment/LaboratoryEquipmentView'
 import { LaboratoryMaterialView } from '@/application/laboratory-material/LaboratoryMaterialView'
+import { LaboratoryEquipmentService } from '@/application/laboratory-equipment/LaboratoryEquipmentService'
+import { LaboratoryMaterialService } from '@/application/laboratory-material/LaboratoryMaterialService'
 
 const PracticumScheduleEquipmentNMaterialForm = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -97,26 +99,46 @@ const PracticumScheduleEquipmentNMaterialForm = () => {
     const equipmentTable = useTable()
     const materialTable = useTable()
 
-    // Data hooks
-    const { laboratoryEquipment, isLoading: isEquipmentLoading, getData: getEquipments } = useLaboratoryEquipment({
-        currentPage: equipmentTable.currentPage,
-        perPage: equipmentTable.perPage,
-        searchTerm: equipmentTable.searchTerm,
-        filter_laboratory_room: 0,
-        setTotalPages: equipmentTable.setTotalPages,
-        setTotalItems: equipmentTable.setTotalItems
-    })
-    const { laboratoryMaterial, isLoading: isMaterialLoading, getData: getMaterials } = useLaboratoryMaterial({
-        currentPage: materialTable.currentPage,
-        perPage: materialTable.perPage,
-        searchTerm: materialTable.searchTerm,
-        setTotalPages: materialTable.setTotalPages,
-        setTotalItems: materialTable.setTotalItems
-    })
+    const laboratoryEquipmentService = new LaboratoryEquipmentService()
+    const [laboratoryEquipments, setLaboratoryEquipments] = useState<LaboratoryEquipmentView[]>([])
+    const [isEquipmentLoading, setIsEqupmentLoading] = useState<boolean>(false)
+
+    const getLaboratoryEquipments = async () => {
+        setIsEqupmentLoading(true)
+        const response = await laboratoryEquipmentService.getLaboratoryEquipmentData({
+            page: equipmentTable.currentPage,
+            per_page: equipmentTable.perPage,
+            search: equipmentTable.searchTerm,
+            filter_laboratory_room: 0
+        })
+        setLaboratoryEquipments(response.data ?? [])
+        equipmentTable.setTotalItems(response.total ?? 0)
+        equipmentTable.setTotalPages(response.last_page ?? 0)
+        setIsEqupmentLoading(false)
+    }
+
+    const laboratoryMaterialService = new LaboratoryMaterialService()
+    const [laboratoryMaterials, setLaboratoryMaterials] = useState<LaboratoryMaterialView[]>([])
+    const [isMaterialLoading, setIsMaterialLoading] = useState<boolean>(false)
+
+    const getLaboratoryMaterials = async () => {
+        setIsMaterialLoading(true)
+        const response = await laboratoryMaterialService.getLaboratoryMaterialData({
+            page: equipmentTable.currentPage,
+            per_page: equipmentTable.perPage,
+            search: equipmentTable.searchTerm,
+        })
+        setLaboratoryMaterials(response.data ?? [])
+        materialTable.setTotalItems(response.total ?? 0)
+        materialTable.setTotalPages(response.last_page ?? 0)
+        setIsMaterialLoading(false)
+    }
 
     // Effects
-    useEffect(() => { getEquipments() }, [getEquipments])
-    useEffect(() => { getMaterials() }, [getMaterials])
+    useEffect(() => {
+        getLaboratoryEquipments()
+        getLaboratoryMaterials()
+    }, [])
 
     const handleSubmit = async () => {
         if (!practicumSchedulingId) return;
@@ -154,7 +176,7 @@ const PracticumScheduleEquipmentNMaterialForm = () => {
                                 </div>
                             ) : (
                                 <Table
-                                    data={laboratoryEquipment}
+                                    data={laboratoryEquipments}
                                     columns={LaboratoryEquipmentColumn({ handleSelectLaboratoryEquipment, selectedIds: formData.practicumSchedulingEquipments.map(e => e.id) })}
                                     loading={false}
                                     searchTerm={equipmentTable.searchTerm}
@@ -213,7 +235,7 @@ const PracticumScheduleEquipmentNMaterialForm = () => {
                                 </div>
                             ) : (
                                 <Table
-                                    data={laboratoryMaterial}
+                                    data={laboratoryMaterials}
                                     columns={LaboratoryMaterialColumn({ handleSelectLaboratoryMaterial, selectedIds: formData.practicumSchedulingMaterials.map(m => m.id) })}
                                     loading={false}
                                     searchTerm={materialTable.searchTerm}

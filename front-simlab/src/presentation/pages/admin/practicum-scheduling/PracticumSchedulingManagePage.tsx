@@ -45,7 +45,7 @@ const PracticumSchedulingManagePage = () => {
                 setLoading(true);
                 const res = await getPracticumSchedulingDetail(practicumSchedulingId);
                 setPracticumScheduling(res.data);
-            } catch {
+            } catch (e) {
                 navigate('/404')
             } finally {
                 setLoading(false);

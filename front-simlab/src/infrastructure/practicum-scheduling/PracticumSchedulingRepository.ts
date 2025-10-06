@@ -29,7 +29,23 @@ export class PracticumSchedulingRepository implements IPracticumSchedulingReposi
         throw json['message']
     }
 
-    async create(data: { praktikum_id: number | null; ruangan_laboratorium_id: number | null; phone_number: string; groups: { group_name: string; practicum_assistant: string; practicum_session: string; start_time: Date | undefined; end_time: Date | undefined; total_participant: number; }[]; }): Promise<ApiResponse<PracticumScheduling>> {
+    async create(data: {
+        practicum_id: number | null,
+        phone_number: string,
+        classes: {
+            lecturer_id: number | null,
+            laboratory_room_id: number | null,
+            name: string,
+            practicum_assistant: string,
+            total_participant: number | null,
+            total_group: number | null,
+            sessions: {
+                practicum_module_id: number | null,
+                start_time: Date | null,
+                end_time: Date | null
+            }[]
+        }[]
+    }): Promise<ApiResponse<PracticumScheduling>> {
         const response = await fetchApi("/practicum-schedule", {
             method: "POST",
             body: JSON.stringify(data)

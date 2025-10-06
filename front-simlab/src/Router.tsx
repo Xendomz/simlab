@@ -39,19 +39,20 @@ import PracticumModulePage from "./presentation/pages/admin/practicum-module/Pra
 import NewsPage from "./presentation/pages/landing/news/NewsPage";
 import { userRole } from "./domain/User/UserRole";
 import KepalaLabJurusanPage from "./presentation/pages/admin/user/kepala-lab-jurusan/KepalaLabJurusanPage";
+import { PracticumSchedulingProvider } from "./presentation/pages/admin/practicum-scheduling/context/PracticumSchedulingContext";
 
 export const router = createBrowserRouter([
     {
         path: '/',
-        element: <MainPage/>
+        element: <MainPage />
     },
     {
         path: '/berita',
-        element: <NewsPage/>
+        element: <NewsPage />
     },
     {
         path: '/berita/:slug',
-        element: <NewsContent/>
+        element: <NewsContent />
     },
     {
         path: '/login',
@@ -279,7 +280,9 @@ export const router = createBrowserRouter([
                         path: '',
                         element: (
                             <ProtectedRoute allowedRoles={[userRole.KepalaLabJurusan, userRole.KepalaLabTerpadu, userRole.KepalaLabJurusan]}>
-                                <PracticumSchedulingPage />
+                                <PracticumSchedulingProvider>
+                                    <PracticumSchedulingPage />
+                                </PracticumSchedulingProvider>
                             </ProtectedRoute>
                         )
                     },
@@ -287,7 +290,9 @@ export const router = createBrowserRouter([
                         path: 'create',
                         element: (
                             <ProtectedRoute allowedRoles={[userRole.KepalaLabJurusan, userRole.KepalaLabTerpadu, userRole.Kooprodi]}>
-                                <PracticumSchedulingCreatePage />
+                                <PracticumSchedulingProvider>
+                                    <PracticumSchedulingCreatePage />
+                                </PracticumSchedulingProvider>
                             </ProtectedRoute>
                         )
                     },
@@ -295,7 +300,9 @@ export const router = createBrowserRouter([
                         path: ':id/manage',
                         element: (
                             <ProtectedRoute allowedRoles={[userRole.KepalaLabJurusan, userRole.Mahasiswa, userRole.KepalaLabTerpadu, userRole.Kooprodi]}>
-                                <PracticumSchedulingManagePage />
+                                <PracticumSchedulingProvider>
+                                    <PracticumSchedulingManagePage />
+                                </PracticumSchedulingProvider>
                             </ProtectedRoute>
                         )
                     },
@@ -323,7 +330,7 @@ export const router = createBrowserRouter([
                     {
                         path: '',
                         element: (
-                            <Navigate to={'/404'} replace/>
+                            <Navigate to={'/404'} replace />
                         )
                     },
                     {

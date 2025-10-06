@@ -4,19 +4,26 @@ export interface PracticumSchedulingTableParam {
     search: string,
 }
 
+export interface PracticumSchedulingSession {
+    practicum_module_id: number | null,
+    start_time: Date | null,
+    end_time: Date | null
+}
+
+export interface PracticumSchedulingClass {
+    lecturer_id: number | null,
+    laboratory_room_id: number | null,
+    name: string,
+    practicum_assistant: string,
+    total_participant: number | null,
+    total_group: number | null,
+    sessions: PracticumSchedulingSession[]
+}
+
 export interface PracticumSchedulingInputDTO {
-    praktikum_id: number | null;
-    ruangan_laboratorium_id: number | null;
-    phone_number: string;
-    groups: {
-        group_name: string;
-        practicum_assistant: string;
-        practicum_session: string;
-        start_time: Date | undefined;
-        end_time: Date | undefined;
-        total_participant: number;
-    }[];
-    
+    practicum_id: number | null,
+    phone_number: string,
+    classes: PracticumSchedulingClass[]
 }
 
 export interface PracticumSchedulingEquipmentNMaterialInputDTO {
