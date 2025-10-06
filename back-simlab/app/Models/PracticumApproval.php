@@ -13,7 +13,7 @@ class PracticumApproval extends Model
         'practicum_scheduling_id',
         'approver_id',
         'role',
-        'approved',
+        'is_approved',
         'information',
     ];
 

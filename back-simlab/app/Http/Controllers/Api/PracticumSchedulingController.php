@@ -10,6 +10,8 @@ use App\Models\PracticumScheduling;
 use App\Models\PracticumSchedulingEquipment;
 use App\Models\PracticumSchedulingMaterial;
 use App\Models\AcademicYear;
+use App\Models\PracticumClass;
+use App\Models\PracticumSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -307,34 +309,51 @@ class PracticumSchedulingController extends BaseController
             $data['status'] = 'draft';
 
             // Remove nested data before creating main scheduling
-            $groups = $data['groups'] ?? [];
-            unset($data['groups']);
+            $classes = $data['classes'] ?? [];
+            unset($data['classes']);
 
             $practicumScheduling = PracticumScheduling::create($data);
 
-            // Create practicum groups
-            foreach ($groups as $group) {
-                $groupData = [
-                    'group_name' => $group['group_name'],
-                    'practicum_assistant' => $group['practicum_assistant'],
-                    'practicum_session' => $group['practicum_session'],
-                    'start_time' => Carbon::parse($group['start_time'])->format('Y-m-d H:i:s'),
-                    'end_time' => Carbon::parse($group['end_time'])->format('Y-m-d H:i:s'),
-                    'total_participant' => $group['total_participant'],
+            // Create Practicum Classes
+            foreach ($classes as $key => $class) {
+                $classData = [
                     'practicum_scheduling_id' => $practicumScheduling->id,
+                    'lecturer_id' => $class['lecturer_id'],
+                    'laboratory_room_id' => $class['laboratory_room_id'],
+                    'name' => $class['name'],
+                    'practicum_assistant' => $class['practicum_assistant'],
+                    'total_participant' => $class['total_participant'],
+                    'total_group' => $class['total_group']
                 ];
-                PracticumGroup::create($groupData);
+
+                // Remove nested data before creating practicum class
+                $sessions = $class['sessions'] ?? [];
+                unset($data['sessions']);
+
+                $practicumClass = PracticumClass::create($classData);
+
+                // Create practicum sessions
+                foreach ($sessions as $key => $session) {
+                    $sessionData = [
+                        'practicum_class_id' => $practicumClass->id,
+                        'practicum_module_id' => $session['practicum_module_id'],
+                        'start_time' => Carbon::parse($session['start_time'])->format('Y-m-d H:i:s'),
+                        'end_time' => Carbon::parse($session['end_time'])->format('Y-m-d H:i:s')
+                    ];
+
+                    PracticumSession::create($sessionData);
+                }
             }
 
             PracticumApproval::create([
                 'practicum_scheduling_id' => $practicumScheduling->id,
                 'role' => 'Pemohon',
                 'approver_id' => $user->id,
-                'approved' => 1
+                'is_approved' => 1
             ]);
 
             DB::commit();
-            return $this->sendResponse($practicumScheduling->load(['user', 'practicum', 'practicumGroups']), "Practicum Scheduling Created Successfully");
+            return $this->sendResponse($practicumScheduling->load(['user', 'practicum']), "Practicum Scheduling Created Successfully");
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->sendError('Failed to create practicum scheduling', [$e->getMessage()], 500);
@@ -417,8 +436,7 @@ class PracticumSchedulingController extends BaseController
             $practicumScheduling = PracticumScheduling::with([
                 'user.studyProgram',
                 'practicum',
-                'laboratoryRoom',
-                'practicumGroups',
+                'practicumClasses',
                 'practicumSchedulingEquipments.laboratoryEquipment',
                 'practicumSchedulingMaterials.laboratoryMaterial'
             ])->findOrFail($id);

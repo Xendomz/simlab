@@ -51,6 +51,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['role:admin|laboran|kepala_lab_terpadu|kepala_lab_jurusan'])->group(function () {
         Route::get('/practicums/select', [PracticumController::class, 'getDataForSelect']);
         Route::get('/laboratory-rooms/select', [LaboratoryRoomController::class, 'getDataForSelect']);
+        Route::get('/users/select', [UserController::class, 'getDataForSelect']);
     });
     Route::middleware(['role:admin|laboran'])->group(function () {
         // Academic Year Route

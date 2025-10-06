@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/presentation/components/ui/tooltip';
 import { PracticumSchedulingService } from '@/application/practicum-scheduling/PracticumSchedulingService';
 import { PracticumSchedulingView } from '@/application/practicum-scheduling/PracticumSchedulingView';
+import { usePracticumScheduling } from './context/PracticumSchedulingContext';
 
 const PracticumSchedulingPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -33,6 +34,8 @@ const PracticumSchedulingPage = () => {
         )
     }, [])
 
+    const { isHasDraftPracticum } = usePracticumScheduling()
+
     const {
         currentPage,
         perPage,
@@ -52,7 +55,6 @@ const PracticumSchedulingPage = () => {
     const practicumSchedulingService = new PracticumSchedulingService()
     const [practicumSchedulings, setPracticumScheduling] = useState<PracticumSchedulingView[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const [isHasDraftPracticum, setIsHasDraftPracticum] = useState<boolean>(false)
 
     const getData = async () => {
         setIsLoading(true)
@@ -71,17 +73,6 @@ const PracticumSchedulingPage = () => {
     useEffect(() => {
         getData()
     }, [currentPage, perPage])
-
-    useEffect(() => {
-        const isStillHaveDraftPracticum = async () => {
-            const res = await practicumSchedulingService.isStillHaveDraftPracticum()
-            if (res.data) {
-                setIsHasDraftPracticum(true)
-            }
-        }
-
-        isStillHaveDraftPracticum()
-    }, [])
 
     useEffect(() => {
         const timer = setTimeout(() => {

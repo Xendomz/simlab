@@ -30,10 +30,9 @@ const TimePicker: React.FC<TimePickerProps> = ({ id, label, value, onChange }) =
 
     const hours = useMemo(() => Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0")), []);
     const minutes = useMemo(() => Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0")), []);
-    const seconds = minutes; // same 0-59
 
     const update = (nh: string, nm: string, ns: string) => {
-        const next = `${nh}:${nm}:${ns}`;
+        const next = `${nh}:${nm}:00`;
         onChange(next);
     };
 
@@ -48,11 +47,11 @@ const TimePicker: React.FC<TimePickerProps> = ({ id, label, value, onChange }) =
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[260px]" align="start">
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                         <div className="flex flex-col gap-1">
                             <span className="text-xs font-medium px-1">Jam</span>
                             <Select value={h} onValueChange={(val) => update(val, m, s)}>
-                                <SelectTrigger className="h-9">
+                                <SelectTrigger className="h-9 w-full">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="max-h-52">
@@ -65,25 +64,12 @@ const TimePicker: React.FC<TimePickerProps> = ({ id, label, value, onChange }) =
                         <div className="flex flex-col gap-1">
                             <span className="text-xs font-medium px-1">Menit</span>
                             <Select value={m} onValueChange={(val) => update(h, val, s)}>
-                                <SelectTrigger className="h-9">
+                                <SelectTrigger className="h-9 w-full">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent className="max-h-52">
                                     {minutes.map((mm) => (
                                         <SelectItem key={mm} value={mm}>{mm}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-xs font-medium px-1">Detik</span>
-                            <Select value={s} onValueChange={(val) => update(h, m, val)}>
-                                <SelectTrigger className="h-9">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="max-h-52">
-                                    {seconds.map((ss) => (
-                                        <SelectItem key={ss} value={ss}>{ss}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
