@@ -27,7 +27,6 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange,
     if (!date) return;
     setSelectedDate(date);
     onChange({ date, startTime, endTime });
-    setOpen(false);
   };
 
   // Helper for select options
@@ -53,7 +52,7 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange,
 
   return (
     <div className="flex gap-2 items-center w-full">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen} modal={true}>
         <PopoverTrigger asChild>
           {selectedDate ? (
             <Button type="button" className='w-full font-normal' variant="outline" onClick={() => setOpen(true)}>
@@ -72,7 +71,6 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({ value, onChange,
             mode="single"
             selected={selectedDate}
             onSelect={date => handleDateSelect(date)}
-            initialFocus
           />
           <div className="flex flex-col gap-4 mt-2">
             <div className="flex flex-col gap-1">

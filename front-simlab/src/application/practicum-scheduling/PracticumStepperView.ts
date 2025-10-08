@@ -6,9 +6,9 @@ export class PracticumStepperView {
     constructor(
         readonly id: number,
         readonly role: string,
-        readonly status: "approved" | "rejected" | "pending",
+        readonly status: "approved" | "rejected" | "pending" | "revision",
         readonly information: string,
-        readonly approved_at?: TimeView,
+        readonly approvedAt?: TimeView,
         readonly approver?: string
     ){}
 

@@ -1,4 +1,3 @@
-
 import { PracticumSchedulingRepository } from "@/infrastructure/practicum-scheduling/PracticumSchedulingRepository";
 import { PracticumSchedulingEquipmentNMaterialInputDTO, PracticumSchedulingInputDTO, PracticumSchedulingTableParam, PracticumSchedulingVerifyDTO } from "./dto/PracticumSchedulingDTO";
 import { PracticumSchedulingView } from "./PracticumSchedulingView";
@@ -10,7 +9,7 @@ export class PracticumSchedulingService {
 
     async getPracticumSchedulingData(params: PracticumSchedulingTableParam): Promise<PaginatedResponse<PracticumSchedulingView>> {
         const practicumSchedulings = await this.practicumSchedulingRepository.getAll(params)
-
+        
         return {
             ...practicumSchedulings,
             data: practicumSchedulings.data.map(PracticumSchedulingView.fromDomain) || []

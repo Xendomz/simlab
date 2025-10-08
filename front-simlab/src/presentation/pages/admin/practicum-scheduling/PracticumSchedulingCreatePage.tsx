@@ -3,8 +3,6 @@ import { useAuth } from '@/application/hooks/useAuth'
 import { useGSAP } from '@gsap/react'
 import React, { useEffect, useRef, useState } from 'react'
 import Header from '@/presentation/components/Header';
-import { usePracticumScheduling } from '@/application/practicum-scheduling/hooks/usePracticumScheduling';
-import { PracticumSchedulingInputDTO } from '@/application/practicum-scheduling/dto/PracticumSchedulingDTO';
 import { Label } from '@/presentation/components/ui/label';
 import { Button } from '@/presentation/components/ui/button';
 import { Input } from '@/presentation/components/ui/input';
@@ -26,6 +24,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { UserService } from '@/application/user/UserService';
 import { userRole } from '@/domain/User/UserRole';
 import { UserSelectView } from '@/application/user/UserSelectView';
+import { usePracticumScheduling } from './context/PracticumSchedulingContext';
+import { PracticumSchedulingService } from '@/application/practicum-scheduling/PracticumSchedulingService';
 
 
 const PracticumSchedulingCreatePage = () => {
@@ -47,7 +47,7 @@ const PracticumSchedulingCreatePage = () => {
             },
         )
     }, [])
-
+    const { isHasDraftPracticum, refreshIsHasDraftPracticum } = usePracticumScheduling()
     const { user } = useAuth()
     const {
         formData,
@@ -89,11 +89,14 @@ const PracticumSchedulingCreatePage = () => {
         setLecturers(response.data ?? [])
     }
 
-
     useEffect(() => {
         getPracticums()
         getLaboratoryRooms()
         getLecturers()
+
+        if (isHasDraftPracticum) {
+            navigate('/404')
+        }
     }, [])
 
     const [practicumModules, setPracticumModules] = useState<PracticumModuleSelectView[]>([])
@@ -101,23 +104,22 @@ const PracticumSchedulingCreatePage = () => {
         setPracticumModules(getPracticumModule(practicums))
     }, [formData.practicum_id])
 
-    const {
-        create,
-    } = usePracticumScheduling({})
-
+    const practicumSchedulingService = new PracticumSchedulingService()
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-
+        
         try {
-            const res = await create(formData);
+            const res = await practicumSchedulingService.create(formData);
             toast.success(res.message)
             navigate(`/panel/penjadwalan-praktikum/${res.data?.id}/manage`)
+            refreshIsHasDraftPracticum()
         } catch (e) {
             const error = e as ApiResponse
             if (error.errors) {
                 processErrors(error.errors);
             }
+            toast.error(error.message)
         } finally {
             setIsSubmitting(false);
         }
@@ -128,24 +130,24 @@ const PracticumSchedulingCreatePage = () => {
         <>
             <Header title="Menu Penjadwalan Praktikum" />
             <div className="flex flex-1 flex-col gap-4 p-4 pt-0" ref={sectionRef}>
+                <div className='flex justify-end'>
+                    <NavLink to={'/panel/penjadwalan-praktikum'}>
+                        <Button>
+                            Kembali
+                            <ArrowLeft />
+                        </Button>
+                    </NavLink>
+                </div>
                 <form className='flex flex-col gap-5' onSubmit={handleSubmit}>
                     <Card>
                         <CardHeader>
                             <CardTitle>Ajukan Peminjaman</CardTitle>
-                            <CardAction>
-                                <NavLink to={'/panel/penjadwalan-praktikum'}>
-                                    <Button>
-                                        Kembali
-                                        <ArrowLeft />
-                                    </Button>
-                                </NavLink>
-                            </CardAction>
                         </CardHeader>
                         <CardContent>
                             <div className='flex flex-col gap-5'>
                                 <div className='flex flex-col md:flex-row gap-5'>
                                     <div className="flex flex-col gap-2 w-full">
-                                        <Label htmlFor='phone_number'>Nama Peminjam <span className="text-red-500">*</span></Label>
+                                        <Label htmlFor='phone_number'>Nama Pemohon <span className="text-red-500">*</span></Label>
                                         <Input
                                             type='text'
                                             value={user?.name}
@@ -172,7 +174,7 @@ const PracticumSchedulingCreatePage = () => {
                                 </div>
                                 <div className='flex flex-col md:flex-row gap-5'>
                                     <div className="flex flex-col gap-2 w-full">
-                                        <Label htmlFor='praktikum_id'>Praktikum <span className="text-red-500">*</span></Label>
+                                        <Label htmlFor='practicum_id'>Praktikum <span className="text-red-500">*</span></Label>
                                         <div>
                                             <Combobox
                                                 options={practicums}
@@ -187,8 +189,8 @@ const PracticumSchedulingCreatePage = () => {
                                                 optionLabelKey='name'
                                                 optionValueKey='id'
                                             />
-                                            {errors.praktikum_id && (
-                                                <span className="text-xs text-red-500 mt-1">{errors.praktikum_id}</span>
+                                            {errors.practicum_id && (
+                                                <span className="text-xs text-red-500 mt-1">{errors.practicum_id}</span>
                                             )}
                                         </div>
                                     </div>
@@ -220,10 +222,11 @@ const PracticumSchedulingCreatePage = () => {
                             <CardContent>
                                 <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-5'>
                                     <div className="flex flex-col gap-2">
-                                        <Label htmlFor=''>Nama Kelas <span className="text-red-500">*</span></Label>
+                                        <Label htmlFor='name'>Nama Kelas <span className="text-red-500">*</span></Label>
                                         <div>
                                             <Input
                                                 type='text'
+                                                id='name'
                                                 name='name'
                                                 value={classes.name}
                                                 onChange={(e) => handleClassChange(e, cidx)}
@@ -266,7 +269,7 @@ const PracticumSchedulingCreatePage = () => {
                                                 name='practicum_assistant'
                                                 value={classes.practicum_assistant}
                                                 onChange={(e) => handleClassChange(e, cidx)}
-                                                placeholder='Nama Kelas'
+                                                placeholder='Asisten Praktikum'
                                             />
                                             {errors[`classes.${cidx}.practicum_assistant`] && (
                                                 <span className="text-xs text-red-500 mt-1">{errors[`classes.${cidx}.practicum_assistant`]}</span>
@@ -367,21 +370,21 @@ const PracticumSchedulingCreatePage = () => {
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className='flex flex-col'>
-                                                                <DateTimePicker
-                                                                    value={{
-                                                                        date: session.start_time ? new Date(session.start_time) : undefined,
-                                                                        startTime: session.start_time ? new Date(session.start_time).toTimeString().slice(0, 5) : '08:00',
-                                                                        endTime: session.end_time ? new Date(session.end_time).toTimeString().slice(0, 5) : '17:00',
-                                                                    }}
-                                                                    onChange={({ date, startTime, endTime }) =>
-                                                                        updateSessionDateTime(cidx, sidx, date, startTime, endTime)
-                                                                    }
-                                                                />
-                                                                {(errors[`classes.${cidx}.sessions.${sidx}.start_time`] || errors[`classes.${cidx}.sessions.${sidx}.end_time`]) && (
-                                                                    <span className="text-xs text-red-500 mt-1">
-                                                                        {errors[`classes.${cidx}.sessions.${sidx}.start_time`] || errors[`classes.${cidx}.sessions.${sidx}.end_time`]}
-                                                                    </span>
-                                                                )}
+                                                            <DateTimePicker
+                                                                value={{
+                                                                    date: session.start_time ? new Date(session.start_time) : undefined,
+                                                                    startTime: session.start_time ? new Date(session.start_time).toTimeString().slice(0, 5) : '08:00',
+                                                                    endTime: session.end_time ? new Date(session.end_time).toTimeString().slice(0, 5) : '17:00',
+                                                                }}
+                                                                onChange={({ date, startTime, endTime }) =>
+                                                                    updateSessionDateTime(cidx, sidx, date, startTime, endTime)
+                                                                }
+                                                            />
+                                                            {(errors[`classes.${cidx}.sessions.${sidx}.start_time`] || errors[`classes.${cidx}.sessions.${sidx}.end_time`]) && (
+                                                                <span className="text-xs text-red-500 mt-1">
+                                                                    {errors[`classes.${cidx}.sessions.${sidx}.start_time`] || errors[`classes.${cidx}.sessions.${sidx}.end_time`]}
+                                                                </span>
+                                                            )}
                                                         </TableCell>
                                                         <TableCell className='text-center'>
                                                             {classes.sessions.length > 1 && (

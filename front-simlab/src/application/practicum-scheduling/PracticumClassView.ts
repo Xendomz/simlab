@@ -2,6 +2,7 @@ import { PracticumClass } from "@/domain/practicum-scheduling/PracticumClass";
 import { TimeView } from "../time/TimeView";
 import { UserView } from "../user/UserView";
 import { LaboratoryRoomView } from "../laboratory-room/LaboratoryRoomView";
+import { PracticumSessionView } from "./PracticumSessionView";
 
 export class PracticumClassView {
     private constructor(
@@ -14,6 +15,7 @@ export class PracticumClassView {
         readonly updatedAt: TimeView,
         readonly lecturer?: UserView,
         readonly laboratoryRoom?: LaboratoryRoomView,
+        readonly practicumSessions?: PracticumSessionView[]
     ) { }
 
     static fromDomain(entity: PracticumClass): PracticumClassView {
@@ -26,7 +28,8 @@ export class PracticumClassView {
             TimeView.fromDomain(entity.createdAt),
             TimeView.fromDomain(entity.updatedAt),
             entity.lecturer ? UserView.fromDomain(entity.lecturer) : undefined,
-            entity.laboratoryRoom ? LaboratoryRoomView.fromDomain(entity.laboratoryRoom) : undefined
+            entity.laboratoryRoom ? LaboratoryRoomView.fromDomain(entity.laboratoryRoom) : undefined,
+            entity.practicumSessions ? entity.practicumSessions.map(PracticumSessionView.fromDomain) : undefined
         )
     }
 }

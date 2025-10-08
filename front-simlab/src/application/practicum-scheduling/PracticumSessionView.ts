@@ -1,5 +1,6 @@
 import { PracticumSession } from "@/domain/practicum-scheduling/PracticumSession";
 import { TimeView } from "../time/TimeView";
+import { PracticumModuleView } from "../practicum-module/PracticumModuleView";
 
 export class PracticumSessionView {
     private constructor(
@@ -9,7 +10,8 @@ export class PracticumSessionView {
         readonly laboranComment: string | null,
         readonly laboranCommentedAt: TimeView | null,
         readonly lecturerComment: string | null,
-        readonly lecturerCommentedAt: TimeView | null
+        readonly lecturerCommentedAt: TimeView | null,
+        readonly practicumModule?: PracticumModuleView
     ) { }
 
     static fromDomain(entity: PracticumSession): PracticumSessionView {
@@ -20,7 +22,12 @@ export class PracticumSessionView {
             entity.laboranComment,
             entity.laboranCommentedAt ? TimeView.fromDomain(entity.laboranCommentedAt) : null,
             entity.lecturerComment,
-            entity.lecturerCommentedAt ? TimeView.fromDomain(entity.lecturerCommentedAt) : null
+            entity.lecturerCommentedAt ? TimeView.fromDomain(entity.lecturerCommentedAt) : null,
+            entity.practicumModule ? PracticumModuleView.fromDomain(entity.practicumModule) : undefined
         )
+    }
+
+    formattedDate() {
+        return this.startTime.formatForDay() +' - ' + this.endTime.formatForTime()
     }
 }

@@ -47,7 +47,7 @@ class PracticumSchedulingController extends BaseController
     {
         try {
             // Start with a base query
-            $query = PracticumScheduling::query()->with(['user', 'practicum']);
+            $query = PracticumScheduling::query()->with(['user', 'practicum', 'academicYear']);
 
             $user = auth()->user();
             $query->where('user_id', $user->id);
@@ -69,6 +69,8 @@ class PracticumSchedulingController extends BaseController
             $perPage = (int) $request->input('per_page', 10);
             $page = (int) $request->input('page', 1);
 
+            $query->orderBy('created_at', 'desc');
+
             // Execute pagination
             $practicumSchedulings = $query->paginate($perPage, ['*'], 'page', $page);
 
@@ -83,27 +85,12 @@ class PracticumSchedulingController extends BaseController
         try {
             $user = auth()->user();
 
-            $query = PracticumScheduling::query()->with(['user', 'practicum', 'laboratoryRoom']);
+            $query = PracticumScheduling::query()->with(['user', 'practicum', 'academicYear']);
             $query->where('academic_year_id', $this->activeAcademicYear->id);
             $query->where('status', '<>' , 'draft');
 
-
-            if ($user->role === 'Laboran') {
+            if ($user->role === 'laboran') {
                 $query->where('laboran_id', $user->id);
-            }
-
-            // Hanya tampilkan ke Kepala Lab Terpadu jika sudah di-approve Koorprodi
-            if ($user->role === 'Kepala Lab Terpadu') {
-                $query->whereHas('practicumApprovals', function($q) {
-                    $q->where('role', 'Koorprodi')->where('approved', 1);
-                });
-            }
-
-            if ($user->role === 'Koorprodi') {
-                // Pastikan hanya data dengan prodi_id yang sama dengan user
-                $query->whereHas('user.studyProgram', function($q) use ($user) {
-                    $q->where('id', $user->prodi_id);
-                });
             }
 
             // Search functionality
@@ -119,23 +106,15 @@ class PracticumSchedulingController extends BaseController
                 });
             }
 
-            // Sorting functionality
-            $sortField = $request->input('sort_by', 'created_at');
-            $sortDirection = $request->input('sort_direction', 'desc');
-            $allowedSortFields = ['id', 'user_id', 'created_at', 'updated_at'];
-
-            if (in_array($sortField, $allowedSortFields)) {
-                $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');
-            }
-
             // Pagination parameters
             $perPage = (int) $request->input('per_page', 10);
             $page = (int) $request->input('page', 1);
+            $query->orderBy('created_at', 'desc');
 
             // Execute pagination
             $practicumSchedulings = $query->paginate($perPage, ['*'], 'page', $page);
             $practicumSchedulings->getCollection()->each(function ($practicumScheduling) {
-                $practicumScheduling->append(['kooprodi_approval', 'kepala_lab_approval', 'laboran_approval']);
+                $practicumScheduling->append(['kepala_lab_approval', 'laboran_approval']);
             });
 
             return $this->sendResponse($practicumSchedulings, "Practicum Scheduling retrieved successfully");
@@ -149,16 +128,12 @@ class PracticumSchedulingController extends BaseController
         DB::beginTransaction();
         try {
             $user = auth()->user();
-            $allowedRoles = ['Koorprodi', 'Kepala Lab Terpadu', 'Laboran'];
-            if (!$user || !in_array($user->role, $allowedRoles)) {
-                DB::rollBack();
-                return $this->sendError('Unauthorized', [], 401);
-            }
 
             $practicumScheduling = PracticumScheduling::findOrFail($id);
             $status = $practicumScheduling->status;
             $action = $request->action;
             $isApprove = $action === 'approve';
+            $isRevision = $action === 'revision';
 
             if ($status === 'draft') {
                 DB::rollBack();
@@ -169,37 +144,11 @@ class PracticumSchedulingController extends BaseController
                 DB::rollBack();
                 return $this->sendError('Peminjaman ini telah dilakukan verifikasi sebelumnya', [], 400);
             }
-            // Approval order and requirements
-            $approvalOrder = [
-                'Koorprodi' => null,
-                'Kepala Lab Terpadu' => 'Koorprodi',
-                'Laboran' => 'Kepala Lab Terpadu',
-            ];
 
             $validationError = $this->validateApprovalFlow($practicumScheduling, $user);
             if ($validationError) {
                 DB::rollBack();
                 return $this->sendError($validationError, [], 400);
-            }
-
-            // Check previous approval if needed
-            $prevRole = $approvalOrder[$user->role];
-            if ($prevRole) {
-                $prevApproved = PracticumApproval::where([
-                    'practicum_scheduling_id' => $practicumScheduling->id,
-                    'role' => $prevRole,
-                    'approved' => 1
-                ])->exists();
-                if (!$prevApproved) {
-                    DB::rollBack();
-                    return $this->sendError("Penjadwalan harus disetujui oleh $prevRole terlebih dahulu.", [], 400);
-                }
-            } else {
-                // For Koordinator Prodi, must be submitted
-                if ($status !== 'pending') {
-                    DB::rollBack();
-                    return $this->sendError('Terjadi kesalahan ketika melakukan persetujuan', [], 400);
-                }
             }
 
             // Prevent duplicate approval by same role and user
@@ -214,26 +163,28 @@ class PracticumSchedulingController extends BaseController
             }
 
             // Special update for Kepala Lab Terpadu and Laboran
-            if ($user->role === 'Kepala Lab Terpadu' && $isApprove && $request->has('laboran_id')) {
+            if ($user->role === 'kepala_lab_terpadu' && $isApprove && $request->has('laboran_id')) {
                 $practicumScheduling->update(['laboran_id' => $request->laboran_id]);
             }
-            if ($user->role === 'Laboran' && $isApprove && $request->has('ruangan_laboratorium_id')) {
-                $practicumScheduling->update([
-                    'ruangan_laboratorium_id' => $request->ruangan_laboratorium_id,
-                    'status' => 'approved'
-                ]);
+
+            if ($user->role === 'laboran' && $isApprove) {
+                $practicumScheduling->update(['status' => 'approved']);
             }
 
             if (!$isApprove) {
                 $practicumScheduling->update(['status' => 'rejected']);
             }
 
+            if ($isRevision) {
+                $practicumScheduling->update(['status' => 'revision']);
+            }
+
             PracticumApproval::create([
                 'practicum_scheduling_id' => $practicumScheduling->id,
                 'role' => $user->role,
                 'approver_id' => $user->id,
-                'approved' => $isApprove ? 1 : 0,
-                'information' => $isApprove ? null : $request->information,
+                'is_approved' => $isApprove ? 1 : ($isRevision ? 2 : 0),
+                'information' => $request->information,
             ]);
 
             DB::commit();
@@ -252,12 +203,8 @@ class PracticumSchedulingController extends BaseController
 
     private function validateApprovalFlow($practicumScheduling, $user): ?string
     {
-        if ($user->role === 'Koorprodi' && $practicumScheduling->koorprodi_approval_status) {
-            return 'Kepala Lab Terpadu sudah melakukan verifikasi.';
-        }
-
-        if ($user->role === 'Laboran') {
-            if (!$practicumScheduling->kepala_lab_approval_status) {
+        if ($user->role === 'laboran') {
+            if (!$practicumScheduling->kepala_lab_approval) {
                 return 'Kepala Lab Terpadu harus verifikasi terlebih dahulu.';
             }
             $kepalaLabApproval = $practicumScheduling->kepala_lab_approval;
@@ -266,7 +213,7 @@ class PracticumSchedulingController extends BaseController
             }
         }
 
-        if ($user->role === 'Kepala Lab Terpadu' && $practicumScheduling->kepala_lab_approval_status) {
+        if ($user->role === 'kepala_lab_terpadu' && $practicumScheduling->kepala_lab_approval) {
             return 'Kepala Lab Terpadu sudah melakukan verifikasi.';
         }
 
@@ -337,8 +284,8 @@ class PracticumSchedulingController extends BaseController
                     $sessionData = [
                         'practicum_class_id' => $practicumClass->id,
                         'practicum_module_id' => $session['practicum_module_id'],
-                        'start_time' => Carbon::parse($session['start_time'])->format('Y-m-d H:i:s'),
-                        'end_time' => Carbon::parse($session['end_time'])->format('Y-m-d H:i:s')
+                        'start_time' => Carbon::parse($session['start_time'])->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s'),
+                        'end_time' => Carbon::parse($session['end_time'])->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s')
                     ];
 
                     PracticumSession::create($sessionData);
@@ -385,7 +332,7 @@ class PracticumSchedulingController extends BaseController
                 foreach ($data['practicumSchedulingEquipments'] as $eq) {
                     PracticumSchedulingEquipment::create([
                         'practicum_scheduling_id' => $practicumScheduling->id,
-                        'alat_laboratorium_id' => $eq['id'],
+                        'laboratory_equipment_id' => $eq['id'],
                         'quantity' => $eq['quantity']
                     ]);
                 }
@@ -396,7 +343,7 @@ class PracticumSchedulingController extends BaseController
                 foreach ($data['practicumSchedulingMaterials'] as $mt) {
                     PracticumSchedulingMaterial::create([
                         'practicum_scheduling_id' => $practicumScheduling->id,
-                        'bahan_laboratorium_id' => $mt['id'],
+                        'laboratory_material_id' => $mt['id'],
                         'quantity' => $mt['quantity']
                     ]);
                 }
@@ -435,8 +382,11 @@ class PracticumSchedulingController extends BaseController
         try {
             $practicumScheduling = PracticumScheduling::with([
                 'user.studyProgram',
+                'laboran',
                 'practicum',
-                'practicumClasses',
+                'practicumClasses.lecturer',
+                'practicumClasses.practicumSessions.practicumModule',
+                'practicumClasses.laboratoryRoom',
                 'practicumSchedulingEquipments.laboratoryEquipment',
                 'practicumSchedulingMaterials.laboratoryMaterial'
             ])->findOrFail($id);
@@ -453,24 +403,33 @@ class PracticumSchedulingController extends BaseController
     {
         try {
             $practicumScheduling = PracticumScheduling::with(['practicumApprovals.approver'])->findOrFail($id);
-            $roles = ['Pemohon', 'Koorprodi', 'Kepala Lab Terpadu', 'Laboran'];
+            $roles = ['pemohon', 'kepala_lab_terpadu', 'laboran'];
             $stepper = [];
             $allApproved = true;
             $hasBeenRejected = false;
             foreach ($roles as $role) {
                 $approval = $practicumScheduling->practicumApprovals->where('role', $role)->sortByDesc('created_at')->first();
                 if ($approval) {
-                    $hasBeenRejected = ($approval->approved === 0) && true;
-                    $status = $approval->approved ? 'approved' : 'rejected';
+                    // Normalize status: 1 = approved, 2 = revision, 0 = rejected
+                    if ($approval->is_approved === 1) {
+                        $status = 'approved';
+                    } elseif ($approval->is_approved === 2) {
+                        $status = 'revision';
+                    } elseif ($approval->is_approved === 0) {
+                        $status = 'rejected';
+                        $hasBeenRejected = true;
+                    } else {
+                        $status = 'pending';
+                    }
                 } else {
                     $status = $hasBeenRejected ? 'rejected' : 'pending';
                 }
 
                 $stepper[] = [
-                    'role' => $role,
+                    'role' => ucwords(str_replace('_', ' ', $role)),
                     'status' => $status,
                     'information' => $approval?->information,
-                    'approved_at' => $approval?->created_at,
+                    'approved_at' => $approval?->created_at ? Carbon::parse($approval->created_at)->setTimezone(config('app.timezone'))->toIso8601String() : null,
                     'approver' => $approval?->approver?->name,
                 ];
 

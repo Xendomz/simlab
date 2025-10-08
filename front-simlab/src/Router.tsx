@@ -279,7 +279,7 @@ export const router = createBrowserRouter([
                     {
                         path: '',
                         element: (
-                            <ProtectedRoute allowedRoles={[userRole.KepalaLabJurusan, userRole.KepalaLabTerpadu, userRole.KepalaLabJurusan]}>
+                            <ProtectedRoute allowedRoles={[userRole.KepalaLabJurusan]}>
                                 <PracticumSchedulingProvider>
                                     <PracticumSchedulingPage />
                                 </PracticumSchedulingProvider>
@@ -317,7 +317,7 @@ export const router = createBrowserRouter([
                     {
                         path: 'verif',
                         element: (
-                            <ProtectedRoute allowedRoles={[userRole.KepalaLabTerpadu, userRole.Laboran, userRole.Kooprodi]}>
+                            <ProtectedRoute allowedRoles={[userRole.KepalaLabTerpadu, userRole.Laboran]}>
                                 <PracticumSchedulingVerification />
                             </ProtectedRoute>
                         )

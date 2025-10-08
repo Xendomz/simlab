@@ -34,11 +34,12 @@ const PracticumScheduleDetailDialog: React.FC<PracticumScheduleDetailDialogProps
                         <>
                             <div className="space-y-4">
                                 <div className="grid md:grid-cols-2 gap-5">
-                                    <Item title='Nama Peminjam' value={practicumScheduling.user?.name}/>
+                                    <Item title='Nama Pemohon' value={practicumScheduling.user?.name}/>
                                     <Item title='Nama Identitas Peminjam' value={practicumScheduling.user?.identityNum}/>
                                     <Item title='Program Studi' value={practicumScheduling.user?.studyProgram?.name}/>
                                     <Item title='Nomor Hp (Whatsapp)' value={practicumScheduling.phoneNumber}/>
                                     <Item title='Mata Kuliah / Praktikum' value={practicumScheduling.practicum?.name}/>
+                                    <Item title='Total Kelas yang Diajukan' value={practicumScheduling.practicumClasses?.length} />
                                 </div>
                             </div>
                         </>

@@ -4,7 +4,7 @@ export class PracticumStepper {
     constructor(
         readonly id: number,
         readonly role: string,
-        readonly status: 'approved' | 'rejected' | 'pending',
+        readonly status: 'approved' | 'rejected' | 'pending' | 'revision',
         readonly information: string,
         readonly approvedAt?: Time,
         readonly approver?: string

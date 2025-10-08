@@ -15,8 +15,9 @@ export type PracticumSchedulingAPI = {
     status: string
     created_at: string;
     updated_at: string;
-    academicYear?: AcademicYearAPI;
+    academic_year?: AcademicYearAPI;
     user?: UserApi;
+    laboran?: UserApi;
     practicum?: PracticumAPI;
     practicum_classes?: PracticumClassAPI[];
     practicum_scheduling_equipments?: PracticumSchedulingEquipmentAPI[];
@@ -32,8 +33,9 @@ export function toDomain(api: PracticumSchedulingAPI): PracticumScheduling {
         api.status as PracticumSchedulingStatus,
         new Time(api.created_at),
         new Time(api.updated_at),
-        api.academicYear ? toAcademicYear(api.academicYear) : undefined,
+        api.academic_year ? toAcademicYear(api.academic_year) : undefined,
         api.user ? toUser(api.user) : undefined,
+        api.laboran ? toUser(api.laboran) : undefined,
         api.practicum ? toPracticum(api.practicum) : undefined,
         api.practicum_classes ? api.practicum_classes.map(toPracticumClass) : undefined,
         api.practicum_scheduling_equipments ? api.practicum_scheduling_equipments.map(toPracticumSchedulingEquipment) : undefined,

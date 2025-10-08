@@ -3,11 +3,10 @@ import { useGSAP } from '@gsap/react'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { PracticumSchedulingEquipmentNMaterialInputDTO } from '@/application/practicum-scheduling/dto/PracticumSchedulingDTO'
 import { useNavigate, useParams } from 'react-router-dom'
-import { usePracticumScheduling } from '@/application/practicum-scheduling/hooks/usePracticumScheduling'
 import { toast } from 'sonner'
 import { useValidationErrors } from '@/presentation/hooks/useValidationError'
 import useTable from '@/application/hooks/useTable'
-import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Skeleton } from '@/presentation/components/ui/skeleton'
 import Table from '@/presentation/components/Table'
 import { LaboratoryEquipmentColumn } from '@/presentation/pages/admin/booking/column/LaboratoryEquipmentColumn'
@@ -21,6 +20,8 @@ import { LaboratoryEquipmentView } from '@/application/laboratory-equipment/Labo
 import { LaboratoryMaterialView } from '@/application/laboratory-material/LaboratoryMaterialView'
 import { LaboratoryEquipmentService } from '@/application/laboratory-equipment/LaboratoryEquipmentService'
 import { LaboratoryMaterialService } from '@/application/laboratory-material/LaboratoryMaterialService'
+import { usePracticumScheduling } from '../context/PracticumSchedulingContext'
+import { PracticumSchedulingService } from '@/application/practicum-scheduling/PracticumSchedulingService'
 
 const PracticumScheduleEquipmentNMaterialForm = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -34,11 +35,12 @@ const PracticumScheduleEquipmentNMaterialForm = () => {
         practicumSchedulingMaterials: []
     })
 
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const { id } = useParams()
     const navigate = useNavigate();
     const practicumSchedulingId = id ? Number(id) : undefined
-    const { storePracticumSchedulingEquipmentMaterial } = usePracticumScheduling({})
+    const { isHasDraftPracticum, refreshIsHasDraftPracticum } = usePracticumScheduling()
+    // const { storePracticumSchedulingEquipmentMaterial } = usePracticumScheduling({})
 
     // Handlers Equipment & Material (grouped, useCallback for perf)
     const handleSelectLaboratoryEquipment = useCallback((data: LaboratoryEquipmentView) => {
@@ -53,7 +55,7 @@ const PracticumScheduleEquipmentNMaterialForm = () => {
         });
     }, []);
 
-    const handleChangeEquipmentQuantity = useCallback((id: number, quantity: number) => {
+    const handleChangeEquipmentQuantity = useCallback((id: number, quantity: number | null) => {
         setFormData(prev => ({
             ...prev,
             practicumSchedulingEquipments: prev.practicumSchedulingEquipments.map(eq => eq.id === id ? { ...eq, quantity } : eq)
@@ -140,13 +142,15 @@ const PracticumScheduleEquipmentNMaterialForm = () => {
         getLaboratoryMaterials()
     }, [])
 
+    const practicumSchedulingService = new PracticumSchedulingService()
     const handleSubmit = async () => {
         if (!practicumSchedulingId) return;
         setIsSubmitting(true);
         try {
-            const res = await storePracticumSchedulingEquipmentMaterial(practicumSchedulingId, formData);
+            const res = await practicumSchedulingService.storePracticumSchedulingEquipmentMaterial(practicumSchedulingId, formData);
             toast.success(res.message);
             navigate('/panel/penjadwalan-praktikum');
+            refreshIsHasDraftPracticum()
         } catch (e: any) {
             toast.error(e?.message || 'Gagal submit');
             processErrors(e.errors);
@@ -165,7 +169,10 @@ const PracticumScheduleEquipmentNMaterialForm = () => {
         <div ref={sectionRef} className='flex flex-col gap-6'>
             {/* === Equipment Section === */}
             <Card>
-                <CardHeader><CardTitle>Ajukan Peminjaman Alat Laboratorium</CardTitle></CardHeader>
+                <CardHeader>
+                    <CardTitle>Ajukan Peminjaman Alat Laboratorium</CardTitle>
+                    <CardDescription>Harap disesuaikan dengan kebutuhan seluruh kelas yang diajukan</CardDescription>
+                </CardHeader>
                 <CardContent>
                     <div className='grid lg:grid-cols-2 xl:grid-cols-3 gap-5'>
                         <div className='xl:col-span-2 overflow-x-auto'>
@@ -191,7 +198,7 @@ const PracticumScheduleEquipmentNMaterialForm = () => {
                             )}
                         </div>
                         <div>
-                            <div className='font-semibold text-sm mb-2'>Daftar Alat yang dibutuhkan</div>
+                            <div className='font-semibold text-sm'>Daftar Alat yang dibutuhkan</div>
                             {errors['practicumSchedulingEquipments'] && (
                                 <p className='mb-2 text-xs italic text-red-500'>{errors['practicumSchedulingEquipments']}</p>
                             )}
@@ -207,7 +214,9 @@ const PracticumScheduleEquipmentNMaterialForm = () => {
                                             <div className='flex flex-col md:flex-row items-center gap-5'>
                                                 <p className='md:max-w-40 w-full text-sm font-medium'>{eq.name}</p>
                                                 <div className='flex gap-2 w-full items-center'>
-                                                    <Input type='number' min={0} value={eq.quantity} onChange={(e) => handleChangeEquipmentQuantity(eq.id, Number(e.target.value))} />
+                                                    <Input type='number' min={0} value={eq.quantity} onChange={(e) => {
+                                                        handleChangeEquipmentQuantity(eq.id, e.target.value ? Number(e.target.value) : null)
+                                                    }} />
                                                     <span className='text-sm font-medium w-fit text-nowrap'>{eq.unit}</span>
                                                 </div>
                                                 <Button type='button' variant='destructive' size='sm' className='w-full md:w-fit' onClick={() => removeEquipment(eq.id)}>Hapus</Button>
@@ -224,7 +233,10 @@ const PracticumScheduleEquipmentNMaterialForm = () => {
 
             {/* === Material Section === */}
             <Card>
-                <CardHeader><CardTitle>Ajukan Peminjaman Bahan Laboratorium</CardTitle></CardHeader>
+                <CardHeader>
+                    <CardTitle>Ajukan Peminjaman Bahan Laboratorium</CardTitle>
+                    <CardDescription>Harap disesuaikan dengan kebutuhan seluruh kelas yang diajukan</CardDescription>
+                </CardHeader>
                 <CardContent>
                     <div className='grid lg:grid-cols-2 xl:grid-cols-3 gap-5'>
                         <div className='xl:col-span-2 w-full overflow-x-auto'>

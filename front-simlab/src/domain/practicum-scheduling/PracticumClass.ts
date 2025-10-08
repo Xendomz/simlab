@@ -1,6 +1,7 @@
 import { Time } from "../time/Time";
 import { LaboratoryRoom } from "../laboratory-room/LaboratoryRoom";
 import { User } from "../User/User";
+import { PracticumSession } from "./PracticumSession";
 
 export class PracticumClass {
     constructor(
@@ -13,5 +14,6 @@ export class PracticumClass {
         readonly updatedAt: Time,
         readonly lecturer?: User,
         readonly laboratoryRoom?: LaboratoryRoom,
+        readonly practicumSessions?: PracticumSession[]
     ){}
 }

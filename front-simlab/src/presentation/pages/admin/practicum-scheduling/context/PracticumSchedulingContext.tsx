@@ -1,9 +1,10 @@
 import { PracticumSchedulingService } from "@/application/practicum-scheduling/PracticumSchedulingService"
+import { ApiResponse } from "@/shared/Types"
 import { createContext, useContext, useEffect, useState } from "react"
 
 interface PracticumSchedulingContextType {
     isHasDraftPracticum: boolean,
-    changeIsHasDraftPracticum: (status: boolean) => void
+    refreshIsHasDraftPracticum: () => void
 }
 
 const PracticumSchedulingContext = createContext<PracticumSchedulingContextType | null>(null)
@@ -14,23 +15,29 @@ type PracticumSchedulingProps = {
 
 export const PracticumSchedulingProvider = ({ children }: PracticumSchedulingProps) => {
     const practicumSchedulingService = new PracticumSchedulingService()
-    const [isHasDraftPracticum, setIsHasDraftPracticum] = useState<boolean>(true)
-
-    useEffect(() => {
-        const isStillHaveDraftPracticum = async () => {
+    const [isHasDraftPracticum, setIsHasDraftPracticum] = useState<boolean>(false)
+    const isStillHaveDraftPracticum = async () => {
+        try {
             const res = await practicumSchedulingService.isStillHaveDraftPracticum()
             if (res.data) {
                 setIsHasDraftPracticum(true)
             }
+        } catch (e) {
+            const error = e as ApiResponse
+            if (error.code === 404) {
+                setIsHasDraftPracticum(false)
+            }                
         }
+    }
 
+    useEffect(() => {
         isStillHaveDraftPracticum()
     }, [])
 
-    const changeIsHasDraftPracticum = (status: boolean) => setIsHasDraftPracticum(status)
+    const refreshIsHasDraftPracticum = () => isStillHaveDraftPracticum
 
     return (
-        <PracticumSchedulingContext.Provider value={{ isHasDraftPracticum, changeIsHasDraftPracticum }}>
+        <PracticumSchedulingContext.Provider value={{ isHasDraftPracticum, refreshIsHasDraftPracticum }}>
             {children}
         </PracticumSchedulingContext.Provider>
     )

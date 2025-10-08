@@ -23,12 +23,12 @@ class PracticumEquipmenMaterialRequest extends ApiRequest
         return [
             // Alat (equipments) tidak required, hanya validasi jika ada
             'practicumSchedulingEquipments' => 'array',
-            'practicumSchedulingEquipments.*.id' => 'required|distinct|exists:alat_laboratoria,id',
+            'practicumSchedulingEquipments.*.id' => 'required|distinct|exists:laboratory_equipments,id',
             'practicumSchedulingEquipments.*.quantity' => 'required|integer|min:1',
 
             // Bahan (materials) tidak required, hanya validasi jika ada
             'practicumSchedulingMaterials' => 'array',
-            'practicumSchedulingMaterials.*.id' => 'required|distinct|exists:bahan_laboratoria,id',
+            'practicumSchedulingMaterials.*.id' => 'required|distinct|exists:laboratory_materials,id',
             'practicumSchedulingMaterials.*.quantity' => 'required|integer|min:1',
         ];
     }

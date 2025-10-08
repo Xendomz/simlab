@@ -1,20 +1,22 @@
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { useEffect, useRef, useState } from 'react';
-import { NavLink, useParams } from 'react-router-dom';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
-import { usePracticumScheduling } from '@/application/practicum-scheduling/hooks/usePracticumScheduling';
 import { PracticumSchedulingView } from '@/application/practicum-scheduling/PracticumSchedulingView';
 import Header from '@/presentation/components/Header';
 import { Skeleton } from '@/presentation/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/presentation/components/ui/tabs';
 import { Button } from '@/presentation/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye } from 'lucide-react';
 import { DataTable } from '@/presentation/components/custom/Datatable';
-import { PracticumScheduleGroupColumn } from './column/PracticumScheduleGroupColumn';
-import { PracticumScheduleEquipmentColumn } from './column/PracticumScheduleEquipmentColumn';
-import { PracticumScheduleMaterialColumn } from './column/PracticumScheduleMaterialColumn';
+import { PracticumScheduleSessionColumn } from './column/PracticumScheduleSessionColumn';
 import PracticumStepper from './PracticumStepper';
+import Item from '@/presentation/components/Item';
+import { PracticumSchedulingService } from '@/application/practicum-scheduling/PracticumSchedulingService';
+import PracticumSchedulingEquipmentDialog from './components/PracticumSchedulingEquipmentDialog';
+import PracticumSchedulingMaterialDialog from './components/PracticumSchedulingMaterialDialog';
+import { useAuth } from '@/application/hooks/useAuth';
+import { userRole } from '@/domain/User/UserRole';
 
 const PracticumSchedulingDetailPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null);
@@ -24,9 +26,17 @@ const PracticumSchedulingDetailPage = () => {
         tl.fromTo(sectionRef.current, { opacity: 0, y: 100 }, { opacity: 1, y: 0, duration: 0.8 });
     }, []);
 
+    const {user} = useAuth()
     const { id } = useParams<{ id: string }>();
     const practicumSchedulingId = Number(id);
-    const { getPracticumSchedulingDetail } = usePracticumScheduling({})
+    const practicumSchedulingService = new PracticumSchedulingService()
+    const navigate = useNavigate();
+
+    let backTo = '/panel/penjadwalan-praktikum';
+    if (user?.role && [userRole.Laboran, userRole.KepalaLabTerpadu].includes(user.role)) {
+        backTo = `/panel/penjadwalan-praktikum/verif`;
+    } 
+
     const [loading, setLoading] = useState(false);
     const [practicumScheduling, setPracticumScheduling] = useState<PracticumSchedulingView>();
     const [error, setError] = useState<string | null>(null);
@@ -36,7 +46,7 @@ const PracticumSchedulingDetailPage = () => {
             if (!practicumSchedulingId) return;
             try {
                 setLoading(true);
-                const res = await getPracticumSchedulingDetail(practicumSchedulingId);
+                const res = await practicumSchedulingService.getPracticumSchedulingDetail(practicumSchedulingId);
                 setPracticumScheduling(res.data);
             } catch (e: any) {
                 setError(e?.message || 'Gagal memuat detail');
@@ -47,7 +57,8 @@ const PracticumSchedulingDetailPage = () => {
         load();
     }, []);
 
-    const defaultTab = 'general';
+    const [openPracticumSchedulingEquipmentDialog, setOpenPracticumSchedulingEquipmentDialog] = useState<boolean>(false)
+    const [openPracticumSchedulingMaterialDialog, setOpenPracticumSchedulingMaterialDialog] = useState<boolean>(false)
 
     if (loading) return (
         <>
@@ -67,9 +78,8 @@ const PracticumSchedulingDetailPage = () => {
         </>
     );
 
-    if (error) return <div className="text-red-500">{error}</div>;
     if (!practicumScheduling) return <div>Data tidak ditemukan</div>;
-    
+
     const equipments = practicumScheduling.practicumSchedulingEquipments || [];
     const materials = practicumScheduling.practicumSchedulingMaterials || [];
     const hasEquipment = Array.isArray(equipments) && equipments.length > 0;
@@ -79,80 +89,86 @@ const PracticumSchedulingDetailPage = () => {
         <div>
             <Header title="Detail Peminjaman" />
             <div className="flex flex-col gap-4 p-4 pt-0" ref={sectionRef}>
-                <Tabs defaultValue={defaultTab} className="w-full">
-                    <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-                        <TabsList className="flex flex-wrap">
-                            <TabsTrigger value="general">Informasi Umum</TabsTrigger>
-                            {hasEquipment && <TabsTrigger value="equipment">Daftar Alat</TabsTrigger>}
-                            {hasMaterial && <TabsTrigger value="material">Daftar Bahan</TabsTrigger>}
-                        </TabsList>
-                        <NavLink to={'/panel/penjadwalan-praktikum'} className={'self-end ml-auto'}>
-                            <Button className="gap-2">
-                                <ArrowLeft className="w-4 h-4" />
-                                Kembali
-                            </Button>
-                        </NavLink>
+                <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                    <div className={'self-end ml-auto'}>
+                        <Button className="gap-2" onClick={() => navigate(backTo)}>
+                            <ArrowLeft className="w-4 h-4" />
+                            Kembali
+                        </Button>
                     </div>
+                </div>
 
-                    <PracticumStepper practicumId={practicumSchedulingId}/>
+                <PracticumStepper practicumId={practicumSchedulingId} />
+                <div className='grid grid-cols-1 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-5'>
+                    {/* Informasi Umum */}
+                    <Card className='lg:col-span-2 h-fit'>
+                        <CardHeader>
+                            <CardTitle>Informasi Umum</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-8">
+                                {practicumScheduling.user && (
+                                    <div className="flex flex-col gap-5">
+                                        <div className="flex flex-col gap-5">
+                                            <Item title='Nama' value={practicumScheduling.user.name} />
+                                            <Item title='Prodi' value={practicumScheduling.user.studyProgram?.name} />
+                                            <Item title='Email' value={practicumScheduling.user.email} />
+                                            <Item title='No Hp' value={practicumScheduling.phoneNumber} />
+                                            <Item title='Mata Kuliah/Pratikum' value={practicumScheduling.practicum?.name} />
+                                            <Item title='Laboran Penanggung Jawab' value={practicumScheduling.laboran?.name} />
+                                            {hasEquipment && (
+                                                <div className={`flex flex-col`}>
+                                                    <span className='font-semibold'>Daftar Peminjaman Alat</span>
 
-                    <TabsContent value="general">
-                        <div className='grid gap-5'>
-                            {/* Informasi Umum */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Informasi Umum</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-8">
-                                        {practicumScheduling.user && (
-                                            <div className="flex flex-col gap-5">
-                                                <div className="grid gap-3 sm:grid-cols-2 text-sm">
-                                                    <div className='flex flex-col gap-2'><span className="font-medium">Nama</span><div>{practicumScheduling.user.name}</div></div>
-                                                    <div className='flex flex-col gap-2'><span className="font-medium">Prodi</span><div>{practicumScheduling.user.studyProgram?.name}</div></div>
-                                                    <div className='flex flex-col gap-2'><span className="font-medium">Email</span><div>{practicumScheduling.user.email}</div></div>
-                                                    <div className='flex flex-col gap-2'><span className="font-medium">No Hp</span><div>{practicumScheduling.phoneNumber}</div></div>
-                                                    <div className='flex flex-col gap-2'><span className="font-medium">Ruangan</span><div>{practicumScheduling.laboratoryRoom?.name}</div></div>
-                                                    <div className='flex flex-col gap-2'><span className="font-medium">Mata Kuliah Praktikum</span><div>{practicumScheduling.practicum?.name}</div></div>
+                                                    <Button onClick={() => setOpenPracticumSchedulingEquipmentDialog(true)}>Lihat Daftar Alat <Eye /></Button>
+                                                    <PracticumSchedulingEquipmentDialog
+                                                        open={openPracticumSchedulingEquipmentDialog}
+                                                        onOpenChange={setOpenPracticumSchedulingEquipmentDialog}
+                                                        data={equipments} />
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
+                                            {hasMaterial && (
+                                                <div className={`flex flex-col`}>
+                                                    <span className='font-semibold'>Daftar Pengajuan Bahan</span>
+                                                    <Button onClick={() => setOpenPracticumSchedulingMaterialDialog(true)}>Lihat Daftar Bahan <Eye /></Button>
+                                                    <PracticumSchedulingMaterialDialog
+                                                        open={openPracticumSchedulingMaterialDialog}
+                                                        onOpenChange={setOpenPracticumSchedulingMaterialDialog}
+                                                        data={materials} />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Kelompok Praktikum</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <DataTable columns={PracticumScheduleGroupColumn()} data={practicumScheduling.practicumGroups || []} loading={false} />
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </TabsContent>
-                    {hasEquipment && (
-                        <TabsContent value="equipment">
-                            <Card>
-                                <CardHeader><CardTitle>Daftar Alat</CardTitle></CardHeader>
-                                <CardContent>
-                                    <DataTable columns={PracticumScheduleEquipmentColumn()} data={equipments} loading={false} />
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    )}
+                    <Card className='lg:col-span-4 xl:col-span-6 2xl:col-span-8 h-fit'>
+                        <CardHeader>
+                            <CardTitle>Kelas Praktikum</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex flex-col gap-5">
+                                {practicumScheduling.practicumClasses?.map((cls, idx) => (
+                                    <Fragment key={cls.id ?? idx}>
+                                        {idx > 0 && (<hr />)}
+                                        <div className='grid md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-5'>
+                                            <Item title={'Nama Kelas'} value={cls.name} />
+                                            <Item title={'Dosen Pengampu'} value={cls.lecturer?.name} />
+                                            <Item title={'Asisten Dosen'} value={cls.practicumAssistant} />
+                                            <Item title={'Ruangan Praktikum'} value={cls.laboratoryRoom?.name} />
+                                            <Item title={'Total Partisipan'} value={cls.totalParticipant} />
+                                            <Item title={'Total Kelompok'} value={cls.totalGroup} />
 
-                    {hasMaterial && (
-                        <TabsContent value="material">
-                            <Card>
-                                <CardHeader><CardTitle>Daftar Bahan</CardTitle></CardHeader>
-                                <CardContent>
-                                    <DataTable columns={PracticumScheduleMaterialColumn()} data={materials} loading={false} />
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    )}
-                </Tabs>
+                                        </div>
+                                        <DataTable columns={PracticumScheduleSessionColumn()} data={cls.practicumSessions || []} loading={false} />
+                                    </Fragment>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </div>
     )

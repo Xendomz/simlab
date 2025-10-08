@@ -11,7 +11,7 @@ export const LaboratoryEquipmentColumn = ({ handleSelectLaboratoryEquipment, sel
     { header: 'Kode Asset', accessorKey: 'assetCode' as keyof LaboratoryEquipmentView},
     { header: 'Nama Alat', accessorKey: 'equipmentName' as keyof LaboratoryEquipmentView},
     { header: 'Jumlah', accessorKey: 'quantity' as keyof LaboratoryEquipmentView, cell: ({ row }) => ( <div>{row.original.quantity} {row.original.unit}</div> )},
-    { header: 'Lokasi Alat', accessorKey: 'ruanganLaboratorium' as keyof LaboratoryEquipmentView, cell: ({ row }) => row.original.ruanganLaboratorium?.name },
+    { header: 'Lokasi Alat', accessorKey: 'laboratoryRoom' as keyof LaboratoryEquipmentView, cell: ({ row }) => row.original.laboratoryRoom?.name },
     {
         header: 'Action',
         accessorKey: 'id' as keyof LaboratoryEquipmentView,

@@ -1,5 +1,6 @@
 import { PracticumSession } from "@/domain/practicum-scheduling/PracticumSession"
 import { Time } from "@/domain/time/Time"
+import { PracticumModuleAPI, toDomain as toPracticumModule } from "../practicum-module/PracticumModuleAPI"
 
 export type PracticumSessionAPI = {
     start_time: string,
@@ -8,7 +9,8 @@ export type PracticumSessionAPI = {
     laboran_comment: string | null,
     laboran_commented_at: string | null,
     lecturer_comment: string | null,
-    lecturer_commented_at: string | null
+    lecturer_commented_at: string | null,
+    practicum_module?: PracticumModuleAPI
 }
 
 export function toDomain(api: PracticumSessionAPI): PracticumSession {
@@ -19,6 +21,7 @@ export function toDomain(api: PracticumSessionAPI): PracticumSession {
         api.laboran_comment,
         api.laboran_commented_at ? new Time(api.laboran_commented_at) : null,
         api.lecturer_comment,
-        api.lecturer_commented_at ? new Time(api.lecturer_commented_at) : null
+        api.lecturer_commented_at ? new Time(api.lecturer_commented_at) : null,
+        api.practicum_module ? toPracticumModule(api.practicum_module) : undefined
     )
 }

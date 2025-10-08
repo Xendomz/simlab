@@ -52,7 +52,7 @@ const PracticumStepper: React.FC<PracticumStepperProps> = ({ practicumId }) => {
                         <div className={`flex items-center ${(i + 1) == practicumSteps.length ? 'w-fit' : 'w-full'}`} key={i}>
                             <div className='flex flex-col items-center w-fit gap-1'>
                                 <div className={`w-10 h-10 flex items-center justify-center rounded-full text-xs font-semibold shadow-sm
-                                    ${step.status === 'approved' ? 'bg-green-600 text-white' : step.status === 'rejected' ? 'bg-red-600 text-white' : 'bg-gray-300 text-gray-600'}`}
+                                    ${step.status === 'approved' ? 'bg-green-600 text-white' : step.status === 'rejected' ? 'bg-red-600 text-white' : step.status === 'revision' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-300 text-gray-600'}`}
                                 >
                                     {i + 1}
                                 </div>
@@ -62,17 +62,25 @@ const PracticumStepper: React.FC<PracticumStepperProps> = ({ practicumId }) => {
                                         <span className="self-center text-[10px] tracking-wide px-2 py-0.5 rounded-full font-semibold bg-green-100 text-green-700">APPROVED</span>
                                     ) : step.status === 'rejected' ? (
                                         <span className="self-center text-[10px] tracking-wide px-2 py-0.5 rounded-full font-semibold bg-red-100 text-red-700">REJECTED</span>
+                                    ) : step.status === 'revision' ? (
+                                        <span className="self-center text-[10px] tracking-wide px-2 py-0.5 rounded-full font-semibold bg-yellow-100 text-yellow-700">REVISION</span>
                                     ) : (
                                         <span className="self-center text-[10px] tracking-wide px-2 py-0.5 rounded-full font-semibold bg-gray-100 text-gray-500">PENDING</span>
                                     )}
-                                    <div className={`text-xs text-muted-foreground ${(step.status === 'approved' || step.status === 'rejected') && step.approver ? '' : 'invisible'}`} >
-                                        {step.status === 'approved' ? 'Diverifikasi oleh: ' : 'Ditolak oleh: '}
-                                        <span className="font-medium">{step.approver}</span>
-                                        {step.approved_at ? ' pada ' + step.approved_at.formatForInformation() : ''}
-                                        {step.status === 'rejected' && step.information && (
-                                            <><br /><span className="italic text-red-500">Alasan: {step.information}</span></>
-                                        )}
-                                    </div>
+
+                                    {/* Details: show approver/time/info for approved, rejected, or revision when available */}
+                                    {((step.status === 'approved' || step.status === 'rejected' || step.status === 'revision') && (step.approver || step.information || step.approvedAt)) ? (
+                                        <div className={`text-xs text-muted-foreground`}>
+                                            {step.status === 'approved' ? 'Diverifikasi oleh: ' : step.status === 'rejected' ? 'Ditolak oleh: ' : 'Dalam proses revisi oleh: '}
+                                            <span className="font-medium">{step.approver} </span>
+                                            {step.approvedAt  ? step.approvedAt.formatForInformation() : ''}
+                                            {step.information && (
+                                                <><br /><span className="italic font-semibold">{step.status == 'approved' ? 'Catatan' : 'Alasan'}: {step.information}</span></>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className={`text-xs text-muted-foreground invisible`} />
+                                    )}
                                 </div>
                             </div>
                             {(i + 1) < practicumSteps.length && (

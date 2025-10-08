@@ -30,7 +30,7 @@ export interface PracticumSchedulingEquipmentNMaterialInputDTO {
     practicumSchedulingEquipments: {
         id: number,
         name: string,
-        quantity: number,
+        quantity: number | null,
         unit: string
     }[];
     practicumSchedulingMaterials: {
@@ -42,7 +42,7 @@ export interface PracticumSchedulingEquipmentNMaterialInputDTO {
 }
 
 export interface PracticumSchedulingVerifyDTO {
-    action: 'approve' | 'reject',
+    action: 'approve' | 'reject' | 'revision',
     laboran_id?: number,
     information?: string,
 }

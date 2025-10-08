@@ -6,7 +6,7 @@ export type PracticumApprovalAPI = {
     id: number;
     role: string;
     approver_id: number;
-    approved: number | boolean;
+    is_approved: number
     information: string;
     created_at: string;
     updated_at: string
@@ -18,7 +18,7 @@ export function toDomain(api: PracticumApprovalAPI): PracticumApproval {
         api.id,
         api.role,
         api.approver_id,
-        Boolean(api.approved),
+        api.is_approved,
         api.information,
         new Time(api.created_at),
         new Time(api.updated_at),

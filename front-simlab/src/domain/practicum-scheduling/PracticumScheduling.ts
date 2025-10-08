@@ -18,6 +18,7 @@ export class PracticumScheduling {
         readonly updatedAt: Time,
         readonly academicYear?: AcademicYear,
         readonly user?: User,
+        readonly laboran?: User,
         readonly practicum?: Practicum,
         readonly practicumClasses?: PracticumClass[],
         readonly practicumSchedulingEquipments?: PracticumSchedulingEquipment[],

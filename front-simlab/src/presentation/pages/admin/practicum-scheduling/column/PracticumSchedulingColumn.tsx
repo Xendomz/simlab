@@ -7,17 +7,17 @@ import { NavLink } from "react-router-dom";
 
 export const PracticumSchedulingColumn = (): ColumnDef<PracticumSchedulingView>[] => [
     {
+        header: 'Tahun Akademik',
+        accessorKey: 'academicYear',
+        cell: ({ row }) => (
+            `${row.original.academicYear?.name}`
+        )
+    },
+    {
         header: 'Praktikum',
         accessorKey: 'praktikumId',
         cell: ({ row }) => (
             `${row.original.practicum?.name}`
-        )
-    },
-    {
-        header: "Ruangan",
-        accessorKey: 'laboratoryRoomId',
-        cell: ({ row }) => (
-            `${row.original.laboratoryRoom?.name}`
         )
     },
     {
@@ -34,21 +34,26 @@ export const PracticumSchedulingColumn = (): ColumnDef<PracticumSchedulingView>[
             switch (row.original.status) {
                 case PracticumSchedulingStatus.Draft:
                     return (
-                        <Badge className="bg-slate-500">Draft</Badge>
+                        <Badge className="bg-muted">Draft</Badge>
                     )
                 case PracticumSchedulingStatus.Pending:
                     return (
-                        <Badge className="bg-sky-500">Pending</Badge>
+                        <Badge className="bg-primary">Pending</Badge>
                     )
 
                 case PracticumSchedulingStatus.Approved:
                     return (
-                        <Badge className="bg-emerald-500">Disetujui</Badge>
+                        <Badge className="bg-emerald-700">Disetujui</Badge>
+                    )
+
+                case PracticumSchedulingStatus.Revision:
+                    return (
+                        <Badge className="bg-yellow-500">Revisi</Badge>
                     )
 
                 case PracticumSchedulingStatus.Rejected:
                     return (
-                        <Badge className="bg-red-500">Ditolak</Badge>
+                        <Badge className="bg-destructive">Ditolak</Badge>
                     )
             }
         }
@@ -64,6 +69,13 @@ export const PracticumSchedulingColumn = (): ColumnDef<PracticumSchedulingView>[
                     </NavLink>
                 );
             }
+            // if (row.original.status === 'revision') {
+            //     return (
+            //         <NavLink to={`/panel/penjadwalan-praktikum/${row.original.id}/manage`}>
+            //             <Button size="sm">Revisi</Button>
+            //         </NavLink>
+            //     );
+            // }
             return (
                 <NavLink to={`/panel/penjadwalan-praktikum/${row.original.id}/detail`}>
                     <Button variant="secondary" size="sm">Detail</Button>

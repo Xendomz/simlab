@@ -43,6 +43,10 @@ class PracticumScheduling extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function laboran() {
+        return $this->belongsTo(User::class, 'laboran_id');
+    }
+
     public function practicumClasses() {
         return $this->hasMany(PracticumClass::class, 'practicum_scheduling_id');
     }
@@ -59,29 +63,17 @@ class PracticumScheduling extends Model
         return $this->hasMany(PracticumApproval::class, 'practicum_scheduling_id');
     }
 
-    public function getKepalaLabApprovalStatusAttribute() {
-        return $this->practicumApprovals()
-            ->where('role', 'Kepala Lab Terpadu')
-            ->exists();
-    }
-
-    public function getKooprodiApprovalAttribute() {
-        $approval = $this->practicumApprovals()
-            ->where('role', 'Koorprodi')
-            ->first();
-        return $approval ?: null;
-    }
-
     public function getKepalaLabApprovalAttribute() {
         $approval = $this->practicumApprovals()
-            ->where('role', 'Kepala Lab Terpadu')
+            ->where('role', 'kepala_lab_terpadu')
             ->first();
-        return $approval ?: null;
+
+        return $approval;
     }
 
     public function getLaboranApprovalAttribute() {
         $approval = $this->practicumApprovals()
-            ->where('role', 'Laboran')
+            ->where('role', 'laboran')
             ->first();
         return $approval ?: null;
     }

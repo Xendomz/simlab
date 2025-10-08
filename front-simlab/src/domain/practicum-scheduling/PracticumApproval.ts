@@ -6,7 +6,7 @@ export class PracticumApproval {
         readonly id: number,
         readonly role: string,
         readonly approverId: number,
-        readonly approved: boolean,
+        readonly isApproved: number,
         readonly information: string,
         readonly createdAt: Time,
         readonly updatedAt: Time,

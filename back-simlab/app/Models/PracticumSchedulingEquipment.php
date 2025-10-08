@@ -11,7 +11,7 @@ class PracticumSchedulingEquipment extends Model
 
     protected $fillable = [
         'practicum_scheduling_id',
-        'alat_laboratorium_id',
+        'laboratory_equipment_id',
         'quantity',
     ];
 
@@ -20,6 +20,6 @@ class PracticumSchedulingEquipment extends Model
     }
 
     public function laboratoryEquipment() {
-        return $this->belongsTo(AlatLaboratorium::class, 'alat_laboratorium_id');
+        return $this->belongsTo(LaboratoryEquipment::class, 'laboratory_equipment_id');
     }
 }

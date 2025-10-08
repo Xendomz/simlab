@@ -1,28 +1,30 @@
 import { PracticumSchedulingView } from "@/application/practicum-scheduling/PracticumSchedulingView";
+import { userRole } from "@/domain/User/UserRole";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { NavLink } from "react-router-dom";
 
 interface ColumnProps {
-    role: 'Kepala Lab Terpadu' | 'Laboran' | 'Koorprodi';
-    openApproval: (booking: any) => void;
-    openRejection?: (booking: any) => void;
+    role: userRole;
+    openApproval: (id: number) => void;
+    openRejection: (id: number) => void;
+    openRevision: (id: number) => void
 }
 
-export const PracticumScheduleVerificationColumn = ({ role, openApproval, openRejection }: ColumnProps): ColumnDef<PracticumSchedulingView>[] => [
+export const PracticumScheduleVerificationColumn = ({ role, openApproval, openRejection, openRevision }: ColumnProps): ColumnDef<PracticumSchedulingView>[] => [
+    {
+        header: 'Tahun Akademik',
+        accessorKey: 'academicYear',
+        cell: ({ row }) => (
+            `${row.original.academicYear?.name}`
+        )
+    },
     {
         header: 'Praktikum',
         accessorKey: 'praktikumId',
         cell: ({ row }) => (
             `${row.original.practicum?.name}`
-        )
-    },
-    {
-        header: "Ruangan",
-        accessorKey: 'laboratoryRoomId',
-        cell: ({ row }) => (
-            `${row.original.laboratoryRoom?.name}`
         )
     },
     {
@@ -41,39 +43,37 @@ export const PracticumScheduleVerificationColumn = ({ role, openApproval, openRe
     },
     {
         header: 'Verifikasi Pengajuan', accessorKey: 'id', cell: ({ row }) => {
-            const renderApprovalBadge = (approval: any) => {
-                if (!approval) return null;
-                return approval.approved ? (
-                    <Badge>Pengajuan Distujui</Badge>
-                ) : (
-                    <Badge variant={'destructive'}>Pengajuan Ditolak</Badge>
-                );
+            const renderApprovalBadge = (is_approved: number | null | undefined) => {
+                if (is_approved === 1) {
+                    return <Badge>Pengajuan Disetujui</Badge>;
+                }
+
+                if (is_approved === 2) {
+                    return <Badge variant={'warning'}>Pengajuan Dalam Proses Revisi</Badge>;
+                }
+
+                if (is_approved === 0) {
+                    return <Badge variant={'destructive'}>Pengajuan Ditolak</Badge>;
+                }
             };
 
-            const kooprodiApproval = row.original.koorprodiApproval;
             const kepalaLabApproval = row.original.kepalaLabApproval;
             const laboranApproval = row.original.laboranApproval;
 
             // If kepala lab rejected, laboran is also considered rejected
-            if (role === 'Laboran' && kepalaLabApproval && kepalaLabApproval.approved === false) {
-                return renderApprovalBadge({ approved: false });
+            if (role === userRole.Laboran && kepalaLabApproval && kepalaLabApproval.isApproved === 0) {
+                return renderApprovalBadge(0);
             }
 
-            // If kooprodi rejected, all are considered rejected
-            if (role !== 'Koorprodi' && kooprodiApproval && kooprodiApproval.approved === false) {
-                return renderApprovalBadge({ approved: false });
-            }
-
-            // Determine approval object based on role
-            let approval;
-            if (role === 'Koorprodi') {
-                approval = kooprodiApproval;
-            } else if (role === 'Kepala Lab Terpadu') {
-                approval = kepalaLabApproval;
+            // Determine approval object based on role (nullable)
+            let approval: number | null = null;
+            if (role === userRole.KepalaLabTerpadu) {
+                approval = kepalaLabApproval?.isApproved ?? null;
             } else {
-                approval = laboranApproval;
+                approval = laboranApproval?.isApproved ?? null;
             }
-            const isPending = !approval;
+
+            const isPending = approval === null || approval === undefined;
 
             return (
                 <>
@@ -81,9 +81,8 @@ export const PracticumScheduleVerificationColumn = ({ role, openApproval, openRe
                     {isPending && (
                         <div className='flex gap-2'>
                             <Button size="sm" onClick={() => openApproval(row.original.id)}>Terima</Button>
-                            {openRejection && (
-                                <Button size="sm" onClick={() => openRejection(row.original.id)} variant="destructive">Tolak</Button>
-                            )}
+                            {/* <Button size="sm" onClick={() => openRevision(row.original.id)} variant="warning">Revisi</Button> */}
+                            <Button size="sm" onClick={() => openRejection(row.original.id)} variant="destructive">Tolak</Button>
                         </div>
                     )}
                 </>

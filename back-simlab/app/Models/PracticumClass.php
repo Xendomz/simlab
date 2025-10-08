@@ -48,4 +48,9 @@ class PracticumClass extends Model
     {
         return $this->hasMany(PracticumSession::class, 'practicum_class_id');
     }
+
+    public function lecturer()
+    {
+        return $this->belongsTo(User::class, 'lecturer_id');
+    }
 }

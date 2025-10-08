@@ -1,3 +1,4 @@
+import { PracticumModule } from "../practicum-module/PracticumModule";
 import { Time } from "../time/Time";
 
 export class PracticumSession {
@@ -8,6 +9,7 @@ export class PracticumSession {
         readonly laboranComment: string | null,
         readonly laboranCommentedAt: Time | null,
         readonly lecturerComment: string | null,
-        readonly lecturerCommentedAt: Time | null
+        readonly lecturerCommentedAt: Time | null,
+        readonly practicumModule?: PracticumModule
     ){}
 }
