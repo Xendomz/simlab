@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import Table from "../../../components/Table";
 import { StudyProgramColumn } from "./StudyProgramColumn";
-import useTable from "../../../../application/hooks/useTable";
 import { ModalType } from "../../../../shared/Types";
 import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
@@ -13,11 +12,10 @@ import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDia
 import { toast } from "sonner";
 import { StudyProgramInputDTO } from "@/application/study-program/StudyProgramDTO";
 import StudyProgramFormDialog from "./components/StudyProgramFormDialog";
-import { MajorService } from "@/application/major/MajorService";
-import { MajorSelectView } from "@/application/major/MajorSelectView";
-import { StudyProgramView } from "@/application/study-program/StudyProgramView";
-import { StudyProgramService } from "@/application/study-program/StudyProgramService";
 import { Combobox } from "@/presentation/components/custom/combobox";
+import { useDepedencies } from "@/presentation/contexts/useDepedencies";
+import { useStudyProgramDataTable } from "./hooks/useStudyProgramDataTable";
+import { useMajorSelect } from "../major/hooks/useMajorSelect";
 
 const StudyProgramPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -39,89 +37,30 @@ const StudyProgramPage = () => {
         )
     }, [])
 
-    const majorService = new MajorService()
-    const [majors, setMajors] = useState<MajorSelectView[]>([])
-    const [selectedMajor, setSelectedMajor] = useState<number>(0)
+    const { majors, selectedMajor,  setSelectedMajor}  = useMajorSelect()
 
-    useEffect(() => {
-        const getMajors = async () => {
-            const response = await majorService.getDataForSelect()
-            setMajors(response.data ?? [])
-        }
-
-        getMajors()
-    }, [])
-
+    const { studyProgramService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        studyPrograms,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const studyProgramService = new StudyProgramService()
-    const [studyPrograms, setStudyPrograms] = useState<StudyProgramView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await studyProgramService.getStudyProgramData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm,
-            filter_major: selectedMajor
-        })
-        setStudyPrograms(response.data ?? [])
-        setTotalItems(response.total ?? 0)
-        setTotalPages(response.last_page ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedMajor])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+        setCurrentPage
+    } = useStudyProgramDataTable({ filter_major: selectedMajor })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
     const [type, setType] = useState<ModalType>('Add')
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedMajor])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
 
     const openModal = (modalType: ModalType, id: number | null = null) => {
         setType(modalType)
@@ -142,7 +81,7 @@ const StudyProgramPage = () => {
             const res = await studyProgramService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setId(null)
         setIsOpen(false)
     }
@@ -152,7 +91,7 @@ const StudyProgramPage = () => {
         const res = await studyProgramService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 

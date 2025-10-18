@@ -25,7 +25,7 @@ import { UserService } from '@/application/user/UserService';
 import { userRole } from '@/domain/User/UserRole';
 import { UserSelectView } from '@/application/user/UserSelectView';
 import { usePracticumScheduling } from './context/PracticumSchedulingContext';
-import { PracticumSchedulingService } from '@/application/practicum-scheduling/PracticumSchedulingService';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
 
 
 const PracticumSchedulingCreatePage = () => {
@@ -93,18 +93,20 @@ const PracticumSchedulingCreatePage = () => {
         getPracticums()
         getLaboratoryRooms()
         getLecturers()
+    }, [])
 
+    useEffect(() => {
         if (isHasDraftPracticum) {
             navigate('/404')
         }
-    }, [])
+    }, [isHasDraftPracticum])
 
     const [practicumModules, setPracticumModules] = useState<PracticumModuleSelectView[]>([])
     useEffect(() => {
         setPracticumModules(getPracticumModule(practicums))
     }, [formData.practicum_id])
 
-    const practicumSchedulingService = new PracticumSchedulingService()
+    const { practicumSchedulingService } = useDepedencies()
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);

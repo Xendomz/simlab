@@ -100,7 +100,7 @@ const Table = <T,>({
 
     return (
         <>
-            <div className="flex flex-wrap items-center justify-between mb-6">
+            <div className="flex flex-wrap items-center justify-between mb-5 p-1">
                 <div className="w-full md:w-1/3">
                     <div className="relative">
                         <Input

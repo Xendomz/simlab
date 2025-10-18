@@ -5,11 +5,17 @@ export const PracticumScheduleEquipmentColumn = (): ColumnDef<PracticumSchedulin
     {
       id: 'name',
       header: 'Alat',
-      cell: ({ row }) => row.original.laboratoryEquipment?.equipmentName|| '-',
+      cell: ({ row }) => {
+        const name = (row.original as any).name || '-';
+        return name;
+      },
     },
     {
       accessorKey: 'quantity',
       header: 'Qty',
-      cell: ({ row }) => `${row.original.quantity} ${row.original.laboratoryEquipment?.unit}`
+      cell: ({ row }) => {
+        const unit = (row.original as any).unit || '';
+        return `${row.original.quantity}${unit ? ` ${unit}` : ''}`;
+      }
     }
 ];

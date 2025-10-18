@@ -1,22 +1,19 @@
-import useTable from '@/application/hooks/useTable'
 import { UserInputDTO } from '@/application/user/UserDTO'
-import { useUser } from '@/application/user/hooks/useUser'
 import Header from '@/presentation/components/Header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { ModalType } from '@/shared/Types'
 import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
 import { KepalaLabJurusanColumn } from './KepalaLabJurusanColumn'
 import Table from '@/presentation/components/Table'
-import { StudyProgramService } from '@/application/study-program/StudyProgramService'
-import { StudyProgramSelectView } from '@/application/study-program/StudyProgramSelectView'
 import KepalaLabJurusanFormDialog from './components/KepalaLabJurusanFormDialog'
 import { userRole } from '@/domain/User/UserRole'
-import { UserService } from '@/application/user/UserService'
-import { UserView } from '@/application/user/UserView'
+import { useDepedencies } from '@/presentation/contexts/useDepedencies'
+import { useStudyProgramSelect } from '../../study-program/hooks/useStudyProgramSelect'
+import { useUserDataTable } from '../hooks/useUserDataTable'
 
 const KepalaLabJurusanPage = () => {
     const sectionRef = useRef(null)
@@ -38,69 +35,23 @@ const KepalaLabJurusanPage = () => {
         )
     }, [])
 
-    const studyProgramService = new StudyProgramService()
-    const [studyPrograms, setStudyPrograms] = useState<StudyProgramSelectView[]>([])
-    const [selectedStudyProgram, setSelectedStudyProgram] = useState<number>(0)
-
-    useEffect(() => {
-        const getStudyPrograms = async () => {
-            const response = await studyProgramService.getDataForSelect()
-            setStudyPrograms(response.data ?? [])
-        }
-
-        getStudyPrograms()
-    }, [])
-
+    const { userService } = useDepedencies()
+    const { studyPrograms } = useStudyProgramSelect()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        users,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const userService = new UserService()
-    const [users, setUsers] = useState<UserView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await userService.getUserData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm,
-            filter_study_program: selectedStudyProgram,
-            role: userRole.KepalaLabJurusan
-        })
-        setUsers(response.data ?? [])
-        setTotalPages(response.last_page ?? 0)
-        setTotalItems(response.total ?? 0)
-        setIsLoading(false)
-    }
-    
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+    } = useUserDataTable({ filter_study_program: 0, role: userRole.KepalaLabJurusan })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
@@ -123,7 +74,7 @@ const KepalaLabJurusanPage = () => {
             if (!id) return
             const res = await userService.updateData(id, formData)
             toast.success(res.message)
-            getData()
+            refresh()
             setIsOpen(false)
         } catch (error: any) {
             toast.error(error.message)
@@ -135,17 +86,17 @@ const KepalaLabJurusanPage = () => {
         const res = await userService.restoreToDosen(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 
     return (
         <>
-            <Header title='Menu Kepala Lab. Unit' />
+            <Header title='Menu Kepala Lab Jurusan' />
             <div className="flex flex-col gap-4 p-4 pt-0" ref={sectionRef}>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Menu Kepala Lab. Unit</CardTitle>
+                        <CardTitle>Menu Kepala Lab Jurusan</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Table

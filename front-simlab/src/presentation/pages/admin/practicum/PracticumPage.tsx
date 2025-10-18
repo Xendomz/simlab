@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import Table from "../../../components/Table";
-import useTable from "@/application/hooks/useTable";
-// import { useStudyProgram } from "@/application/study-program/hooks/useStudyProgram";
 import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Button } from "@/presentation/components/ui/button";
@@ -13,12 +11,11 @@ import { toast } from "sonner";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import { PracticumInputDTO } from "@/application/practicum/PracticumDTO";
 import { PracticumColumn } from "./PracticumColumn";
-import { StudyProgramService } from "@/application/study-program/StudyProgramService";
-import { StudyProgramSelectView } from "@/application/study-program/StudyProgramSelectView";
-import { PracticumService } from "@/application/practicum/PracticumService";
-import { PracticumView } from "@/application/practicum/PracticumView";
 import { Combobox } from "@/presentation/components/custom/combobox";
 import PracticumFormDialog from "./components/PracticumFormDialog";
+import { useStudyProgramSelect } from "../study-program/hooks/useStudyProgramSelect";
+import { usePracticumDataTable } from "./hooks/usePracticumDataTable";
+import { useDepedencies } from "@/presentation/contexts/useDepedencies";
 
 const PracticumPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -40,89 +37,30 @@ const PracticumPage = () => {
         )
     }, [])
 
-    const studyProgramService = new StudyProgramService()
-    const [studyPrograms, setStudyPrograms] = useState<StudyProgramSelectView[]>([])
-    const [selectedStudyProgram, setSelectedStudyProgram] = useState<number>(0)
+    const { studyPrograms, selectedStudyProgram, setSelectedStudyProgram } = useStudyProgramSelect()
 
-    useEffect(() => {
-        const getStudyPrograms = async () => {
-            const response = await studyProgramService.getDataForSelect()
-            setStudyPrograms(response.data ?? [])
-        }
-
-        getStudyPrograms()
-    }, [])
-
+    const { practicumService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        practicums,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const practicumService = new PracticumService()
-    const [practicums, setPracticums] = useState<PracticumView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await practicumService.getPracticalWorkData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm,
-            filter_study_program: selectedStudyProgram
-        })
-        setPracticums(response.data ?? [])
-        setTotalItems(response.total ?? 0)
-        setTotalPages(response.last_page ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedStudyProgram])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+        setCurrentPage
+    } = usePracticumDataTable({ filter_study_program: selectedStudyProgram })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
     const [type, setType] = useState<ModalType>('Add')
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedStudyProgram])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
 
     const openModal = (modalType: ModalType, id: number | null = null) => {
         setType(modalType)
@@ -143,7 +81,7 @@ const PracticumPage = () => {
             const res = await practicumService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setId(null)
         setIsOpen(false)
     }
@@ -153,7 +91,7 @@ const PracticumPage = () => {
         const res = await practicumService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 

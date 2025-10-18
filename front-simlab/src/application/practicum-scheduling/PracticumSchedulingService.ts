@@ -37,6 +37,7 @@ export class PracticumSchedulingService {
     async storePracticumSchedulingEquipmentMaterial(id: number, data: PracticumSchedulingEquipmentNMaterialInputDTO): Promise<ApiResponse> {
         const payload = {
             practicumSchedulingEquipments: data.practicumSchedulingEquipments.map(e => ({ id: e.id, quantity: e.quantity })),
+            proposedEquipments: data.proposedEquipments.map(m => ({ name: m.name, quantity: m.quantity })),
             practicumSchedulingMaterials: data.practicumSchedulingMaterials.map(m => ({ id: m.id, quantity: m.quantity })),
         }
         return await this.practicumSchedulingRepository.storePracticumSchedulingEquipmentMaterial(id, payload)

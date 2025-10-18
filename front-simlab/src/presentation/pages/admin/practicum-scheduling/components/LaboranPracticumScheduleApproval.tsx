@@ -10,7 +10,7 @@ import { PracticumSchedulingService } from '@/application/practicum-scheduling/P
 import { PracticumSchedulingView } from '@/application/practicum-scheduling/PracticumSchedulingView';
 import { userRole } from '@/domain/User/UserRole';
 import RejectionDialog from '@/presentation/components/custom/RejectionDialog';
-import ApproveDialog from '@/presentation/components/custom/ApproveDialog';
+import ApproveWithLaboratoryMaterialRealizationDialog from '@/presentation/components/custom/ApproveWithLaboratoryMaterialRealizationDialog';
 
 const LaboranPracticumScheduleApproval = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -85,9 +85,11 @@ const LaboranPracticumScheduleApproval = () => {
     const [id, setId] = useState<number | null>(null)
     const [openApprovalDialog, setOpenApprovalDialog] = useState<boolean>(false)
     const [openRejectionDialog, setOpenRejectionDialog] = useState<boolean>(false)
+    const [selectedPracticumScheduling, setSelectedPracticumScheduling] = useState<PracticumSchedulingView>()
 
     const openApproval = (id: number) => {
         setId(id)
+        setSelectedPracticumScheduling(practicumSchedulings.find((practicumScheduling) => practicumScheduling.id === id))
         setOpenApprovalDialog(true)
     }
 
@@ -112,11 +114,12 @@ const LaboranPracticumScheduleApproval = () => {
         return () => clearTimeout(timer)
     }, [searchTerm])
 
-    const handleApproval = async (information: string): Promise<void> => {
+    const handleApproval = async (information: string, materials: number[]): Promise<void> => {
         if (!id) return;
         const res = await practicumSchedulingService.verify(id, {
             action: 'approve',
-            information: information
+            information: information,
+            materials: materials
         })
         toast.success(res.message)
         setOpenApprovalDialog(false)
@@ -156,7 +159,7 @@ const LaboranPracticumScheduleApproval = () => {
                             handlePageChange={handlePageChange} />
                     </CardContent>
                 </Card>
-                <ApproveDialog open={openApprovalDialog} onOpenChange={setOpenApprovalDialog} handleSave={handleApproval}/>
+                <ApproveWithLaboratoryMaterialRealizationDialog practicumScheduling={selectedPracticumScheduling} open={openApprovalDialog} onOpenChange={setOpenApprovalDialog} handleSave={handleApproval}/>
                 <RejectionDialog open={openRejectionDialog} onOpenChange={setOpenRejectionDialog} handleRejection={handleRejection} />
             </div>
         </>

@@ -10,9 +10,10 @@ import { NavLink } from 'react-router-dom';
 import { PracticumSchedulingColumn } from './column/PracticumSchedulingColumn';
 import { useEffect, useRef, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/presentation/components/ui/tooltip';
-import { PracticumSchedulingService } from '@/application/practicum-scheduling/PracticumSchedulingService';
 import { PracticumSchedulingView } from '@/application/practicum-scheduling/PracticumSchedulingView';
 import { usePracticumScheduling } from './context/PracticumSchedulingContext';
+import { useDebounce } from '@/presentation/hooks/useDebounce';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
 
 const PracticumSchedulingPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -52,7 +53,7 @@ const PracticumSchedulingPage = () => {
         handlePageChange,
     } = useTable()
 
-    const practicumSchedulingService = new PracticumSchedulingService()
+    const { practicumSchedulingService } = useDepedencies()
     const [practicumSchedulings, setPracticumScheduling] = useState<PracticumSchedulingView[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -70,21 +71,14 @@ const PracticumSchedulingPage = () => {
         setIsLoading(false)
     }
 
+    const debounceSearchTerm = useDebounce(searchTerm, 500)
     useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
+        getData();
+    }, [currentPage, perPage, debounceSearchTerm]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        setCurrentPage(1);
+    }, [debounceSearchTerm]);
 
     return (
         <>

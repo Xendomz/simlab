@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import Table from "../../../components/Table";
@@ -7,18 +7,16 @@ import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Button } from "@/presentation/components/ui/button";
 import { Plus } from "lucide-react";
-import useTable from "@/application/hooks/useTable";
 import { ModalType } from "@/shared/Types";
 import { LaboratoryEquipmentInputDTO } from "@/application/laboratory-equipment/LaboratoryEquipmentDTO";
 import { toast } from "sonner";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import LaboratoryEquipmentFormDialog from "./components/LaboratoryEquipmentFormDialog";
 import { Combobox } from "@/presentation/components/custom/combobox";
-import { LaboratoryRoomService } from "@/application/laboratory-room/LaboratoryRoomService";
-import { LaboratoryRoomSelectView } from "@/application/laboratory-room/LaboratoryRoomSelectView";
 import LaboratoryEquipmentDetailDialog from "./components/LaboratoryEquipmentDetailDialog";
-import { LaboratoryEquipmentService } from "@/application/laboratory-equipment/LaboratoryEquipmentService";
-import { LaboratoryEquipmentView } from "@/application/laboratory-equipment/LaboratoryEquipmentView";
+import { useLaboratoryRoomSelect } from "../laboratory-room/hooks/useLaboratoryRoomSelect";
+import { useDepedencies } from "@/presentation/contexts/useDepedencies";
+import { useLaboratoryEquipmentDataTable } from "./hooks/useLaboratoryEquipmentDataTable";
 
 const LaboratoryEquipmentPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -40,69 +38,25 @@ const LaboratoryEquipmentPage = () => {
         )
     }, [])
 
-    const laboratoryRommService = new LaboratoryRoomService()
-    const [laboratoryRooms, setLaboratoryRooms] = useState<LaboratoryRoomSelectView[]>([])
-    const [selectedLaboratoryRoom, setSelectedLaboratoryRoom] = useState<number>(0)
+    const { laboratoryRooms, selectedLaboratoryRoom, setSelectedLaboratoryRoom } = useLaboratoryRoomSelect()
 
-    useEffect(() => {
-        const getLaboratoryRooms = async () => {
-            const response = await laboratoryRommService.getDataForSelect()
-            setLaboratoryRooms(response.data ?? [])
-        }
-
-        getLaboratoryRooms()
-    }, [])
-
-
+    const { laboratoryEquipmentService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        laboratoryEquipments,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const laboratoryEquipmentService = new LaboratoryEquipmentService()
-    const [laboratoryEquipments, setLaboratoryEquipments] = useState<LaboratoryEquipmentView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await laboratoryEquipmentService.getLaboratoryEquipmentData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm,
-            filter_laboratory_room: selectedLaboratoryRoom
-        })
-        setLaboratoryEquipments(response.data ?? [])
-        setTotalItems(response.total ?? 0)
-        setTotalPages(response.last_page ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedLaboratoryRoom])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+        setCurrentPage
+    } = useLaboratoryEquipmentDataTable({ filter_laboratory_room: selectedLaboratoryRoom })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isModalDetailOpen, setIsModalDetailOpen] = useState<boolean>(false)
@@ -111,7 +65,6 @@ const LaboratoryEquipmentPage = () => {
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -135,7 +88,7 @@ const LaboratoryEquipmentPage = () => {
             const res = await laboratoryEquipmentService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setId(null)
         setIsOpen(false)
     }
@@ -145,7 +98,7 @@ const LaboratoryEquipmentPage = () => {
         const res = await laboratoryEquipmentService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 

@@ -22,12 +22,16 @@ class PracticumEquipmenMaterialRequest extends ApiRequest
     {
         return [
             // Alat (equipments) tidak required, hanya validasi jika ada
-            'practicumSchedulingEquipments' => 'array',
+            'practicumSchedulingEquipments' => 'sometimes|array',
             'practicumSchedulingEquipments.*.id' => 'required|distinct|exists:laboratory_equipments,id',
             'practicumSchedulingEquipments.*.quantity' => 'required|integer|min:1',
 
+            'proposedEquipments' => 'sometimes|array',
+            'proposedEquipments.*.name' => 'required|string|max:255|distinct',
+            'proposedEquipments.*.quantity' => 'required|integer|min:1',
+
             // Bahan (materials) tidak required, hanya validasi jika ada
-            'practicumSchedulingMaterials' => 'array',
+            'practicumSchedulingMaterials' => 'sometimes|array',
             'practicumSchedulingMaterials.*.id' => 'required|distinct|exists:laboratory_materials,id',
             'practicumSchedulingMaterials.*.quantity' => 'required|integer|min:1',
         ];
@@ -53,6 +57,16 @@ class PracticumEquipmenMaterialRequest extends ApiRequest
             'practicumSchedulingMaterials.*.quantity.required' => 'Jumlah bahan wajib diisi.',
             'practicumSchedulingMaterials.*.quantity.integer' => 'Jumlah bahan harus berupa angka.',
             'practicumSchedulingMaterials.*.quantity.min' => 'Jumlah bahan minimal 1.',
+
+            // Alat usulan (proposedEquipments)
+            'proposedEquipments.array' => 'Data alat usulan harus berupa array.',
+            'proposedEquipments.*.name.required' => 'Nama alat usulan wajib diisi.',
+            'proposedEquipments.*.name.string' => 'Nama alat usulan harus berupa teks.',
+            'proposedEquipments.*.name.max' => 'Nama alat usulan maksimal 255 karakter.',
+            'proposedEquipments.*.name.distinct' => 'Terdapat duplikasi nama alat usulan.',
+            'proposedEquipments.*.quantity.required' => 'Jumlah alat usulan wajib diisi.',
+            'proposedEquipments.*.quantity.integer' => 'Jumlah alat usulan harus berupa angka.',
+            'proposedEquipments.*.quantity.min' => 'Jumlah alat usulan minimal 1.',
         ];
     }
 }

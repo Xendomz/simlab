@@ -1,4 +1,3 @@
-import { FacultyView } from '@/application/faculty/FacultyView';
 import { MajorInputDTO } from '@/application/major/MajorDTO';
 import { MajorView } from '@/application/major/MajorView';
 import { Button } from '@/presentation/components/ui/button';
@@ -9,12 +8,13 @@ import { useValidationErrors } from '@/presentation/hooks/useValidationError';
 import { ApiResponse } from '@/shared/Types';
 import React, { useEffect, useState } from 'react'
 import { Combobox } from '@/presentation/components/custom/combobox';
+import { FacultySelectView } from '@/application/faculty/FacultySelectView';
 
 interface MajorFormDialogProps {
     title: string,
     open: boolean,
     data: MajorView[],
-    faculties: FacultyView[]
+    faculties: FacultySelectView[]
     dataId: number | null,
     onOpenChange: (open: boolean) => void,
     handleSave: (data: MajorInputDTO) => Promise<void>

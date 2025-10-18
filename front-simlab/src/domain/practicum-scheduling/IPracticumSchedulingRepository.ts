@@ -34,11 +34,12 @@ export interface IPracticumSchedulingRepository {
 
     getPracticumSchedulingData(id: number): Promise<ApiResponse<PracticumScheduling>>
     storePracticumSchedulingEquipmentMaterial(id: number, data: {
-        practicumSchedulingEquipments: { id: number, quantity: number }[],
-        practicumSchedulingMaterials: { id: number, quantity: number }[],
+        practicumSchedulingEquipments: { id: number, quantity: number | null }[],
+        proposedEquipments: { name: string, quantity: number | null }[],
+        practicumSchedulingMaterials: { id: number, quantity: number | null }[],
     }): Promise<ApiResponse>
 
-    verify(id: number, data: { action: 'approve' | 'reject', information?: string, laboran_id?: number }): Promise<ApiResponse>
+    verify(id: number, data: { action: 'approve' | 'reject', information?: string, laboran_id?: number; materials: number[] }): Promise<ApiResponse>
     isStillHaveDraftPracticum(): Promise<ApiResponse<boolean>>
     getPracticumSteps(id: number): Promise<ApiResponse<PracticumStepper[]>>
 }

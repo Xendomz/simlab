@@ -1,27 +1,29 @@
 import { PracticumSchedulingEquipment } from "@/domain/practicum-scheduling/PracticumSchedulingEquipment";
-import { LaboratoryEquipmentView } from "../laboratory-equipment/LaboratoryEquipmentView";
 import { TimeView } from "../time/TimeView";
+import { PracticumSchedulingEquipmentType } from "@/domain/practicum-scheduling/PracticumSchedulingEquipmentType";
 
 export class PracticumSchedulingEquipmentView {
     constructor(
         readonly id: number,
         readonly practicumSchedulingId: number,
-        readonly laboratoryEquipmentId: number,
         readonly quantity: number,
         readonly createdAt: TimeView,
         readonly updatedAt: TimeView,
-        readonly laboratoryEquipment?: LaboratoryEquipmentView
+        readonly name: string,
+        readonly unit: string | null,
+        readonly type: PracticumSchedulingEquipmentType
     ){}
 
     static fromDomain(entity: PracticumSchedulingEquipment): PracticumSchedulingEquipmentView {
         return new PracticumSchedulingEquipmentView (
             entity.id,
             entity.practicumSchedulingId,
-            entity.laboartoryEquipmentId,
             entity.quantity,
             TimeView.fromDomain(entity.createdAt),
             TimeView.fromDomain(entity.updatedAt),
-            entity.laboratoryEquipment ? LaboratoryEquipmentView.fromDomain(entity.laboratoryEquipment) : undefined
+            entity.name,
+            entity.unit,
+            entity.type
         )
     }
 }

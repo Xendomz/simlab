@@ -40,6 +40,7 @@ import NewsPage from "./presentation/pages/landing/news/NewsPage";
 import { userRole } from "./domain/User/UserRole";
 import KepalaLabJurusanPage from "./presentation/pages/admin/user/kepala-lab-jurusan/KepalaLabJurusanPage";
 import { PracticumSchedulingProvider } from "./presentation/pages/admin/practicum-scheduling/context/PracticumSchedulingContext";
+import { DepedencyProvider } from "./presentation/contexts/DepedencyProvider";
 
 export const router = createBrowserRouter([
     {
@@ -74,7 +75,9 @@ export const router = createBrowserRouter([
         path: '/panel',
         element: (
             <AuthProvider>
-                <AdminLayout />
+                <DepedencyProvider>
+                    <AdminLayout />
+                </DepedencyProvider>
             </AuthProvider>
         ),
         children: [

@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import { AcademicYearColumn } from "./AcademicYearColumn";
 import Table from "../../../components/Table";
 import { ModalType } from "../../../../shared/Types";
-import useTable from "../../../../application/hooks/useTable";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import Header from "@/presentation/components/Header";
 import { Plus } from "lucide-react";
@@ -13,8 +12,8 @@ import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDia
 import { toast } from "sonner";
 import { AcademicYearInputDTO } from "@/application/academic-year/AcademicYearDTO";
 import AcademicYearFormDialog from "./components/AcademicYearFormDialog";
-import { AcademicYearService } from "@/application/academic-year/AcademicYearService";
-import { AcademicYearView } from "@/application/academic-year/AcademicYearView";
+import { useDepedencies } from "@/presentation/contexts/useDepedencies";
+import { useAcademicYearDataTable } from "./hooks/useAcademicYearDataTable";
 
 const AcademicYearPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -36,54 +35,22 @@ const AcademicYearPage = () => {
         )
     }, [])
 
+    const { academicYearService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        academicYears,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const academicYearService = new AcademicYearService()
-    const [academicYears, setAcademicYears] = useState<AcademicYearView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await academicYearService.getAcademicYearData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm
-        })
-        setAcademicYears(response.data ?? [])
-        setTotalItems(response.total ?? 0)
-        setTotalPages(response.last_page ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+    } = useAcademicYearDataTable()
 
     const [isOpen, setIsOpen] = useState(false)
     const [id, setId] = useState<number | null>(null)
@@ -112,21 +79,21 @@ const AcademicYearPage = () => {
             const res = await academicYearService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setId(null)
         setIsOpen(false)
     }
 
-    const handleConfirm = async() => {
-        if (!id) return 
+    const handleConfirm = async () => {
+        if (!id) return
         if (confirmType == 'delete') {
             const res = await academicYearService.deleteData(id)
             toast.success(res.message)
         } else {
-            const res = await academicYearService.toggleStatus(id)            
+            const res = await academicYearService.toggleStatus(id)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 

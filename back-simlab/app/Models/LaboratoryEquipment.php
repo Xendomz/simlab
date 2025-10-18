@@ -32,4 +32,9 @@ class LaboratoryEquipment extends Model
     {
         return $this->belongsTo(LaboratoryRoom::class, 'laboratory_room_id');
     }
+
+    public function practicumSchedulingEquipments()
+    {
+        return $this->morphMany(PracticumSchedulingEquipment::class, 'equipmentable');
+    }
 }

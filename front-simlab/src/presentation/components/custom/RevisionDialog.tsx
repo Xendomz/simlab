@@ -10,13 +10,13 @@ import { toast } from "sonner";
 interface RevisionDialogProps {
     open: boolean,
     onOpenChange: (open: boolean) => void,
-    handleRejection: (information: string) => Promise<void>;
+    handleRevision: (information: string) => Promise<void>;
 }
 
 const RevisionDialog: React.FC<RevisionDialogProps> = ({
     open,
     onOpenChange,
-    handleRejection
+    handleRevision
 }) => {
     const [reason, setReason] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +26,7 @@ const RevisionDialog: React.FC<RevisionDialogProps> = ({
         e.preventDefault();
         setIsSubmitting(true)
         try {
-            await handleRejection(reason);
+            await handleRevision(reason);
         } catch (e) {
             const error = e as ApiResponse
             toast.error(error.message || 'Gagal submit')

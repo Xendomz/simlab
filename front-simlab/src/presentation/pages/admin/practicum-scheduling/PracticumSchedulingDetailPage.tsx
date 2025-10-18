@@ -17,6 +17,8 @@ import PracticumSchedulingEquipmentDialog from './components/PracticumScheduling
 import PracticumSchedulingMaterialDialog from './components/PracticumSchedulingMaterialDialog';
 import { useAuth } from '@/application/hooks/useAuth';
 import { userRole } from '@/domain/User/UserRole';
+import { PracticumSchedulingStatus } from '@/domain/practicum-scheduling/PracticumSchedulingStatus';
+import PracticumSchedulingStepperDialog from './components/PracticumSchedulingStepperDialog';
 
 const PracticumSchedulingDetailPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null);
@@ -26,16 +28,16 @@ const PracticumSchedulingDetailPage = () => {
         tl.fromTo(sectionRef.current, { opacity: 0, y: 100 }, { opacity: 1, y: 0, duration: 0.8 });
     }, []);
 
-    const {user} = useAuth()
+    const { user } = useAuth()
     const { id } = useParams<{ id: string }>();
     const practicumSchedulingId = Number(id);
     const practicumSchedulingService = new PracticumSchedulingService()
     const navigate = useNavigate();
 
-    let backTo = '/panel/penjadwalan-praktikum';
-    if (user?.role && [userRole.Laboran, userRole.KepalaLabTerpadu].includes(user.role)) {
-        backTo = `/panel/penjadwalan-praktikum/verif`;
-    } 
+    const backTo =
+        user?.role && [userRole.Laboran, userRole.KepalaLabTerpadu].includes(user.role)
+            ? '/panel/penjadwalan-praktikum/verif'
+            : '/panel/penjadwalan-praktikum';
 
     const [loading, setLoading] = useState(false);
     const [practicumScheduling, setPracticumScheduling] = useState<PracticumSchedulingView>();
@@ -90,6 +92,7 @@ const PracticumSchedulingDetailPage = () => {
             <Header title="Detail Peminjaman" />
             <div className="flex flex-col gap-4 p-4 pt-0" ref={sectionRef}>
                 <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+                    <PracticumSchedulingStepperDialog service={practicumSchedulingService} practicumSchedulingId={practicumScheduling.id} />
                     <div className={'self-end ml-auto'}>
                         <Button className="gap-2" onClick={() => navigate(backTo)}>
                             <ArrowLeft className="w-4 h-4" />
@@ -97,8 +100,6 @@ const PracticumSchedulingDetailPage = () => {
                         </Button>
                     </div>
                 </div>
-
-                <PracticumStepper practicumId={practicumSchedulingId} />
                 <div className='grid grid-cols-1 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-5'>
                     {/* Informasi Umum */}
                     <Card className='lg:col-span-2 h-fit'>
@@ -119,21 +120,14 @@ const PracticumSchedulingDetailPage = () => {
                                             {hasEquipment && (
                                                 <div className={`flex flex-col`}>
                                                     <span className='font-semibold'>Daftar Peminjaman Alat</span>
-
-                                                    <Button onClick={() => setOpenPracticumSchedulingEquipmentDialog(true)}>Lihat Daftar Alat <Eye /></Button>
                                                     <PracticumSchedulingEquipmentDialog
-                                                        open={openPracticumSchedulingEquipmentDialog}
-                                                        onOpenChange={setOpenPracticumSchedulingEquipmentDialog}
                                                         data={equipments} />
                                                 </div>
                                             )}
                                             {hasMaterial && (
                                                 <div className={`flex flex-col`}>
                                                     <span className='font-semibold'>Daftar Pengajuan Bahan</span>
-                                                    <Button onClick={() => setOpenPracticumSchedulingMaterialDialog(true)}>Lihat Daftar Bahan <Eye /></Button>
                                                     <PracticumSchedulingMaterialDialog
-                                                        open={openPracticumSchedulingMaterialDialog}
-                                                        onOpenChange={setOpenPracticumSchedulingMaterialDialog}
                                                         data={materials} />
                                                 </div>
                                             )}
@@ -162,7 +156,7 @@ const PracticumSchedulingDetailPage = () => {
                                             <Item title={'Total Kelompok'} value={cls.totalGroup} />
 
                                         </div>
-                                        <DataTable columns={PracticumScheduleSessionColumn()} data={cls.practicumSessions || []} loading={false} />
+                                        <DataTable columns={PracticumScheduleSessionColumn(user?.role, practicumScheduling.status === PracticumSchedulingStatus.Approved)} data={cls.practicumSessions || []} loading={false} />
                                     </Fragment>
                                 ))}
                             </div>

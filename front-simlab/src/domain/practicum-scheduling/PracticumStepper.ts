@@ -1,11 +1,11 @@
 import { Time } from "../time/Time";
+import { PracticumStepperStatus } from "./PracticumStepperStatus";
 
 export class PracticumStepper {
     constructor(
-        readonly id: number,
         readonly role: string,
-        readonly status: 'approved' | 'rejected' | 'pending' | 'revision',
-        readonly information: string,
+        readonly status: PracticumStepperStatus,
+        readonly information: string | null,
         readonly approvedAt?: Time,
         readonly approver?: string
     ){}

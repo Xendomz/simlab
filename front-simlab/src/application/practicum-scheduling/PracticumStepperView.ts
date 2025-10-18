@@ -1,20 +1,19 @@
 import { PracticumStepper } from "@/domain/practicum-scheduling/PracticumStepper";
 import { TimeView } from "../time/TimeView";
+import { PracticumStepperStatus } from "@/domain/practicum-scheduling/PracticumStepperStatus";
 
 
 export class PracticumStepperView {
     constructor(
-        readonly id: number,
         readonly role: string,
-        readonly status: "approved" | "rejected" | "pending" | "revision",
-        readonly information: string,
+        readonly status: PracticumStepperStatus,
+        readonly information: string | null,
         readonly approvedAt?: TimeView,
         readonly approver?: string
     ){}
 
     static fromDomain(entity: PracticumStepper): PracticumStepperView {
         return new PracticumStepperView(
-            entity.id,
             entity.role,
             entity.status,
             entity.information,

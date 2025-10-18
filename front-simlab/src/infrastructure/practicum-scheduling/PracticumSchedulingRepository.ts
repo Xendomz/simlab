@@ -78,7 +78,7 @@ export class PracticumSchedulingRepository implements IPracticumSchedulingReposi
         throw json
     }
 
-    async storePracticumSchedulingEquipmentMaterial(id: number, data: { practicumSchedulingEquipments: { id: number; quantity: number; }[]; practicumSchedulingMaterials: { id: number; quantity: number; }[]; }): Promise<ApiResponse> {
+    async storePracticumSchedulingEquipmentMaterial(id: number, data: { practicumSchedulingEquipments: { id: number; quantity: number | null; }[]; proposedEquipments: { name: string; quantity: number | null; }[]; practicumSchedulingMaterials: { id: number; quantity: number | null; }[]; }): Promise<ApiResponse> {
         const response = await fetchApi(`/practicum-schedule/${id}/equipment-n-material`, {
             method: 'POST',
             body: JSON.stringify(data)
@@ -113,7 +113,7 @@ export class PracticumSchedulingRepository implements IPracticumSchedulingReposi
     }
 
 
-    async verify(id: number, data: { action: 'approve' | 'reject', information?: string, laboran_id?: number, ruangan_laboratorium_id?: number }): Promise<ApiResponse> {
+    async verify(id: number, data: { action: 'approve' | 'reject', information?: string, laboran_id?: number, materials: number[] }): Promise<ApiResponse> {
         const response = await fetchApi(`/practicum-schedule/${id}/verify`, {
             method: 'POST',
             body: JSON.stringify(data)

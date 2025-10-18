@@ -9,10 +9,9 @@ interface ColumnProps {
     role: userRole;
     openApproval: (id: number) => void;
     openRejection: (id: number) => void;
-    openRevision: (id: number) => void
 }
 
-export const PracticumScheduleVerificationColumn = ({ role, openApproval, openRejection, openRevision }: ColumnProps): ColumnDef<PracticumSchedulingView>[] => [
+export const PracticumScheduleVerificationColumn = ({ role, openApproval, openRejection }: ColumnProps): ColumnDef<PracticumSchedulingView>[] => [
     {
         header: 'Tahun Akademik',
         accessorKey: 'academicYear',

@@ -2,6 +2,7 @@ import { FacultyRepository } from "@/infrastructure/faculty/FacultyRepository";
 import { FacultyInputDTO, FacultyTableParam } from "./FacultyDTO";
 import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { FacultyView } from "./FacultyView";
+import { FacultySelectView } from "./FacultySelectView";
 
 export class FacultyService {
     private readonly facultyRepository = new FacultyRepository()
@@ -37,12 +38,12 @@ export class FacultyService {
         return await this.facultyRepository.deleteData(id)
     }
 
-    async getDataForSelect(): Promise<ApiResponse<FacultyView[]>> {
+    async getDataForSelect(): Promise<ApiResponse<FacultySelectView[]>> {
         const faculties = await this.facultyRepository.getDataForSelect()
 
         return {
             ...faculties,
-            data: faculties.data ? faculties.data.map(FacultyView.fromDomain) : undefined
+            data: faculties.data ? faculties.data.map(FacultySelectView.fromDomain) : undefined
         }
     }
 }

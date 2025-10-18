@@ -46,6 +46,7 @@ const KepalaLabFormDialog: React.FC<KepalaLabFormDialogProps> = ({
 
     useEffect(() => {
         setErrors({})
+        
         if (dataId) {
             const selectedKepalaLabTerpadu = data.find((kepalaLabTerpadu) => kepalaLabTerpadu.id == dataId)
             if (selectedKepalaLabTerpadu) {

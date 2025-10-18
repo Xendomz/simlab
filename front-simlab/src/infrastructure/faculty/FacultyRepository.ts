@@ -4,6 +4,7 @@ import { generateQueryStringFromObject } from "../Helper";
 import { fetchApi } from "../ApiClient";
 import { FacultyAPI, toDomain } from "./FacultyAPI";
 import { Faculty } from "@/domain/faculty/Faculty";
+import { FacultySelect } from "@/domain/faculty/FacultySelect";
 
 export class FacultyRepository implements IFacultyRepository {
     async getAll(params: { page: number; per_page: number; search: string; }): Promise<PaginatedResponse<Faculty>> {
@@ -69,7 +70,7 @@ export class FacultyRepository implements IFacultyRepository {
         throw json
     }
 
-    async getDataForSelect(): Promise<ApiResponse<Faculty[]>> {
+    async getDataForSelect(): Promise<ApiResponse<FacultySelect[]>> {
         const response = await fetchApi(`/faculties/select`)
 
         const json = await response.json() as ApiResponse

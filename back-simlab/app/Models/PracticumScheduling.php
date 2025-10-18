@@ -63,6 +63,17 @@ class PracticumScheduling extends Model
         return $this->hasMany(PracticumApproval::class, 'practicum_scheduling_id');
     }
 
+    public function getTotalGroupsAttribute()
+    {
+        // If the relationship is already loaded, sum in-memory to avoid an extra query
+        if ($this->relationLoaded('practicumClasses')) {
+            return (int) $this->practicumClasses->sum('total_group');
+        }
+
+        // Otherwise perform a SQL SUM which is efficient for large datasets
+        return (int) $this->practicumClasses()->sum('total_group');
+    }
+
     public function getKepalaLabApprovalAttribute() {
         $approval = $this->practicumApprovals()
             ->where('role', 'kepala_lab_terpadu')

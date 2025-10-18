@@ -1,9 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
-import useTable from '@/application/hooks/useTable';
-import { PracticumModuleService } from '@/application/practicum-module/PracticumModuleService';
-import { PracticumModuleView } from '@/application/practicum-module/PracticumModuleView';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import Header from '@/presentation/components/Header';
 import { Button } from '@/presentation/components/ui/button';
@@ -14,10 +11,11 @@ import { ModalType } from '@/shared/Types';
 import { toast } from 'sonner';
 import { PracticumModuleInputDTO } from '@/application/practicum-module/PracticumModuleDTO';
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog';
-import PracticumModuleFormDialog from './components/PracticumModuleFormDIalog';
-import { PracticumService } from '@/application/practicum/PracticumService';
-import { PracticumSelectView } from '@/application/practicum/PracticumSelectView';
 import { Combobox } from '@/presentation/components/custom/combobox';
+import PracticumModuleFormDialog from './components/PracticumModuleFormDialog';
+import { usePracticumSelect } from '../practicum/hooks/usePracticumSelect';
+import { usePracticumModuleDataTable } from './hooks/usePracticumModuleDataTable';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
 
 const PracticumModulePage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -39,68 +37,25 @@ const PracticumModulePage = () => {
         )
     }, [])
 
-    const practicumService = new PracticumService()
-    const [practicums, setPracticums] = useState<PracticumSelectView[]>([])
-    const [selectedPracticum, setSelectedPracticum] = useState<number>(0)
-
-    useEffect(() => {
-        const getPracticums = async () => {
-            const response = await practicumService.getDataForSelect()
-            setPracticums(response.data ?? [])
-        }
-
-        getPracticums()
-    }, [])
+    const { practicums, selectedPracticum, setSelectedPracticum } = usePracticumSelect()
+    const { practicumModuleService } = useDepedencies()
 
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        practicumModules,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const practicumModuleService = new PracticumModuleService()
-    const [practicumModule, setPracticumModule] = useState<PracticumModuleView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await practicumModuleService.getPracticumModuleData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm,
-            filter_practicum: selectedPracticum
-        })
-        setPracticumModule(response.data ?? [])
-        setTotalItems(response.total ?? 0)
-        setTotalPages(response.last_page ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedPracticum])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+        setCurrentPage
+    } = usePracticumModuleDataTable({ filter_practicum: selectedPracticum })
 
     const [isOpen, setIsOpen] = useState(false)
     const [id, setId] = useState<number | null>(null)
@@ -129,7 +84,7 @@ const PracticumModulePage = () => {
             const res = await practicumModuleService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setId(null)
         setIsOpen(false)
     }
@@ -143,7 +98,7 @@ const PracticumModulePage = () => {
             const res = await practicumModuleService.toggleStatus(id)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 
@@ -179,7 +134,7 @@ const PracticumModulePage = () => {
                             </div>
                         </div>
                         <Table
-                            data={practicumModule}
+                            data={practicumModules}
                             columns={PracticumModuleColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -197,7 +152,7 @@ const PracticumModulePage = () => {
                 <PracticumModuleFormDialog
                     open={isOpen}
                     onOpenChange={setIsOpen}
-                    data={practicumModule}
+                    data={practicumModules}
                     dataId={id}
                     practicums={practicums}
                     handleSave={handleSave}

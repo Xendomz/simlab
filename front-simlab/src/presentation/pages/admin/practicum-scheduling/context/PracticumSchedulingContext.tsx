@@ -1,4 +1,4 @@
-import { PracticumSchedulingService } from "@/application/practicum-scheduling/PracticumSchedulingService"
+import { useDepedencies } from "@/presentation/contexts/useDepedencies"
 import { ApiResponse } from "@/shared/Types"
 import { createContext, useContext, useEffect, useState } from "react"
 
@@ -14,7 +14,7 @@ type PracticumSchedulingProps = {
 }
 
 export const PracticumSchedulingProvider = ({ children }: PracticumSchedulingProps) => {
-    const practicumSchedulingService = new PracticumSchedulingService()
+    const { practicumSchedulingService } = useDepedencies()
     const [isHasDraftPracticum, setIsHasDraftPracticum] = useState<boolean>(false)
     const isStillHaveDraftPracticum = async () => {
         try {

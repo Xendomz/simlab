@@ -1,9 +1,8 @@
 import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import Table from '../../../../components/Table'
 import { LaboranColumn } from './LaboranColumn'
-import useTable from '@/application/hooks/useTable'
 import { toast } from 'sonner'
 import { ModalType } from '@/shared/Types'
 import { UserInputDTO } from '@/application/user/UserDTO'
@@ -13,9 +12,9 @@ import { Button } from '@/presentation/components/ui/button'
 import { Plus } from 'lucide-react'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
 import LaboranFormDialog from './components/LaboranFormDialog'
-import { UserService } from '@/application/user/UserService'
-import { UserView } from '@/application/user/UserView'
 import { userRole } from '@/domain/User/UserRole'
+import { useUserDataTable } from '../hooks/useUserDataTable'
+import { useDepedencies } from '@/presentation/contexts/useDepedencies'
 
 const LaboranPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -37,64 +36,29 @@ const LaboranPage = () => {
         )
     }, [])
 
+    const { userService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        users,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const userService = new UserService()
-    const [users, setUsers] = useState<UserView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-            setIsLoading(true)
-            const response = await userService.getUserData({
-                page: currentPage,
-                per_page: perPage,
-                search: searchTerm,
-                filter_study_program: 0,
-                role: userRole.Laboran
-            })
-            setUsers(response.data ?? [])
-            setTotalPages(response.last_page ?? 0)
-            setTotalItems(response.total ?? 0)
-            setIsLoading(false)
-        }
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+    } = useUserDataTable({ filter_study_program: 0, role: userRole.Laboran })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
     const [type, setType] = useState<ModalType>('Add')
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
-
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -113,7 +77,7 @@ const LaboranPage = () => {
             const res = await userService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setIsOpen(false)
     }
 
@@ -122,7 +86,7 @@ const LaboranPage = () => {
         const res = await userService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 

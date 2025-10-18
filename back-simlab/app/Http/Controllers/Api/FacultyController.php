@@ -97,7 +97,7 @@ class FacultyController extends BaseController
     public function getDataForSelect()
     {
         try {
-            $faculties = Faculty::all();
+            $faculties = Faculty::select('id', 'name')->get();
             return $this->sendResponse($faculties, 'Data fakultas berhasil diambil');
         } catch (\Exception $e) {
             return $this->sendError('Gagal mengambil data fakultas', [$e->getMessage()], 500);

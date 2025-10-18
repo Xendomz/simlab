@@ -1,9 +1,6 @@
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
-import { useEffect, useRef, useState } from 'react';
-import useTable from '@/application/hooks/useTable';
-import { FacultyService } from '@/application/faculty/FacultyService';
-import { FacultyView } from '@/application/faculty/FacultyView';
+import { useRef, useState } from 'react';
 import Header from '@/presentation/components/Header';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Button } from '@/presentation/components/ui/button';
@@ -15,6 +12,8 @@ import { FacultyInputDTO } from '@/application/faculty/FacultyDTO';
 import { toast } from 'sonner';
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog';
 import FacultyFormDialog from './components/FacultyFormDialog';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
+import { useFacultyDataTable } from './hooks/useFacultyDataTable';
 
 const FacultyPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -36,54 +35,22 @@ const FacultyPage = () => {
         )
     }, [])
 
+    const { facultyService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        faculties,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const facultyService = new FacultyService()
-    const [faculties, setFaculties] = useState<FacultyView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await facultyService.getFacultyData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm
-        });
-        setFaculties(response.data ?? [])
-        setTotalItems(response.total ?? 0)
-        setTotalPages(response.last_page ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+    } = useFacultyDataTable()
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
@@ -110,7 +77,7 @@ const FacultyPage = () => {
             toast.success(res.message)
         }
 
-        getData()
+        refresh()
         setIsOpen(false)
     }
 
@@ -119,7 +86,7 @@ const FacultyPage = () => {
         const res = await facultyService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 

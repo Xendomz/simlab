@@ -1,24 +1,26 @@
 import { PracticumSchedulingMaterialView } from '@/application/practicum-scheduling/PracticumSchedulingMaterialView'
 import React from 'react'
 import { Button } from '@/presentation/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/presentation/components/ui/dialog';
 import { ScrollArea } from '@/presentation/components/ui/scroll-area';
 import { DataTable } from '@/presentation/components/custom/Datatable';
 import { PracticumScheduleMaterialColumn } from '../column/PracticumScheduleMaterialColumn';
+import { Eye } from 'lucide-react';
 
 interface PracticumSchedulingMaterialDialogProps {
-    open: boolean,
-    onOpenChange: (open: boolean) => void,
     data: PracticumSchedulingMaterialView[]
 }
 
 const PracticumSchedulingMaterialDialog: React.FC<PracticumSchedulingMaterialDialogProps> = ({
-    open,
-    onOpenChange,
     data
 }) => {
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button>
+                    Lihat Daftar Bahan <Eye />
+                </Button>
+            </DialogTrigger>
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Daftar Alat yang Dipinjam</DialogTitle>

@@ -3,7 +3,7 @@ import { UserView } from '@/application/user/UserView';
 import { Button } from '@/presentation/components/ui/button';
 
 interface ColumnProps {
-    openModal: (type: 'Add' | 'Edit', id?: number) => void;
+    openModal: (id?: number) => void;
 }
 
 export const AdminColumn = ({ openModal }: ColumnProps): ColumnDef<UserView>[] => [
@@ -14,7 +14,7 @@ export const AdminColumn = ({ openModal }: ColumnProps): ColumnDef<UserView>[] =
         accessorKey: 'id',
         cell: ({row}) => (
             <>
-                <Button size={'sm'} onClick={() => openModal('Edit',row.original.id)}>
+                <Button size={'sm'} onClick={() => openModal(row.original.id)}>
                     Edit
                 </Button>
             </>

@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\PracticumEquipmenMaterialRequest;
 use App\Http\Requests\PracticumSchedulingRequest;
+use App\Http\Resources\PracticumScheduling\PracticumSchedulingResource;
 use App\Models\PracticumApproval;
 use App\Models\PracticumGroup;
 use App\Models\PracticumScheduling;
 use App\Models\PracticumSchedulingEquipment;
 use App\Models\PracticumSchedulingMaterial;
 use App\Models\AcademicYear;
+use App\Models\LaboratoryEquipment;
+use App\Models\LaboratoryTemporaryEquipment;
 use App\Models\PracticumClass;
 use App\Models\PracticumSession;
 use Illuminate\Http\Request;
@@ -87,10 +90,16 @@ class PracticumSchedulingController extends BaseController
 
             $query = PracticumScheduling::query()->with(['user', 'practicum', 'academicYear']);
             $query->where('academic_year_id', $this->activeAcademicYear->id);
-            $query->where('status', '<>' , 'draft');
+            $query->where('status', '<>', 'draft');
 
             if ($user->role === 'laboran') {
+                // Restrict to assignments for this laboran
                 $query->where('laboran_id', $user->id);
+
+                // Eager-load additional relations laboran needs for verification details
+                $query->with([
+                    'practicumSchedulingMaterials.laboratoryMaterial',
+                ]);
             }
 
             // Search functionality
@@ -168,6 +177,17 @@ class PracticumSchedulingController extends BaseController
             }
 
             if ($user->role === 'laboran' && $isApprove) {
+                if ($request->materials) {
+                    if (in_array(0, $request->materials)) {
+                        DB::rollBack();
+                        return $this->sendError('Terdapat bahan yang tidak dapat disediakan', ['materials' => 'Minimal bahan yang disediakan lebih dari 0'], 400);
+                    }
+                    foreach ($practicumScheduling->practicumSchedulingMaterials as $key => $material) {
+                        $material->update(['realization' => $request->materials[$key]]);
+                        # code...
+                    }
+                }
+
                 $practicumScheduling->update(['status' => 'approved']);
             }
 
@@ -312,41 +332,53 @@ class PracticumSchedulingController extends BaseController
         DB::beginTransaction();
         try {
             $practicumScheduling = PracticumScheduling::with(['practicumSchedulingEquipments', 'practicumSchedulingMaterials'])->findOrFail($id);
+            $user = auth()->user();
 
-            if (!in_array($practicumScheduling->status, ['draft', 'pending'])) {
-                DB::rollBack();
-                return $this->sendError('Status penjadwalan tidak mengizinkan penambahan data.', [], 400);
+            // If current user is laboran, allow adding materials only when they are the assigned laboran.
+            $isLaboranAddingMaterials = false;
+            if ($user->role === 'laboran') {
+                // laboran can only add materials for scheduling assigned to them
+                if ($practicumScheduling->laboran_id !== $user->id) {
+                    DB::rollBack();
+                    return $this->sendError('Anda tidak diizinkan menambah data untuk penjadwalan ini.', [], 403);
+                }
+
+                // Laboran may add materials even if status is not draft
+                $isLaboranAddingMaterials = true;
+            } else {
+                // Non-laboran (applicant) can only add when scheduling is draft
+                if (!in_array($practicumScheduling->status, ['draft'])) {
+                    DB::rollBack();
+                    return $this->sendError('Status penjadwalan tidak mengizinkan penambahan data.', [], 400);
+                }
             }
 
             $data = $request->validated();
-            // Cegah duplikasi
-            if (($practicumScheduling->practicumSchedulingEquipments && $practicumScheduling->practicumSchedulingEquipments->count() > 0)
-                || ($practicumScheduling->practicumSchedulingMaterials && $practicumScheduling->practicumSchedulingMaterials->count() > 0)
-            ) {
-                DB::rollBack();
-                return $this->sendError('Alat atau bahan sudah pernah ditambahkan.', [], 400);
-            }
 
-            // Insert equipments
-            if (!empty($data['practicumSchedulingEquipments'])) {
-                foreach ($data['practicumSchedulingEquipments'] as $eq) {
-                    PracticumSchedulingEquipment::create([
-                        'practicum_scheduling_id' => $practicumScheduling->id,
-                        'laboratory_equipment_id' => $eq['id'],
-                        'quantity' => $eq['quantity']
-                    ]);
+            // Prevent duplicate additions depending on actor
+            if ($isLaboranAddingMaterials) {
+                // Laboran: only check for existing materials duplication
+                if ($practicumScheduling->practicumSchedulingMaterials && $practicumScheduling->practicumSchedulingMaterials->isNotEmpty()) {
+                    DB::rollBack();
+                    return $this->sendError('Bahan sudah pernah ditambahkan untuk penjadwalan ini.', [], 400);
                 }
-            }
 
-            // Insert materials
-            if (!empty($data['practicumSchedulingMaterials'])) {
-                foreach ($data['practicumSchedulingMaterials'] as $mt) {
-                    PracticumSchedulingMaterial::create([
-                        'practicum_scheduling_id' => $practicumScheduling->id,
-                        'laboratory_material_id' => $mt['id'],
-                        'quantity' => $mt['quantity']
-                    ]);
+                // Only insert materials for laboran
+                $this->storeMaterials($practicumScheduling, $data['practicumSchedulingMaterials'] ?? []);
+            } else {
+                // Applicant (non-laboran): full flow (equipments + proposed + materials)
+                // Prevent Duplicated
+                if ($this->hasExistingEquipmentOrMaterial($practicumScheduling)) {
+                    DB::rollBack();
+                    return $this->sendError('Alat atau bahan sudah pernah ditambahkan.', [], 400);
                 }
+
+                // Insert equipments (existing laboratory equipments)
+                $this->storeEquipments($practicumScheduling, $data['practicumSchedulingEquipments'] ?? []);
+                // Insert proposed equipments (temporary equipments stored separately)
+                $this->storeProposedEquipments($practicumScheduling, $data['proposedEquipments'] ?? []);
+                // Insert materials
+                $this->storeMaterials($practicumScheduling, $data['practicumSchedulingMaterials'] ?? []);
             }
 
             // Update status jika draft
@@ -364,7 +396,7 @@ class PracticumSchedulingController extends BaseController
 
             DB::commit();
             $practicumScheduling->load([
-                'practicumSchedulingEquipments.laboratoryEquipment',
+                'practicumSchedulingEquipments.equipmentable',
                 'practicumSchedulingMaterials.laboratoryMaterial'
             ]);
             return $this->sendResponse($practicumScheduling, 'Practicum Equipment & Material Submitted Successfully');
@@ -387,11 +419,11 @@ class PracticumSchedulingController extends BaseController
                 'practicumClasses.lecturer',
                 'practicumClasses.practicumSessions.practicumModule',
                 'practicumClasses.laboratoryRoom',
-                'practicumSchedulingEquipments.laboratoryEquipment',
+                'practicumSchedulingEquipments.equipmentable',
                 'practicumSchedulingMaterials.laboratoryMaterial'
             ])->findOrFail($id);
 
-            return $this->sendResponse($practicumScheduling, 'Practicum Scheduling Retrieved Successfully');
+            return $this->sendResponse(new PracticumSchedulingResource($practicumScheduling), 'Practicum Scheduling Retrieved Successfully');
         } catch (ModelNotFoundException $e) {
             return $this->sendError("Practicum Scheduling Not Found", [], 404);
         } catch (\Exception $e) {
@@ -451,6 +483,55 @@ class PracticumSchedulingController extends BaseController
             return $this->sendError("Practicum Scheduling Not Found", [], 404);
         } catch (\Exception $e) {
             return $this->sendError('Failed to retrieve approvals', [$e->getMessage()], 500);
+        }
+    }
+
+
+    // Helper
+    private function hasExistingEquipmentOrMaterial($scheduling)
+    {
+        return (
+            ($scheduling->practicumSchedulingEquipments && $scheduling->practicumSchedulingEquipments->isNotEmpty()) ||
+            ($scheduling->practicumSchedulingMaterials && $scheduling->practicumSchedulingMaterials->isNotEmpty())
+        );
+    }
+
+    private function storeEquipments($scheduling, array $equipments)
+    {
+        foreach ($equipments as $eq) {
+            PracticumSchedulingEquipment::create([
+                'practicum_scheduling_id' => $scheduling->id,
+                'quantity' => $eq['quantity'],
+                'equipmentable_id' => $eq['id'],
+                'equipmentable_type' => LaboratoryEquipment::class,
+            ]);
+        }
+    }
+
+    private function storeProposedEquipments($scheduling, array $proposedEquipments)
+    {
+        foreach ($proposedEquipments as $p) {
+            $temp = LaboratoryTemporaryEquipment::create([
+                'name' => $p['name']
+            ]);
+
+            PracticumSchedulingEquipment::create([
+                'practicum_scheduling_id' => $scheduling->id,
+                'quantity' => $p['quantity'],
+                'equipmentable_id' => $temp->id,
+                'equipmentable_type' => LaboratoryTemporaryEquipment::class,
+            ]);
+        }
+    }
+
+    private function storeMaterials($scheduling, array $materials)
+    {
+        foreach ($materials as $mt) {
+            PracticumSchedulingMaterial::create([
+                'practicum_scheduling_id' => $scheduling->id,
+                'laboratory_material_id' => $mt['id'],
+                'quantity' => $mt['quantity'] * $scheduling->total_groups
+            ]);
         }
     }
 }

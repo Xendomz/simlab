@@ -1,6 +1,6 @@
 import { LaboratoryRoomInputDTO } from '@/application/laboratory-room/LaboratoryRoomDTO';
 import { LaboratoryRoomView } from '@/application/laboratory-room/LaboratoryRoomView';
-import { UserView } from '@/application/user/UserView';
+import { UserSelectView } from '@/application/user/UserSelectView';
 import { Combobox } from '@/presentation/components/custom/combobox';
 import { Button } from '@/presentation/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog';
@@ -15,7 +15,7 @@ import React, { useEffect, useState } from 'react'
 interface LaboratoryRoomFormDialogProps {
     title: string,
     open: boolean,
-    laboran: UserView[]
+    laboran: UserSelectView[]
     data: LaboratoryRoomView[],
     dataId: number | null,
     onOpenChange: (open: boolean) => void,

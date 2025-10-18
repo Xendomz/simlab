@@ -1,21 +1,18 @@
-import useTable from '@/application/hooks/useTable'
 import { UserInputDTO } from '@/application/user/UserDTO'
 import Header from '@/presentation/components/Header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
-import { ModalType } from '@/shared/Types'
 import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
 import Table from '@/presentation/components/Table'
 import { KepalaLabColumn } from './KepalaLabColumn'
 import KepalaLabFormDialog from './components/KepalaLabFormDialog'
-import { StudyProgramService } from '@/application/study-program/StudyProgramService'
-import { StudyProgramSelectView } from '@/application/study-program/StudyProgramSelectView'
-import { UserService } from '@/application/user/UserService'
-import { UserView } from '@/application/user/UserView'
 import { userRole } from '@/domain/User/UserRole'
+import { useDepedencies } from '@/presentation/contexts/useDepedencies'
+import { useUserDataTable } from '../hooks/useUserDataTable'
+import { useStudyProgramSelect } from '../../study-program/hooks/useStudyProgramSelect'
 
 const KepalaLabPage = () => {
     const sectionRef = useRef(null)
@@ -37,76 +34,29 @@ const KepalaLabPage = () => {
         )
     }, [])
 
-    const studyProgramService = new StudyProgramService()
-    const [studyPrograms, setStudyPrograms] = useState<StudyProgramSelectView[]>([])
-
-    useEffect(() => {
-        const getStudyPrograms = async () => {
-            const response = await studyProgramService.getDataForSelect()
-            setStudyPrograms(response.data ?? [])
-        }
-
-        getStudyPrograms()
-    }, [])
-
+    const { userService } =  useDepedencies()
+    const { studyPrograms } = useStudyProgramSelect()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        users,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const userService = new UserService()
-    const [users, setUsers] = useState<UserView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-    
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await userService.getUserData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm,
-            filter_study_program: 0,
-            role: userRole.KepalaLabTerpadu
-        })
-        setUsers(response.data ?? [])
-        setTotalPages(response.last_page ?? 0)
-        setTotalItems(response.total ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage
+    } = useUserDataTable({ filter_study_program: 0, role: userRole.KepalaLabTerpadu })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
-    const [type, setType] = useState<ModalType>('Add')
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
-    const openModal = (modalType: ModalType, id: number | null = null) => {
-        setType(modalType)
+    const openModal = (id: number | null = null) => {
         setId(id)
         setIsOpen(true)
     }
@@ -120,7 +70,8 @@ const KepalaLabPage = () => {
         if (!id) return
         const res = await userService.updateData(id, formData)
         toast.success(res.message)
-        getData()
+
+        refresh()
         setIsOpen(false)
     }
 
@@ -129,7 +80,7 @@ const KepalaLabPage = () => {
         const res = await userService.restoreToDosen(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 
@@ -164,7 +115,7 @@ const KepalaLabPage = () => {
                     studyPrograms={studyPrograms}
                     dataId={id}
                     handleSave={handleSave}
-                    title={type == 'Add' ? 'Tambah Dosen' : 'Edit Dosen'}
+                    title={'Edit Kepala Lab Terpadu'}
                 />
             </div>
         </>

@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import Table from "../../../components/Table";
 import { TestingTypeColumn } from "./TestingTypeColumn";
-import useTable from "../../../../application/hooks/useTable";
 import { ModalType } from "../../../../shared/Types";
 import { TestingTypeInputDTO } from "../../../../application/testing-type/dtos/TestingTypeDTO";
 import Header from "@/presentation/components/Header";
@@ -13,8 +12,8 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import TestingTypeFormDialog from "./components/TestingTypeFormDialog";
-import { TestingTypeView } from "@/application/testing-type/TestingTypeView";
-import { TestingTypeService } from "@/application/testing-type/TestingTypeService";
+import { useTestingTypeDataTable } from "./hooks/useTestingTypeDataTable";
+import { useDepedencies } from "@/presentation/contexts/useDepedencies";
 
 const TestingTypePage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -36,54 +35,22 @@ const TestingTypePage = () => {
         )
     }, [])
 
+    const { testingTypeService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        testingTypes,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const testingTypeService = new TestingTypeService()
-    const [testingTypes, setTestingTypes] = useState<TestingTypeView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await testingTypeService.getTestingTypeData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm,
-        })
-        setTestingTypes(response.data ?? [])
-        setTotalItems(response.total ?? 0)
-        setTotalPages(response.last_page ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+    } = useTestingTypeDataTable()
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
@@ -109,7 +76,7 @@ const TestingTypePage = () => {
             const res = await testingTypeService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setIsOpen(false)
     }
 
@@ -118,7 +85,7 @@ const TestingTypePage = () => {
         const res = await testingTypeService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 

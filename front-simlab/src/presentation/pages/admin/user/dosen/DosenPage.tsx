@@ -6,7 +6,7 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/presenta
 import { useGSAP } from '@gsap/react'
 import { useEffect, useRef, useState } from 'react'
 import { DosenColumn } from './DosenColumn'
-import { ApiResponse, ModalType } from '@/shared/Types'
+import { ModalType } from '@/shared/Types'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
 import { toast } from 'sonner';
 import { UserInputDTO } from '@/application/user/UserDTO';
@@ -19,6 +19,10 @@ import { Combobox } from '@/presentation/components/custom/combobox';
 import { UserService } from '@/application/user/UserService';
 import { UserView } from '@/application/user/UserView';
 import { userRole } from '@/domain/User/UserRole';
+import { useDebounce } from '@/presentation/hooks/useDebounce';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
+import { useStudyProgramSelect } from '../../study-program/hooks/useStudyProgramSelect';
+import { useUserDataTable } from '../hooks/useUserDataTable';
 
 const DosenPage = () => {
     const sectionRef = useRef(null)
@@ -40,69 +44,24 @@ const DosenPage = () => {
         )
     }, [])
 
-    const studyProgramService = new StudyProgramService()
-    const [studyPrograms, setStudyPrograms] = useState<StudyProgramSelectView[]>([])
-    const [selectedStudyProgram, setSelectedStudyProgram] = useState<number>(0)
-
-    useEffect(() => {
-        const getStudyPrograms = async () => {
-            const response = await studyProgramService.getDataForSelect()
-            setStudyPrograms(response.data ?? [])
-        }
-
-        getStudyPrograms()
-    }, [])
-
+    const { userService } = useDepedencies()
+    const { studyPrograms, selectedStudyProgram, setSelectedStudyProgram } = useStudyProgramSelect()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        users,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const userService = new UserService()
-    const [users, setUsers] = useState<UserView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await userService.getUserData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm,
-            filter_study_program: selectedStudyProgram,
-            role: userRole.Dosen
-        })
-        setUsers(response.data ?? [])
-        setTotalPages(response.last_page ?? 0)
-        setTotalItems(response.total ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedStudyProgram])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+        setCurrentPage
+    } = useUserDataTable({ filter_study_program: selectedStudyProgram, role: userRole.Dosen })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
@@ -128,7 +87,7 @@ const DosenPage = () => {
             const res = await userService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setIsOpen(false)
     }
 
@@ -137,7 +96,7 @@ const DosenPage = () => {
         const res = await userService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 

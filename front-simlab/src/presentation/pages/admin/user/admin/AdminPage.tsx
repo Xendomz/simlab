@@ -1,18 +1,16 @@
 import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import Table from '../../../../components/Table'
 import { AdminColumn } from './AdminColumn'
 import Header from '@/presentation/components/Header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import AdminFormDialog from './components/AdminFormDialog'
-import useTable from '@/application/hooks/useTable'
 import { UserInputDTO } from '@/application/user/UserDTO'
 import { toast } from 'sonner'
-import { ModalType } from '@/shared/Types'
-import { UserView } from '@/application/user/UserView'
-import { UserService } from '@/application/user/UserService'
 import { userRole } from '@/domain/User/UserRole'
+import { useDepedencies } from '@/presentation/contexts/useDepedencies'
+import { useUserDataTable } from '../hooks/useUserDataTable'
 
 const AdminPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -35,72 +33,37 @@ const AdminPage = () => {
     }, [])
 
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        users,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage
+     } = useUserDataTable({filter_study_program: 0, role: userRole.Admin})
 
-    const userService = new UserService()
-    const [users, setUsers] = useState<UserView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await userService.getUserData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm,
-            filter_study_program: 0,
-            role: userRole.Admin
-        })
-        setUsers(response.data ?? [])
-        setTotalPages(response.last_page ?? 0)
-        setTotalItems(response.total ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+    const { userService } = useDepedencies()
 
     const [isOpen, setIsOpen] = useState(false)
     const [id, setId] = useState<number | null>(null)
-    const [type, setType] = useState<ModalType>('Add')
 
-    const openModal = (modalType: ModalType, id: number | null = null) => {
-        setType(modalType)
+    const openModal = (id: number | null = null) => {
         setId(id)
         setIsOpen(true)
     }
 
     const handleSave = async (formData: UserInputDTO): Promise<void> => {
-        if (id) {
-            const res = await userService.updateData(id, formData)
-            toast.success(res.message)
-        }
-        getData()
+        if (!id) return;
+        
+        const res = await userService.updateData(id, formData)
+        toast.success(res.message)
+        refresh()
         setIsOpen(false)
     }
 
@@ -135,7 +98,7 @@ const AdminPage = () => {
                 data={users}
                 dataId={id}
                 handleSave={handleSave}
-                title={type == 'Add' ? 'Tambah Petugas Laboran' : 'Edit Petugas Laboran'}
+                title={'Edit Data Admin'}
             />
         </>
     )

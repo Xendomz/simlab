@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('practicum_scheduling_id')->constrained()->onDelete('cascade');
             $table->foreignId('laboratory_material_id')->constrained()->onDelete('cascade');
             $table->integer('quantity');
+            $table->integer('realization')->nullable();
             $table->timestamps();
         });
     }

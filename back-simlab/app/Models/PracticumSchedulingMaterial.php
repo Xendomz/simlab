@@ -13,6 +13,7 @@ class PracticumSchedulingMaterial extends Model
         'practicum_scheduling_id',
         'laboratory_material_id',
         'quantity',
+        'realization'
     ];
 
     public function practicumScheduling() {

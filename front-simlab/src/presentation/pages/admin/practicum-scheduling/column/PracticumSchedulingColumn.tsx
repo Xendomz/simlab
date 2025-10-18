@@ -34,7 +34,7 @@ export const PracticumSchedulingColumn = (): ColumnDef<PracticumSchedulingView>[
             switch (row.original.status) {
                 case PracticumSchedulingStatus.Draft:
                     return (
-                        <Badge className="bg-muted">Draft</Badge>
+                        <Badge className="bg-secondary">Draft</Badge>
                     )
                 case PracticumSchedulingStatus.Pending:
                     return (

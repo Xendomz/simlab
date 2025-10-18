@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import Table from "../../../components/Table";
 import { MajorColumn } from "./MajorColumn";
-import useTable from "../../../../application/hooks/useTable";
 import { ModalType } from "../../../../shared/Types";
 import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
@@ -13,11 +12,10 @@ import { toast } from "sonner";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import MajorFormDialog from "./components/MajorFormDialog";
 import { MajorInputDTO } from "@/application/major/MajorDTO";
-import { MajorView } from "@/application/major/MajorView";
-import { MajorService } from "@/application/major/MajorService";
-import { FacultyView } from "@/application/faculty/FacultyView";
-import { FacultyService } from "@/application/faculty/FacultyService";
 import { Combobox } from "@/presentation/components/custom/combobox";
+import { useFacultySelect } from "../faculty/hooks/useFacultySelect";
+import { useDepedencies } from "@/presentation/contexts/useDepedencies";
+import { useMajorDataTable } from "./hooks/useMajorDataTable";
 
 const MajorPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -39,90 +37,30 @@ const MajorPage = () => {
         )
     }, [])
 
-    const facultyService = new FacultyService()
-    const [faculties, setFaculties] = useState<FacultyView[]>([])
-    const [selectedFaculty, setSelectedFaculty] = useState<number>(0)
+    const { faculties, selectedFaculty, setSelectedFaculty } = useFacultySelect()
 
-    useEffect(() => {
-        const getFaculties = async () => {
-            const response = await facultyService.getDataForSelect();
-            setFaculties(response.data ?? [])
-        }
-
-        getFaculties()
-    }, [])
-
+    const { majorService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        majors,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const majorService = new MajorService()
-    const [majors, setMajors] = useState<MajorView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getData = async () => {
-        setIsLoading(true)
-        const response = await majorService.getMajorData({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm,
-            filter_faculty: selectedFaculty
-        });
-        setMajors(response.data ?? [])
-        setTotalItems(response.total ?? 0)
-        setTotalPages(response.last_page ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedFaculty])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+        setCurrentPage
+    } = useMajorDataTable({ filter_faculty: selectedFaculty })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
     const [type, setType] = useState<ModalType>('Add')
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
-
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
 
     const openModal = (modalType: ModalType, id: number | null = null) => {
         setType(modalType)
@@ -143,7 +81,7 @@ const MajorPage = () => {
             const res = await majorService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setIsOpen(false)
     }
 
@@ -152,7 +90,7 @@ const MajorPage = () => {
         const res = await majorService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 

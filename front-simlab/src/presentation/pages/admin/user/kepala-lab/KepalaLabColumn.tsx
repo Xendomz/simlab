@@ -3,7 +3,7 @@ import { UserView } from '@/application/user/UserView';
 import { Button } from '@/presentation/components/ui/button';
 
 interface ColumnProps {
-    openModal: (type: 'Add' | 'Edit', id?: number) => void;
+    openModal: (id?: number) => void;
     openConfirm: (id: number) => void;
 }
 
@@ -17,7 +17,7 @@ export const KepalaLabColumn = ({ openModal, openConfirm }: ColumnProps): Column
         accessorKey: 'id' as keyof UserView,
         cell: ({ row }) => (
             <div className='flex gap-2'>
-                <Button size={'sm'} onClick={() => openModal('Edit', row.original.id)}>
+                <Button size={'sm'} onClick={() => openModal(row.original.id)}>
                     Edit
                 </Button>
                 <Button size={'sm'} variant={'destructive'} onClick={() => openConfirm(row.original.id)}>

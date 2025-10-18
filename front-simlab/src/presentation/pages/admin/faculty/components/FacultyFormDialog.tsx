@@ -94,7 +94,6 @@ const FacultyFormDialog: React.FC<FacultyFormDialogProps> = ({
                                     name='code'
                                     value={formData['code'] || ''}
                                     onChange={handleChange}
-                                    className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                                     placeholder='Kode Fakultas'
                                 />
                                 {errors['code'] && (
@@ -113,7 +112,6 @@ const FacultyFormDialog: React.FC<FacultyFormDialogProps> = ({
                                     name='name'
                                     value={formData['name'] || ''}
                                     onChange={handleChange}
-                                    className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                                     placeholder='Nama Fakultas'
                                 />
                                 {errors['name'] && (

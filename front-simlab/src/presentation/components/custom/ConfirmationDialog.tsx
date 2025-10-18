@@ -43,7 +43,7 @@ export default function ConfirmationDialog({ open, onOpenChange, onConfirm, conf
                             Close
                         </Button>
                     </DialogClose>
-                    <Button type="button" variant={confirmVariant} onClick={submit}>
+                    <Button type="button" variant={confirmVariant} disabled={isLoading} onClick={submit}>
                         { isLoading ? 'Submitting...' : 'Continue' }
                     </Button>
                 </DialogFooter>
