@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\PracticumEquipmenMaterialRequest;
+use App\Http\Requests\PracticumSchedulingLecturerNoteRequest;
 use App\Http\Requests\PracticumSchedulingRequest;
+use App\Http\Requests\PracticumSchedulingSessionConductedRequest;
 use App\Http\Resources\PracticumScheduling\PracticumSchedulingResource;
 use App\Models\PracticumApproval;
 use App\Models\PracticumGroup;
@@ -15,6 +17,7 @@ use App\Models\LaboratoryEquipment;
 use App\Models\LaboratoryTemporaryEquipment;
 use App\Models\PracticumClass;
 use App\Models\PracticumSession;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -29,23 +32,8 @@ class PracticumSchedulingController extends BaseController
         $this->activeAcademicYear = AcademicYear::where('status', 'Active')->first();
     }
 
-    private function isAllowedAccess($practicumData, $user = null)
-    {
-        if (!$user) {
-            $user = auth()->user();
-        }
 
-        // Hanya Mahasiswa, Dosen, Pihak Luar yang dibatasi aksesnya
-        if (in_array($user->role, ['kepala_lab_jurusan'])) {
-            // Hanya boleh akses booking milik sendiri
-            if ($practicumData) {
-                return $practicumData->user_id === $user->id;
-            }
-        }
-        // Role lain (Admin, Laboran, Kepala Lab Terpadu) boleh akses semua
-        return true;
-    }
-
+    // get Practicum Scheduling data for kepala lab jurusan
     public function index(Request $request)
     {
         try {
@@ -83,6 +71,7 @@ class PracticumSchedulingController extends BaseController
         }
     }
 
+    // get Practicum Scheduling data for laboran & kepala lab terpadu
     public function getPracticumSchedulingForVerification(Request $request)
     {
         try {
@@ -132,6 +121,47 @@ class PracticumSchedulingController extends BaseController
         }
     }
 
+    public function getPracticumSchedulingByLecturer(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $query = PracticumScheduling::query()
+                ->with(['user', 'practicum', 'academicYear'])
+                ->with(['practicumClasses' => function ($q) use ($user) {
+                    $q->where('lecturer_id', $user->id)->with('lecturer');
+                }])
+                ->where('status', 'approved')
+                ->whereHas('practicumClasses', function ($q) use ($user) {
+                    $q->where('lecturer_id', $user->id);
+                });
+
+            if ($request->filled('search')) {
+                $searchTerm = $request->input('search');
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->orWhereHas('user', function ($userQ) use ($searchTerm) {
+                        $userQ->where('name', 'LIKE', "%{$searchTerm}%");
+                    });
+                    $q->orWhereHas('practicum', function ($practicumQ) use ($searchTerm) {
+                        $practicumQ->where('name', 'LIKE', "%{$searchTerm}%");
+                    });
+                });
+            }
+
+            // Pagination parameters
+            $perPage = (int) $request->input('per_page', 10);
+            $page = (int) $request->input('page', 1);
+
+            $query->orderBy('created_at', 'desc');
+
+            // Execute pagination
+            $practicumSchedulings = $query->paginate($perPage, ['*'], 'page', $page);
+
+            return $this->sendResponse($practicumSchedulings, "Practicum Scheduling retrieved successfully");
+        } catch (\Exception $e) {
+            return $this->sendError('Failed to retrieve Practicum Scheduling', [$e->getMessage()], 500);
+        }
+    }
+
     public function verifyPracticumScheduling(Request $request, $id)
     {
         DB::beginTransaction();
@@ -144,6 +174,7 @@ class PracticumSchedulingController extends BaseController
             $isApprove = $action === 'approve';
             $isRevision = $action === 'revision';
 
+            // Do validation restriction based on status
             if ($status === 'draft') {
                 DB::rollBack();
                 return $this->sendError('Penjadwalan harus disubmit terlebih dahulu sebelum dapat diverifikasi.', [], 400);
@@ -154,6 +185,7 @@ class PracticumSchedulingController extends BaseController
                 return $this->sendError('Peminjaman ini telah dilakukan verifikasi sebelumnya', [], 400);
             }
 
+            // rov
             $validationError = $this->validateApprovalFlow($practicumScheduling, $user);
             if ($validationError) {
                 DB::rollBack();
@@ -176,16 +208,23 @@ class PracticumSchedulingController extends BaseController
                 $practicumScheduling->update(['laboran_id' => $request->laboran_id]);
             }
 
-            if ($user->role === 'laboran' && $isApprove) {
-                if ($request->materials) {
-                    if (in_array(0, $request->materials)) {
+            if ($user->role === 'laboran' && $isApprove && $request->filled('materials')) {
+                $materials = $request->materials;
+
+                foreach ($practicumScheduling->practicumSchedulingMaterials as $key => $material) {
+                    $realization = $materials[$key] ?? 0;
+
+                    if ($realization <= 0) {
                         DB::rollBack();
-                        return $this->sendError('Terdapat bahan yang tidak dapat disediakan', ['materials' => 'Minimal bahan yang disediakan lebih dari 0'], 400);
+                        return $this->sendError('Terjadi kesalahan dalam proses verifikasi', ['materials' => 'Minimal bahan yang disediakan lebih dari 0'], 400);
                     }
-                    foreach ($practicumScheduling->practicumSchedulingMaterials as $key => $material) {
-                        $material->update(['realization' => $request->materials[$key]]);
-                        # code...
+
+                    if ($realization > $material->quantity) {
+                        DB::rollBack();
+                        return $this->sendError('Terjadi kesalahan dalam proses verifikasi', ['materials' => 'Terdapat bahan yang melebihi jumlah yang diajukan'], 400);
                     }
+
+                    $material->update(['realization' => $request->materials[$key]]);
                 }
 
                 $practicumScheduling->update(['status' => 'approved']);
@@ -252,11 +291,6 @@ class PracticumSchedulingController extends BaseController
         $query = PracticumScheduling::where('status', 'draft');
         $query->where('user_id', $user->id);
         $practicumScheduling = $query->first();
-
-        // Menjalankan validasi agar hanya boleh akses booking (peminjaman) milik sendiri
-        if (!$this->isAllowedAccess($practicumScheduling, $user)) {
-            return $this->sendError('Forbiden', [], 403);
-        }
 
         if ($practicumScheduling) {
             return $this->sendResponse(1, 'Practicum Data Retrieved Successfully');
@@ -412,16 +446,30 @@ class PracticumSchedulingController extends BaseController
     public function getPracticumSchedulingData($id)
     {
         try {
+            $user = auth()->user();
             $practicumScheduling = PracticumScheduling::with([
                 'user.studyProgram',
                 'laboran',
                 'practicum',
-                'practicumClasses.lecturer',
                 'practicumClasses.practicumSessions.practicumModule',
                 'practicumClasses.laboratoryRoom',
                 'practicumSchedulingEquipments.equipmentable',
                 'practicumSchedulingMaterials.laboratoryMaterial'
-            ])->findOrFail($id);
+            ]);
+            // Apply conditional relationship filter if the user is a dosen
+            if ($user->role === 'dosen') {
+                $practicumScheduling->with([
+                    'practicumClasses' => function ($q) use ($user) {
+                        $q->where('lecturer_id', $user->id)->with('lecturer');
+                    },
+                ]);
+            } else {
+                $practicumScheduling->with([
+                    'practicumClasses.lecturer',
+                ]);
+            }
+
+            $practicumScheduling = $practicumScheduling->findOrFail($id);
 
             return $this->sendResponse(new PracticumSchedulingResource($practicumScheduling), 'Practicum Scheduling Retrieved Successfully');
         } catch (ModelNotFoundException $e) {
@@ -486,8 +534,116 @@ class PracticumSchedulingController extends BaseController
         }
     }
 
+    public function setSessionConducted(PracticumSchedulingSessionConductedRequest $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            // Find the session to update
+            $session = PracticumSession::findOrFail($request->session_id);
+
+            if (!$this->isAllowToConducted($session->start_time)) {
+                return $this->sendError('Sesi yang dapat diisi hanya yang sudah masuk ke dalam minggu pelaksanaan kelas', [], 403);
+            }
+
+            $this->isConductedSession($id, $session->id);
+
+
+            // Update status
+            $session->is_class_conducted = $request->status;
+            if ($request->filled('information')) {
+                $session->laboran_comment = $request->information;
+                $session->laboran_commented_at = now();
+            }
+            $session->save();
+
+            DB::commit();
+            return $this->sendResponse([], 'Berhasil mengubah status sesi praktikum');
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return $this->sendError("Penjadwalan praktikum tidak ditemukan", [], 404);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->sendError('Failed to retrieve practicum scheduling', [$e->getMessage()], 500);
+        }
+    }
+
+    public function setLecturerNote(PracticumSchedulingLecturerNoteRequest $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $user = auth()->user();
+
+            $session = PracticumSession::findOrFail($request->session_id);
+
+            if (!$this->isAllowToConducted($session->start_time)) {
+                return $this->sendError('Sesi yang dapat diisi hanya yang sudah masuk ke dalam minggu pelaksanaan kelas', [], 403);
+            }
+
+            $this->isConductedSession($id, $session->id, $user);
+
+            // Update status
+            if ($request->filled('information')) {
+                $session->lecturer_comment = $request->information;
+                $session->lecturer_commented_at = now();
+            }
+            $session->save();
+
+            DB::commit();
+            return $this->sendResponse([], 'Berhasil mengubah status sesi praktikum');
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return $this->sendError("Penjadwalan praktikum tidak ditemukan", [], 404);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->sendError('Failed to retrieve practicum scheduling', [$e->getMessage()], 500);
+        }
+    }
+
 
     // Helper
+    private function isAllowToConducted($startTime): int
+    {
+        // Ambil waktu sekarang
+        $now = Carbon::now();
+
+        // Awal minggu (Minggu)
+        $startOfWeek = $now->copy()->startOfWeek(Carbon::SUNDAY);
+
+        // Akhir minggu (Sabtu)
+        $endOfWeek = $now->copy()->endOfWeek(Carbon::SATURDAY);
+
+        // Jika tanggal target masih di masa depan dan belum masuk minggu ini
+        if ($startTime->greaterThan($endOfWeek)) {
+            return 0;
+        }
+
+        // Jika tanggal sudah dalam minggu ini atau sebelumnya
+        return 1;
+    }
+
+    private function isConductedSession($id, $session_id, $user = null)
+    {
+        // Retrieve the scheduling with its nested relationships
+        $practicumScheduling = PracticumScheduling::with([
+            'practicumClasses.practicumSessions',
+        ])->findOrFail($id);
+
+        // Ensure the session belongs to this scheduling (for safety)
+        $class = $practicumScheduling
+            ->practicumClasses
+            ->first(fn($class) => $class->practicumSessions->contains('id', $session_id));
+
+        if (! $class) {
+            return $this->sendError('Sesi yang anda masukan tidak tersedia pada penjadwalan ini', [], 403);
+        }
+
+        if ($user) {
+            if ($class->lecturer_id !== $user->id) {
+                return $this->sendError('Anda tidak memiliki hak untuk mengubah sesi ini', [], 403);
+            }
+        }
+    }
+
     private function hasExistingEquipmentOrMaterial($scheduling)
     {
         return (

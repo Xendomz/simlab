@@ -3,6 +3,7 @@ import { Time } from "../time/Time";
 
 export class PracticumSession {
     constructor(
+        readonly id: number,
         readonly startTime: Time,
         readonly endTime: Time,
         readonly isClassConducted: number | null,

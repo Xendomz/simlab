@@ -15,6 +15,11 @@ export const PracticumScheduleMaterialColumn = (): ColumnDef<PracticumScheduling
     {
       accessorKey: 'realization',
       header: 'Qty (yang dapat direalisasikan)',
-      cell: ({ row }) => `${row.original.realization} ${row.original.laboratoryMaterial?.unit}`
+      cell: ({ row }) => {
+        if (row.original.realization) {
+          return `${row.original.realization} ${row.original.laboratoryMaterial?.unit}`
+        }
+        return 'Masih menunggu persetujuan laboran'
+      }
     }
 ];

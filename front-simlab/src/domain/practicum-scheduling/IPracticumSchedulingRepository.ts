@@ -14,6 +14,12 @@ export interface IPracticumSchedulingRepository {
         search: string,
     }): Promise<PaginatedResponse<PracticumScheduling>>
 
+    getPracticumSchedulingByLecturer(params: {
+        page: number,
+        per_page: number,
+        search: string,
+    }): Promise<PaginatedResponse<PracticumScheduling>>
+
     create(data: {
         practicum_id: number | null,
         phone_number: string,
@@ -39,7 +45,23 @@ export interface IPracticumSchedulingRepository {
         practicumSchedulingMaterials: { id: number, quantity: number | null }[],
     }): Promise<ApiResponse>
 
-    verify(id: number, data: { action: 'approve' | 'reject', information?: string, laboran_id?: number; materials: number[] }): Promise<ApiResponse>
+    setSessionConducted(id: number, data: {
+        session_id: number,
+        status: boolean,
+        information: string | null
+    }): Promise<ApiResponse>
+
+    setLecturerNote(id: number, data: {
+        session_id: number,
+        information: string | null
+    }): Promise<ApiResponse>
+
+    verify(id: number, data: {
+        action: 'approve' | 'reject' | 'revision',
+        laboran_id?: number,
+        information?: string,
+        materials?: number[]
+    }): Promise<ApiResponse>
     isStillHaveDraftPracticum(): Promise<ApiResponse<boolean>>
     getPracticumSteps(id: number): Promise<ApiResponse<PracticumStepper[]>>
 }

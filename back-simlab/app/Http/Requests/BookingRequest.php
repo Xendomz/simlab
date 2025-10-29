@@ -36,7 +36,7 @@ class BookingRequest extends ApiRequest
         // Add ruangan_laboratorium_id required if booking_type is not null and not 'equipment'
         $bookingType = $this->input('booking_type');
         if (!is_null($bookingType) && $bookingType !== 'equipment') {
-            $rules['ruangan_laboratorium_id'] = 'required';
+            $rules['laboratory_room_id'] = 'required';
         }
 
         // // If supervisor is filled, supervisor_email is required, and vice versa
@@ -84,7 +84,7 @@ class BookingRequest extends ApiRequest
 
             'participant_list.string' => 'Daftar peserta harus berupa teks.',
 
-            'ruangan_laboratorium_id.required' => 'Ruangan laboratorium wajib dipilih.',
+            'laboratory_room_id.required' => 'Ruangan laboratorium wajib dipilih.',
         ];
     }
 }

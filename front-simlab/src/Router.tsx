@@ -41,6 +41,7 @@ import { userRole } from "./domain/User/UserRole";
 import KepalaLabJurusanPage from "./presentation/pages/admin/user/kepala-lab-jurusan/KepalaLabJurusanPage";
 import { PracticumSchedulingProvider } from "./presentation/pages/admin/practicum-scheduling/context/PracticumSchedulingContext";
 import { DepedencyProvider } from "./presentation/contexts/DepedencyProvider";
+import { BookingProvider } from "./presentation/pages/admin/booking/context/BookingContext";
 
 export const router = createBrowserRouter([
     {
@@ -238,7 +239,9 @@ export const router = createBrowserRouter([
                         path: '',
                         element: (
                             <ProtectedRoute allowedRoles={[userRole.Dosen, userRole.Mahasiswa, userRole.KepalaLabTerpadu, userRole.Kooprodi]}>
-                                <BookingPage />
+                                <BookingProvider>
+                                    <BookingPage />
+                                </BookingProvider>
                             </ProtectedRoute>
                         )
                     },
@@ -246,7 +249,9 @@ export const router = createBrowserRouter([
                         path: 'create',
                         element: (
                             <ProtectedRoute allowedRoles={[userRole.Dosen, userRole.Mahasiswa, userRole.KepalaLabTerpadu, userRole.Kooprodi]}>
-                                <BookingCreatePage />
+                                <BookingProvider>
+                                    <BookingCreatePage />
+                                </BookingProvider>
                             </ProtectedRoute>
                         )
                     },
@@ -254,7 +259,9 @@ export const router = createBrowserRouter([
                         path: ':id/manage',
                         element: (
                             <ProtectedRoute allowedRoles={[userRole.Dosen, userRole.Mahasiswa, userRole.KepalaLabTerpadu, userRole.Kooprodi]}>
-                                <BookingManagePage />
+                                <BookingProvider>
+                                    <BookingManagePage />
+                                </BookingProvider>
                             </ProtectedRoute>
                         )
                     },
@@ -262,7 +269,9 @@ export const router = createBrowserRouter([
                         path: ':id/detail',
                         element: (
                             <ProtectedRoute allowedRoles={[userRole.Admin, userRole.Dosen, userRole.Mahasiswa, userRole.KepalaLabTerpadu, userRole.Laboran]}>
-                                <BookingDetailPage />
+                                <BookingProvider>
+                                    <BookingDetailPage />
+                                </BookingProvider>
                             </ProtectedRoute>
                         )
                     },
@@ -270,7 +279,9 @@ export const router = createBrowserRouter([
                         path: 'verif',
                         element: (
                             <ProtectedRoute allowedRoles={[userRole.KepalaLabTerpadu, userRole.Laboran]}>
-                                <BookingVerification />
+                                <BookingProvider>
+                                    <BookingVerification />
+                                </BookingProvider>
                             </ProtectedRoute>
                         )
                     },
@@ -282,7 +293,7 @@ export const router = createBrowserRouter([
                     {
                         path: '',
                         element: (
-                            <ProtectedRoute allowedRoles={[userRole.KepalaLabJurusan]}>
+                            <ProtectedRoute allowedRoles={[userRole.KepalaLabJurusan, userRole.Dosen]}>
                                 <PracticumSchedulingProvider>
                                     <PracticumSchedulingPage />
                                 </PracticumSchedulingProvider>
@@ -312,7 +323,7 @@ export const router = createBrowserRouter([
                     {
                         path: ':id/detail',
                         element: (
-                            <ProtectedRoute allowedRoles={[userRole.KepalaLabJurusan, userRole.KepalaLabTerpadu, userRole.Laboran, userRole.Kooprodi]}>
+                            <ProtectedRoute allowedRoles={[userRole.KepalaLabJurusan, userRole.KepalaLabTerpadu, userRole.Laboran, userRole.Kooprodi, userRole.Dosen]}>
                                 <PracticumSchedulingDetailPage />
                             </ProtectedRoute>
                         )

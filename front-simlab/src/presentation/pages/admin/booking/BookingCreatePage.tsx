@@ -2,7 +2,6 @@
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react'
 import React, { useEffect, useRef, useState } from 'react'
-import { useBooking } from '@/application/booking/hooks/useBooking';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Button } from '@/presentation/components/ui/button';
@@ -10,7 +9,6 @@ import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/application/hooks/useAuth';
 import { Label } from '@/presentation/components/ui/label';
 import { Input } from '@/presentation/components/ui/input';
-import { BookingInputDTO } from '@/application/booking/dto/BookingDTO';
 import { useValidationErrors } from '@/presentation/hooks/useValidationError';
 import { ApiResponse } from '@/shared/Types';
 import BookingDateTimeRangePicker from '@/presentation/components/custom/BookingDateTimePicker';
@@ -20,6 +18,10 @@ import { Textarea } from '@/presentation/components/ui/textarea';
 // import { useLaboratoryRoom } from '@/application/laboratory-room/hooks/useLaboratoryRoom';
 import { BookingType } from '@/domain/booking/BookingType';
 import { Combobox } from '@/presentation/components/custom/combobox';
+import { useLaboratoryRoomSelect } from '../laboratory-room/hooks/useLaboratoryRoomSelect';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
+import { useBooking } from './context/BookingContext';
+import { useBookingForm } from './hooks/useBookingForm';
 
 const BookingCreatePage = () => {
   const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -42,84 +44,33 @@ const BookingCreatePage = () => {
   }, [])
 
   const { user } = useAuth()
-  console.log(user);
-  
+  const {laboratoryRooms} = useLaboratoryRoomSelect()
+  const {bookingService} = useDepedencies()
+  const {isHasDraftBooking} = useBooking()
 
   const {
-    laboratoryRoom,
-    getData: getLaboratories
-  } = useLaboratoryRoom({
-    currentPage: 1,
-    perPage: 9999,
-    searchTerm: '',
-    setTotalPages() { },
-    setTotalItems() { }
-  })
-
-  const {
-    create,
-    isStillHaveDraftBooking,
-    isHasDraftBooking
-  } = useBooking({})
-
-  const [formData, setFormData] = useState<BookingInputDTO>({
-    phone_number: '',
-    purpose: '',
-    supporting_file: null,
-    activity_name: '',
-    supervisor: null,
-    supervisor_email: null,
-    start_time: undefined,
-    end_time: undefined,
-    booking_type: '',
-    ruangan_laboratorium_id: undefined,
-    total_participant: 0,
-    participant_list: ''
-  })
+    formData,
+    setFormData,
+    handleChange,
+    handleDateTimeChange
+  } = useBookingForm()
 
   const { errors, processErrors } = useValidationErrors()
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    isStillHaveDraftBooking()
-    getLaboratories()
-  }, [])
-
-  useEffect(() => {
     if (isHasDraftBooking) {
       navigate('/404')
     }
-  }, [isHasDraftBooking, navigate])
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-
-    if (name === 'supporting_file' && (e.target as HTMLInputElement).files) {
-      setFormData((prev) => ({ ...prev, supporting_file: (e.target as HTMLInputElement).files ? (e.target as HTMLInputElement).files![0] : null }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-
-  };
-
-  const handleDateTimeChange = (e: { target: { name: "start_time" | "end_time"; value: Date } }) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  }, [isHasDraftBooking])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const res = await create(formData);
+      const res = await bookingService.createData(formData);
       toast.success(res.message)
       if (res.data?.bookingType === BookingType.Room) {
         navigate(`/panel/peminjaman/`)
@@ -234,7 +185,7 @@ const BookingCreatePage = () => {
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor='supporting_file'>
-                  Surat Pengantar / Berkas Pendukung <span className="text-red-500">*</span>
+                  Surat Pengantar / Berkas Pendukung
                 </Label>
                 <Input
                   type='file'
@@ -294,20 +245,20 @@ const BookingCreatePage = () => {
                     Ruangan <span className="text-red-500">*</span>
                   </Label>
                   <Combobox
-                    options={laboratoryRoom}
-                    value={formData.ruangan_laboratorium_id?.toString() || ''}
+                    options={laboratoryRooms}
+                    value={formData.laboratory_room_id?.toString() || ''}
                     onChange={(val) => {
                       setFormData((prev) => ({
                         ...prev,
-                        ruangan_laboratorium_id: val ? Number(val) : undefined
+                        laboratory_room_id: val ? Number(val) : null
                       }))
                     }}
                     placeholder="Pilih ruangan"
                     optionLabelKey='name'
                     optionValueKey='id'
                   />
-                  {errors['ruangan_laboratorium_id'] && (
-                    <p className="mt-1 text-xs italic text-red-500">{errors['ruangan_laboratorium_id']}</p>
+                  {errors['laboratory_room_id'] && (
+                    <p className="mt-1 text-xs italic text-red-500">{errors['laboratory_room_id']}</p>
                   )}
                 </div>
               )}

@@ -6,26 +6,23 @@ import Header from '@/presentation/components/Header';
 import { Label } from '@/presentation/components/ui/label';
 import { Button } from '@/presentation/components/ui/button';
 import { Input } from '@/presentation/components/ui/input';
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Copy, Plus, Trash } from 'lucide-react';
 import { useValidationErrors } from '@/presentation/hooks/useValidationError';
 import { toast } from 'sonner';
 import { ApiResponse } from '@/shared/Types';
 import { Combobox } from '@/presentation/components/custom/combobox';
-import { LaboratoryRoomService } from '@/application/laboratory-room/LaboratoryRoomService';
-import { LaboratoryRoomSelectView } from '@/application/laboratory-room/LaboratoryRoomSelectView';
-import { PracticumService } from '@/application/practicum/PracticumService';
-import { PracticumSelectView } from '@/application/practicum/PracticumSelectView';
 import { DateTimePicker } from '@/presentation/components/ui/datetime-picker';
 import { usePracticumSchedulingForm } from './hooks/usePracticumSchedulingForm';
 import { PracticumModuleSelectView } from '@/application/practicum-module/PracticumModuleSelectView';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/presentation/components/ui/table';
-import { UserService } from '@/application/user/UserService';
 import { userRole } from '@/domain/User/UserRole';
-import { UserSelectView } from '@/application/user/UserSelectView';
 import { usePracticumScheduling } from './context/PracticumSchedulingContext';
 import { useDepedencies } from '@/presentation/contexts/useDepedencies';
+import { useLaboratoryRoomSelect } from '../laboratory-room/hooks/useLaboratoryRoomSelect';
+import { usePracticumSelect } from '../practicum/hooks/usePracticumSelect';
+import { useUserSelect } from '../user/hooks/useUserSelect';
 
 
 const PracticumSchedulingCreatePage = () => {
@@ -68,32 +65,15 @@ const PracticumSchedulingCreatePage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
 
-    const laboratoryRoomService = new LaboratoryRoomService()
-    const [laboratoryRooms, setLaboratoryRooms] = useState<LaboratoryRoomSelectView[]>([])
-    const getLaboratoryRooms = async () => {
-        const response = await laboratoryRoomService.getDataForSelect()
-        setLaboratoryRooms(response.data ?? [])
-    }
-
-    const practicumService = new PracticumService()
-    const [practicums, setPracticums] = useState<PracticumSelectView[]>([])
-    const getPracticums = async () => {
-        const response = await practicumService.getDataForSelect()
-        setPracticums(response.data ?? [])
-    }
-
-    const userSerivce = new UserService()
-    const [lecturers, setLecturers] = useState<UserSelectView[]>([])
-    const getLecturers = async () => {
-        const response = await userSerivce.getDataForSelect(userRole.Dosen)
-        setLecturers(response.data ?? [])
-    }
-
+    const { laboratoryRooms } = useLaboratoryRoomSelect()
+    const { practicums } = usePracticumSelect()
+    const { users: lecturers } = useUserSelect({ role: userRole.Dosen })
+    const { practicumSchedulingService } = useDepedencies()
+    
+    const [practicumModules, setPracticumModules] = useState<PracticumModuleSelectView[]>([])
     useEffect(() => {
-        getPracticums()
-        getLaboratoryRooms()
-        getLecturers()
-    }, [])
+        setPracticumModules(getPracticumModule(practicums))
+    }, [formData.practicum_id])
 
     useEffect(() => {
         if (isHasDraftPracticum) {
@@ -101,12 +81,6 @@ const PracticumSchedulingCreatePage = () => {
         }
     }, [isHasDraftPracticum])
 
-    const [practicumModules, setPracticumModules] = useState<PracticumModuleSelectView[]>([])
-    useEffect(() => {
-        setPracticumModules(getPracticumModule(practicums))
-    }, [formData.practicum_id])
-
-    const { practicumSchedulingService } = useDepedencies()
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -126,7 +100,6 @@ const PracticumSchedulingCreatePage = () => {
             setIsSubmitting(false);
         }
     }
-
 
     return (
         <>

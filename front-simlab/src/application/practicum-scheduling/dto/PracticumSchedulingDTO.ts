@@ -45,6 +45,17 @@ export interface PracticumSchedulingEquipmentNMaterialInputDTO {
     }[];
 }
 
+export interface PracticumSchedulingSessionConductedDTO {
+    session_id: number,
+    status: boolean,
+    information: string | null
+}
+
+export interface PracticumSchedulingLecturerNotesDTO {
+    session_id: number,
+    information: string | null
+}
+
 export interface PracticumSchedulingVerifyDTO {
     action: 'approve' | 'reject' | 'revision',
     laboran_id?: number,

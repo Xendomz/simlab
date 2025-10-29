@@ -38,19 +38,24 @@ const ApproveWithLaboratoryMaterialRealizationDialog: React.FC<ApproveWithLabora
   const { errors, processErrors } = useValidationErrors()
 
   const handleQuantityChange = (index: number, value: string) => {
-    // Remove leading zeros (but keep "0" if that’s the only digit)
-    const sanitized = value.replace(/^0+(?!$)/, '')
+    // Allow only digits
+    let newValue = value.replace(/\D/g, '');
 
-    // Parse the cleaned value
-    const parsed = parseInt(sanitized, 10)
-    const qty = isNaN(parsed) ? 0 : parsed
+    // Remove leading zeros but keep a single zero if all digits were zeros
+    newValue = newValue.replace(/^0+(?=\d)/, '');
+
+    // If empty, default to "0"
+    if (newValue === '') newValue = '0';
+
+    // Convert to number before saving
+    const numericValue = Number(newValue);
 
     setMaterialQuantities(prev => {
-      const next = [...(prev ?? [])]
-      next[index] = qty
-      return next
-    })
-  }
+      const next = [...(prev ?? [])];
+      next[index] = numericValue;
+      return next;
+    });
+  };
 
   const onSubmit = async () => {
     setIsSubmitting(true)
@@ -60,7 +65,7 @@ const ApproveWithLaboratoryMaterialRealizationDialog: React.FC<ApproveWithLabora
       const error = e as ApiResponse
       toast.error(error.message || 'Gagal Submit')
       if (error.errors) {
-        
+
         processErrors(error.errors)
         console.log(error);
       }
@@ -118,12 +123,12 @@ const ApproveWithLaboratoryMaterialRealizationDialog: React.FC<ApproveWithLabora
                         <TableRow key={material.id ?? index}>
                           <TableCell>{index + 1}</TableCell>
                           <TableCell>{material.laboratoryMaterial?.materialName}</TableCell>
-                          <TableCell>{material.quantity}</TableCell>
+                          <TableCell>{material.quantity} {material.laboratoryMaterial?.unit}</TableCell>
                           <TableCell>
                             <Input
                               type='number'
                               placeholder='Jumlah'
-                              value={materialQuantities?.[index] || 0}
+                              value={String(materialQuantities?.[index]) || 0}
                               onChange={e => handleQuantityChange(index, e.target.value)}
                             />
                           </TableCell>

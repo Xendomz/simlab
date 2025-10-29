@@ -1,8 +1,6 @@
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react'
-import React, { useEffect, useRef, useState } from 'react'
-import useTable from '@/application/hooks/useTable';
-import { useBooking } from '@/application/booking/hooks/useBooking';
+import React, { useRef, useState } from 'react'
 import Header from '@/presentation/components/Header';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
 import { Button } from '@/presentation/components/ui/button';
@@ -12,6 +10,8 @@ import Table from '@/presentation/components/Table';
 import { NavLink } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/presentation/components/ui/tooltip';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select'
+import { useBookingDataTable } from './hooks/useBookingDataTable';
+import { useBooking } from './context/BookingContext';
 
 const BookingPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -33,22 +33,6 @@ const BookingPage = () => {
         )
     }, [])
 
-    const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
-        searchTerm,
-
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
-        handleSearch,
-        handlePerPageChange,
-        handlePageChange,
-    } = useTable()
-
     const [selectedStatus, setSelectedStatus] = useState<string>('')
     const handleFilterStatus = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
@@ -57,40 +41,23 @@ const BookingPage = () => {
         setCurrentPage(1);
     }
 
+    const { isHasDraftBooking } = useBooking()
+
     const {
-        booking,
+        bookings,
         isLoading,
-        getData,
-        isStillHaveDraftBooking,
-        isHasDraftBooking
-    } = useBooking({
-        currentPage,
-        perPage,
         searchTerm,
-        setTotalPages,
-        setTotalItems,
-        status: selectedStatus
-    })
 
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedStatus])
-
-    useEffect(() => {
-        isStillHaveDraftBooking()
-    }, [])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
+        // TableHandler
+        perPage,
+        handleSearch,
+        handlePageChange,
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+        setCurrentPage
+    } = useBookingDataTable({ status: selectedStatus })
 
     return (
         <>
@@ -153,7 +120,7 @@ const BookingPage = () => {
                             </div>
                         </div>
                         <Table
-                            data={booking}
+                            data={bookings}
                             columns={BookingColumn()}
                             loading={isLoading}
                             searchTerm={searchTerm}

@@ -48,7 +48,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::middleware(['role:admin|laboran|kepala_lab_terpadu'])->group(function () {
         Route::resource('users', UserController::class)->only(['index']);
     });
-    Route::middleware(['role:admin|laboran|kepala_lab_terpadu|kepala_lab_jurusan'])->group(function () {
+    Route::middleware(['role:admin|laboran|kepala_lab_terpadu|kepala_lab_jurusan|dosen|mahasiswa'])->group(function () {
         Route::get('/practicums/select', [PracticumController::class, 'getDataForSelect']);
         Route::get('/laboratory-rooms/select', [LaboratoryRoomController::class, 'getDataForSelect']);
         Route::get('/users/select', [UserController::class, 'getDataForSelect']);
@@ -93,7 +93,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // booking (peminjaman)
     Route::group(['prefix' => 'bookings', 'as' => 'bookings'], function () {
-        Route::group(['middleware' => 'role:Mahasiswa|Dosen|Pihak Luar'], function () {
+        Route::group(['middleware' => 'role:mahasiswa|dosen|pihak_luar'], function () {
             Route::get('/', [BookingController::class, 'index']);
             Route::post('/', [BookingController::class, 'store']);
             Route::get('/have-draft', [BookingController::class, 'isStillHaveDraftBooking']);
@@ -109,15 +109,30 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Practical Schedule
-    Route::group(['prefix' => 'practicum-schedule', 'as' => 'practicum', 'middleware', 'role:Dosen|kepala_lab_jurusan|laboran|kepala_lab_terpadu'], function () {
+    Route::group(['prefix' => 'practicum-schedule', 'as' => 'practicum', 'middleware', 'role:dosen|kepala_lab_jurusan|laboran|kepala_lab_terpadu'], function () {
         Route::get('/{id}/detail', [PracticumSchedulingController::class, 'getPracticumSchedulingData']);
         Route::get('/{id}/steps', [PracticumSchedulingController::class, 'getPracticumSteps']);
+
+        // route based on role: laboran
+        Route::group(['middleware' => 'role:dosen'], function () {
+            Route::get('/my-classes', [PracticumSchedulingController::class, 'getPracticumSchedulingByLecturer']);
+            Route::post('/{id}/set-lecturer-note', [PracticumSchedulingController::class, 'setLecturerNote']);
+        });
+
+        // route based on role: laboran
+        Route::group(['middleware' => 'role:laboran'], function () {
+            Route::post('/{id}/set-session-conducted', [PracticumSchedulingController::class, 'setSessionConducted']);
+        });
+
+        // route based on role: kepala_lab_jurusan
         Route::group(['middleware' => 'role:kepala_lab_jurusan'], function () {
             Route::get('/', [PracticumSchedulingController::class, 'index']);
             Route::post('/', [PracticumSchedulingController::class, 'store']);
             Route::post('/{id}/equipment-n-material', [PracticumSchedulingController::class, 'storePracticumEquipmentNMaterial']);
             Route::get('/have-draft', [PracticumSchedulingController::class, 'isStillHaveDraftPracticum']);
         });
+
+        // route based on role: laboran & kepala_lab_jurusan
         Route::group(['middleware' => 'role:kepala_lab_terpadu|laboran'], function () {
             Route::get('/verification', [PracticumSchedulingController::class, 'getPracticumSchedulingForVerification']);
             Route::post('/{id}/verify', [PracticumSchedulingController::class, 'verifyPracticumScheduling']);

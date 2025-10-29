@@ -1,4 +1,5 @@
 import { AcademicYearService } from "@/application/academic-year/AcademicYearService"
+import { BookingService } from "@/application/booking/BookingService"
 import { FacultyService } from "@/application/faculty/FacultyService"
 import { LaboratoryEquipmentService } from "@/application/laboratory-equipment/LaboratoryEquipmentService"
 import { LaboratoryMaterialService } from "@/application/laboratory-material/LaboratoryMaterialService"
@@ -24,7 +25,8 @@ type Services = {
     facultyService: FacultyService,
     academicYearService: AcademicYearService
     studyProgramService: StudyProgramService
-    practicumSchedulingService: PracticumSchedulingService
+    practicumSchedulingService: PracticumSchedulingService,
+    bookingService: BookingService
 }
 
 const services: Services = {
@@ -39,7 +41,8 @@ const services: Services = {
     facultyService: new FacultyService(),
     academicYearService: new AcademicYearService(),
     studyProgramService: new StudyProgramService(),
-    practicumSchedulingService: new PracticumSchedulingService()
+    practicumSchedulingService: new PracticumSchedulingService(),
+    bookingService: new BookingService()
 }
 
 export const DepedencyContext = createContext<Services>(services)

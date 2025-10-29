@@ -45,4 +45,8 @@ export class PracticumSchedulingView {
             entity.laboranApproval ? PracticumApprovalView.fromDomain(entity.laboranApproval) : undefined,
         );
     }
+
+    getTotalClass(): number {
+        return this.practicumClasses?.length || 0
+    }
 }

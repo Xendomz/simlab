@@ -8,7 +8,7 @@ export const navItems: NavItem[] = [
     icon: LayoutDashboard,
     is_end: true,
     // roles: [userRole.Admin, userRole.KepalaLabTerpadu,userRole.Kooprodi, userRole.KepalaLabJurusan,  userRole.Laboran,userRole.Mahasiswa,userRole.PihakLuar,userRole.Dosen' ],
-    roles: [userRole.Admin, userRole.KepalaLabTerpadu, userRole.Kooprodi, userRole.KepalaLabJurusan, userRole.Laboran, userRole.Laboran, userRole.PihakLuar, userRole.Dosen, userRole.AdminKeuangan ],
+    roles: [userRole.Admin, userRole.KepalaLabTerpadu, userRole.Kooprodi, userRole.KepalaLabJurusan, userRole.Laboran, userRole.Mahasiswa, userRole.PihakLuar, userRole.Dosen, userRole.AdminKeuangan ],
   },
   {
     title: "Data Master",
@@ -54,7 +54,7 @@ export const navItems: NavItem[] = [
     title: "Penjadwalan Praktikum",
     url: "/panel/penjadwalan-praktikum",
     icon: CalendarPlus,
-    roles: [userRole.KepalaLabJurusan],
+    roles: [userRole.KepalaLabJurusan, userRole.Dosen],
   },
   {
     title: "Manajemen Peminjaman",

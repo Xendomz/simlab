@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -19,16 +19,27 @@ interface ApproveDialogProps {
     open: boolean,
     onOpenChange: (open: boolean) => void,
     handleSave: (information: string) => Promise<void>
+    title?: string,
+    message?: string,
+    buttonLabel?: string
 }
 
 const ApproveDialog: React.FC<ApproveDialogProps> = ({
     open,
     onOpenChange,
-    handleSave
+    handleSave,
+    title,
+    message,
+    buttonLabel
 }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [information, setInformation] = useState<string>('')
     const { errors, processErrors } = useValidationErrors()
+
+    useEffect(() => {
+        setInformation('')
+    }, [open])
+
     const onSubmit = async () => {
         setIsSubmitting(true)
         try {
@@ -49,8 +60,8 @@ const ApproveDialog: React.FC<ApproveDialogProps> = ({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Konfirmasi Verifikasi</DialogTitle>
-                    <DialogDescription>Apakah Anda yakin ingin melanjutkan proses verifikasi?</DialogDescription>
+                    <DialogTitle>{ title || 'Konfirmasi Verifikasi' }</DialogTitle>
+                    <DialogDescription>{ message || 'Apakah Anda yakin ingin melanjutkan proses verifikasi?' }</DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col gap-5">
                     <div className="flex flex-col gap-2">
@@ -74,7 +85,7 @@ const ApproveDialog: React.FC<ApproveDialogProps> = ({
                         <Button type="button" variant="secondary">Batal</Button>
                     </DialogClose>
                     <Button type="button" onClick={onSubmit} disabled={isSubmitting}>
-                        {isSubmitting ? 'Memproses...' : 'Verifikasi'}
+                        {isSubmitting ? 'Memproses...' : ( buttonLabel || 'Verifikasi')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

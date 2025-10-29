@@ -23,8 +23,8 @@ const PracticumSchedulingMaterialDialog: React.FC<PracticumSchedulingMaterialDia
             </DialogTrigger>
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>Daftar Alat yang Dipinjam</DialogTitle>
-                    <DialogDescription></DialogDescription>
+                    <DialogTitle>Daftar Bahan yang Dipinjam</DialogTitle>
+                    <DialogDescription>Berikut merupakan daftar bahan yang diajukan untuk semua kelas. Harap hubungi kepala jurusan yang mengajukan untuk pembagian bahan per kelas</DialogDescription>
                 </DialogHeader>
                 <ScrollArea className='h-full max-h-[70vh]'>
                     <div className='p-1'>

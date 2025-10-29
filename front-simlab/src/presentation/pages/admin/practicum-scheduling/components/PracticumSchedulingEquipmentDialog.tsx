@@ -26,7 +26,7 @@ const PracticumSchedulingEquipmentDialog: React.FC<PracticumSchedulingEquipmentD
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>Daftar Alat yang Dipinjam</DialogTitle>
-                    <DialogDescription></DialogDescription>
+                    <DialogDescription>Berikut merupakan daftar alat serta usulan alat yang dapat digunakan pada setiap kelas praktikum.</DialogDescription>
                 </DialogHeader>
                 <ScrollArea className='h-full max-h-[70vh]'>
                     <div className="p-1 flex flex-col gap-5">

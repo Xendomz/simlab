@@ -1,5 +1,5 @@
 import { PracticumSchedulingRepository } from "@/infrastructure/practicum-scheduling/PracticumSchedulingRepository";
-import { PracticumSchedulingEquipmentNMaterialInputDTO, PracticumSchedulingInputDTO, PracticumSchedulingTableParam, PracticumSchedulingVerifyDTO } from "./dto/PracticumSchedulingDTO";
+import { PracticumSchedulingEquipmentNMaterialInputDTO, PracticumSchedulingInputDTO, PracticumSchedulingLecturerNotesDTO, PracticumSchedulingSessionConductedDTO, PracticumSchedulingTableParam, PracticumSchedulingVerifyDTO } from "./dto/PracticumSchedulingDTO";
 import { PracticumSchedulingView } from "./PracticumSchedulingView";
 import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { PracticumStepperView } from "./PracticumStepperView";
@@ -10,6 +10,15 @@ export class PracticumSchedulingService {
     async getPracticumSchedulingData(params: PracticumSchedulingTableParam): Promise<PaginatedResponse<PracticumSchedulingView>> {
         const practicumSchedulings = await this.practicumSchedulingRepository.getAll(params)
         
+        return {
+            ...practicumSchedulings,
+            data: practicumSchedulings.data.map(PracticumSchedulingView.fromDomain) || []
+        }
+    }
+
+    async getPracticumSchedulingByLecturer(params: PracticumSchedulingTableParam): Promise<PaginatedResponse<PracticumSchedulingView>> {
+        const practicumSchedulings = await this.practicumSchedulingRepository.getPracticumSchedulingByLecturer(params)
+
         return {
             ...practicumSchedulings,
             data: practicumSchedulings.data.map(PracticumSchedulingView.fromDomain) || []
@@ -41,6 +50,14 @@ export class PracticumSchedulingService {
             practicumSchedulingMaterials: data.practicumSchedulingMaterials.map(m => ({ id: m.id, quantity: m.quantity })),
         }
         return await this.practicumSchedulingRepository.storePracticumSchedulingEquipmentMaterial(id, payload)
+    }
+
+    async setSessionConducted(id: number, data: PracticumSchedulingSessionConductedDTO): Promise<ApiResponse> {
+        return await this.practicumSchedulingRepository.setSessionConducted(id, data);
+    }
+
+    async setLecturerNote(id: number, data: PracticumSchedulingLecturerNotesDTO): Promise<ApiResponse> {
+        return await this.practicumSchedulingRepository.setLecturerNote(id, data);
     }
 
     async verify(id: number, data: PracticumSchedulingVerifyDTO): Promise<ApiResponse> {

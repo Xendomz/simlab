@@ -3,6 +3,7 @@ import { Time } from "@/domain/time/Time"
 import { PracticumModuleAPI, toDomain as toPracticumModule } from "../practicum-module/PracticumModuleAPI"
 
 export type PracticumSessionAPI = {
+    id: number
     start_time: string,
     end_time: string,
     is_class_conducted: number | null,
@@ -15,6 +16,7 @@ export type PracticumSessionAPI = {
 
 export function toDomain(api: PracticumSessionAPI): PracticumSession {
     return new PracticumSession(
+        api.id,
         new Time(api.start_time),
         new Time(api.end_time),
         api.is_class_conducted,

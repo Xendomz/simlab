@@ -24,7 +24,7 @@ export interface BookingInputDTO {
     start_time: Date | undefined;
     end_time: Date | undefined;
     booking_type: string;
-    ruangan_laboratorium_id: number | undefined;
+    laboratory_room_id: number | null;
     total_participant: number;
     participant_list: string;
 }

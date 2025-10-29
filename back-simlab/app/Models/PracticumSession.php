@@ -24,6 +24,8 @@ class PracticumSession extends Model
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'laboran_commented_at' => 'datetime',
+        'lecturer_commented_at' => 'datetime'
     ];
 
     protected function serializeDate(\DateTimeInterface $date): string

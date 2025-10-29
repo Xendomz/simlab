@@ -2,9 +2,8 @@ import { PracticumSchedulingView } from "@/application/practicum-scheduling/Prac
 import { Button } from "@/presentation/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { NavLink } from "react-router-dom";
-import PracticumSchedulingBadgeStatus from "../components/PracticumSchedulingBadgeStatus";
 
-export const PracticumSchedulingColumn = (): ColumnDef<PracticumSchedulingView>[] => [
+export const PracticumSchedulingByLecturerColumn = (): ColumnDef<PracticumSchedulingView>[] => [
     {
         header: 'Tahun Akademik',
         accessorKey: 'academicYear',
@@ -20,32 +19,23 @@ export const PracticumSchedulingColumn = (): ColumnDef<PracticumSchedulingView>[
         )
     },
     {
-        header: "Tanggal Pengajuan",
-        accessorKey: 'createdAt',
+        header: 'Pemohon',
+        accessorKey: 'userId',
         cell: ({ row }) => (
-            `${row.original.createdAt.formatForInformation()}`
+            `${row.original.user?.name}`
         )
     },
     {
-        header: "Status Pengajuan",
-        accessorKey: 'PracticumSchedulingStatus',
-        cell: ({ row }) => {
-            return (
-                <PracticumSchedulingBadgeStatus status={row.original.status}/>
-            )
-        }
+        header: 'Total Kelas yang Diampu',
+        accessorKey: 'practicumClasses',
+        cell: ({ row }) => (
+            `${row.original.getTotalClass()} Kelas`
+        )
     },
     {
         header: "Action",
         accessorKey: 'id',
         cell: ({ row }) => {
-            if (row.original.status === 'draft') {
-                return (
-                    <NavLink to={`/panel/penjadwalan-praktikum/${row.original.id}/manage`}>
-                        <Button size="sm">Lanjutkan</Button>
-                    </NavLink>
-                );
-            }
             return (
                 <NavLink to={`/panel/penjadwalan-praktikum/${row.original.id}/detail`}>
                     <Button variant="secondary" size="sm">Detail</Button>
@@ -53,4 +43,4 @@ export const PracticumSchedulingColumn = (): ColumnDef<PracticumSchedulingView>[
             );
         }
     }
-];
+]

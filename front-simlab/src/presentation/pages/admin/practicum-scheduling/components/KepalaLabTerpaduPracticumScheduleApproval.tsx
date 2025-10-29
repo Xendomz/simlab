@@ -1,17 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react'
-import useTable from '@/application/hooks/useTable';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
 import Table from '@/presentation/components/Table';
 import { PracticumScheduleVerificationColumn } from '../column/PracticumScheduleVerificationColumn';
-import { PracticumSchedulingService } from '@/application/practicum-scheduling/PracticumSchedulingService';
-import { PracticumSchedulingView } from '@/application/practicum-scheduling/PracticumSchedulingView';
 import RejectionDialog from '@/presentation/components/custom/RejectionDialog';
 import { userRole } from '@/domain/User/UserRole';
 import ApproveWithLaboranSelectDialog from '@/presentation/components/custom/ApproveWithLaboranSelectDialog';
-import RevisionDialog from '@/presentation/components/custom/RevisionDialog';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
+import { usePracticumSchedulingVerificationDataTable } from '../hooks/usePracticumSchedulingVerificationDataTable';
 
 const KepalaLabTerpaduPracticumScheduleApproval = () => {
   const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -33,54 +31,23 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
     )
   }, [])
 
+  const { practicumSchedulingService } = useDepedencies()
+
   const {
-    currentPage,
-    perPage,
-    totalPages,
-    totalItems,
+    practicumSchedulings,
+    isLoading,
     searchTerm,
+    refresh,
 
-    setTotalPages,
-    setTotalItems,
-    setCurrentPage,
-
+    // TableHandler
+    perPage,
     handleSearch,
-    handlePerPageChange,
     handlePageChange,
-  } = useTable()
-
-  const practicumSchedulingService = new PracticumSchedulingService()
-  const [practicumSchedulings, setPracticumSchedulings] = useState<PracticumSchedulingView[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-
-  const getDataForVerification = async () => {
-    setIsLoading(true)
-    const response = await practicumSchedulingService.getPracticumSchedulingForVerification({
-      page: currentPage,
-      per_page: perPage,
-      search: searchTerm
-    })
-    setPracticumSchedulings(response.data ?? [])
-    setTotalPages(response.last_page ?? 0)
-    setTotalItems(response.total ?? 0)
-    setIsLoading(false)
-  }
-
-  useEffect(() => {
-    getDataForVerification()
-  }, [currentPage, perPage])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (currentPage === 1) {
-        getDataForVerification()
-      } else {
-        setCurrentPage(1)
-      }
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchTerm])
+    handlePerPageChange,
+    totalItems,
+    totalPages,
+    currentPage,
+  } = usePracticumSchedulingVerificationDataTable()
 
   const [id, setId] = useState<number | null>(null)
   const [openApprovalDialog, setOpenApprovalDialog] = useState<boolean>(false)
@@ -102,22 +69,6 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
     setOpenRevisionDialog(true)
   }
 
-  useEffect(() => {
-    getDataForVerification()
-  }, [currentPage, perPage])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (currentPage === 1) {
-        getDataForVerification()
-      } else {
-        setCurrentPage(1)
-      }
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [searchTerm])
-
   const handleApproval = async (laboran_id: number, information: string): Promise<void> => {
     if (!id) return
     const res = await practicumSchedulingService.verify(id, {
@@ -127,7 +78,7 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
     })
     toast.success(res.message)
     setOpenApprovalDialog(false)
-    getDataForVerification()
+    refresh()
   }
 
   const handleRevision = async (information: string): Promise<void> => {
@@ -138,7 +89,7 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
     })
     toast.success(res.message)
     setOpenRevisionDialog(false)
-    getDataForVerification()
+    refresh()
   }
 
   const handleRejection = async (information: string): Promise<void> => {
@@ -150,7 +101,7 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
 
     toast.success(res.message)
     setOpenRejectionDialog(false)
-    getDataForVerification()
+    refresh()
   }
 
 
@@ -164,7 +115,7 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
           <CardContent>
             <Table
               data={practicumSchedulings}
-              columns={PracticumScheduleVerificationColumn({ role: userRole.KepalaLabTerpadu, openApproval, openRejection, openRevision })}
+              columns={PracticumScheduleVerificationColumn({ role: userRole.KepalaLabTerpadu, openApproval, openRejection })}
               loading={isLoading}
               searchTerm={searchTerm}
               handleSearch={(e) => handleSearch(e)}
@@ -176,7 +127,7 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
               handlePageChange={handlePageChange} />
           </CardContent>
         </Card>
-        <ApproveWithLaboranSelectDialog open={openApprovalDialog} onOpenChange={setOpenApprovalDialog} handleSave={handleApproval}/>
+        <ApproveWithLaboranSelectDialog open={openApprovalDialog} onOpenChange={setOpenApprovalDialog} handleSave={handleApproval} />
         {/* <RevisionDialog open={openRevisionDialog} onOpenChange={setOpenRevisionDialog} handleRejection={handleRevision}/> */}
         <RejectionDialog open={openRejectionDialog} onOpenChange={setOpenRejectionDialog} handleRejection={handleRejection} />
       </div>

@@ -6,15 +6,11 @@ import { PracticumScheduling } from "@/domain/practicum-scheduling/PracticumSche
 import { fetchApi } from "../ApiClient";
 import { PracticumStepper } from "@/domain/practicum-scheduling/PracticumStepper";
 import { PracticumStepperAPI, toDomain as toPracticumStepper } from "./PracticumStepperAPI";
+import { generateQueryStringFromObject } from "../Helper";
 
 export class PracticumSchedulingRepository implements IPracticumSchedulingRepository {
     async getAll(params: { page: number; per_page: number; search: string; }): Promise<PaginatedResponse<PracticumScheduling>> {
-        const queryString = new URLSearchParams(
-            Object.entries(params).reduce((acc, [key, value]) => {
-                acc[key] = String(value);
-                return acc;
-            }, {} as Record<string, string>)
-        ).toString();
+        const queryString = generateQueryStringFromObject(params);
 
         const response = await fetchApi(`/practicum-schedule?${queryString}`, { method: 'GET' })
         const json = await response.json()
@@ -78,6 +74,24 @@ export class PracticumSchedulingRepository implements IPracticumSchedulingReposi
         throw json
     }
 
+    async getPracticumSchedulingByLecturer(params: { page: number; per_page: number; search: string; }): Promise<PaginatedResponse<PracticumScheduling>> {
+        const queryString = generateQueryStringFromObject(params);
+
+        const response = await fetchApi(`/practicum-schedule/my-classes?${queryString}`, {
+            method: 'GET'
+        })
+        const json = await response.json()
+        if (response.ok) {
+            const data = json['data'] as PaginatedResponse<PracticumSchedulingAPI>
+
+            return {
+                ...data,
+                data: data.data?.map(toDomain) || []
+            }
+        }
+        throw json['message']
+    }
+
     async storePracticumSchedulingEquipmentMaterial(id: number, data: { practicumSchedulingEquipments: { id: number; quantity: number | null; }[]; proposedEquipments: { name: string; quantity: number | null; }[]; practicumSchedulingMaterials: { id: number; quantity: number | null; }[]; }): Promise<ApiResponse> {
         const response = await fetchApi(`/practicum-schedule/${id}/equipment-n-material`, {
             method: 'POST',
@@ -92,12 +106,7 @@ export class PracticumSchedulingRepository implements IPracticumSchedulingReposi
     }
 
     async getPracticumSchedulingForVerification(params: { page: number; per_page: number; search: string; }): Promise<PaginatedResponse<PracticumScheduling>> {
-        const queryString = new URLSearchParams(
-            Object.entries(params).reduce((acc, [key, value]) => {
-                acc[key] = String(value);
-                return acc;
-            }, {} as Record<string, string>)
-        ).toString();
+        const queryString = generateQueryStringFromObject(params);
 
         const response = await fetchApi(`/practicum-schedule/verification?${queryString}`, { method: 'GET' })
         const json = await response.json()
@@ -112,8 +121,38 @@ export class PracticumSchedulingRepository implements IPracticumSchedulingReposi
         throw json['message']
     }
 
+    async setSessionConducted(id: number, data: { session_id: number; status: boolean; information: string | null; }): Promise<ApiResponse> {
+        const response = await fetchApi(`/practicum-schedule/${id}/set-session-conducted`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
 
-    async verify(id: number, data: { action: 'approve' | 'reject', information?: string, laboran_id?: number, materials: number[] }): Promise<ApiResponse> {
+        const json = await response.json()
+        if (response.ok) {
+            return json;
+        }
+        throw json
+    }
+
+    async setLecturerNote(id: number, data: { session_id: number; information: string | null; }): Promise<ApiResponse> {
+        const response = await fetchApi(`/practicum-schedule/${id}/set-lecturer-note`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+
+        const json = await response.json()
+        if (response.ok) {
+            return json;
+        }
+        throw json
+    }
+
+    async verify(id: number, data: { 
+        action: 'approve' | 'reject' | 'revision',
+        laboran_id?: number,
+        information?: string,
+        materials?: number[]
+     }): Promise<ApiResponse> {
         const response = await fetchApi(`/practicum-schedule/${id}/verify`, {
             method: 'POST',
             body: JSON.stringify(data)
