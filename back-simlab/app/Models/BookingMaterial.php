@@ -9,7 +9,7 @@ class BookingMaterial extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['booking_id', 'bahan_laboratorium_id', 'quantity'];
+    protected $fillable = ['booking_id', 'laboratory_material_id', 'quantity'];
 
     public function booking()
     {
@@ -18,6 +18,6 @@ class BookingMaterial extends Model
 
     public function laboratoryMaterial()
     {
-        return $this->belongsTo(BahanLaboratorium::class, 'bahan_laboratorium_id');
+        return $this->belongsTo(LaboratoryMaterial::class, 'laboratory_material_id');
     }
 }

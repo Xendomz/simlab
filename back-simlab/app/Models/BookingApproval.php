@@ -16,7 +16,7 @@ class BookingApproval extends Model
             ->toIso8601String();
     }
 
-    protected $fillable = ['booking_id', 'role', 'approver_id', 'approved', 'information', 'is_allowed_offsite'];
+    protected $fillable = ['booking_id', 'role', 'approver_id', 'is_approved', 'information'];
 
     public function booking()
     {

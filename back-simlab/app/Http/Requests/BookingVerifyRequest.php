@@ -15,7 +15,7 @@ class BookingVerifyRequest extends ApiRequest
     {
         $user = $this->user();
         $laboranIdRule = 'exists:users,id';
-        if (!$user || $user->role !== 'Laboran') {
+        if (!$user || $user->role !== 'laboran') {
             $laboranIdRule = 'required_if:action,approve|' . $laboranIdRule;
         } else {
             // Laboran tidak perlu input laboran_id saat approve
@@ -38,7 +38,7 @@ class BookingVerifyRequest extends ApiRequest
         // Equipment approval: jika approve, role Laboran, dan booking_type equipment
         if (
             $this->input('action') === 'approve'
-            && $user && $user->role === 'Laboran'
+            && $user && $user->role === 'laboran'
             && $bookingType === 'equipment'
         ) {
             $rules['laboratory_room_id'] = 'required|exists:laboratory_rooms,id';

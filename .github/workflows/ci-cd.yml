@@ -1,78 +1,78 @@
-name: Deploy to aaPanel
+# name: Deploy to aaPanel
 
-on:
-  push:
-    branches:
-      - ci-cd-testing   # atau branch lain untuk auto deploy
+# on:
+#   push:
+#     branches:
+#       - ci-cd-testing   # atau branch lain untuk auto deploy
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      - name: Deploy Laravel API
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /www/wwwroot/testingci/
-            git pull origin ci-cd-testing
+#       - name: Deploy Laravel API
+#         uses: appleboy/ssh-action@v1.0.0
+#         with:
+#           host: ${{ secrets.SSH_HOST }}
+#           username: ${{ secrets.SSH_USER }}
+#           key: ${{ secrets.SSH_KEY }}
+#           script: |
+#             cd /www/wwwroot/testingci/
+#             git pull origin ci-cd-testing
 
-  update-backend:
-    runs-on: ubuntu-latest
-    needs: deploy
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+#   update-backend:
+#     runs-on: ubuntu-latest
+#     needs: deploy
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      - name: Deploy Laravel API
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /www/wwwroot/testingci/
+#       - name: Deploy Laravel API
+#         uses: appleboy/ssh-action@v1.0.0
+#         with:
+#           host: ${{ secrets.SSH_HOST }}
+#           username: ${{ secrets.SSH_USER }}
+#           key: ${{ secrets.SSH_KEY }}
+#           script: |
+#             cd /www/wwwroot/testingci/
 
-            rsync -a --delete \
-            --exclude-from='/www/wwwroot/testingci/.deployignore' \
-            /www/wwwroot/testingci/back-simlab/ \
-            /www/wwwroot/api-simlab.noalive.id/
+#             rsync -a --delete \
+#             --exclude-from='/www/wwwroot/testingci/.deployignore' \
+#             /www/wwwroot/testingci/back-simlab/ \
+#             /www/wwwroot/api-simlab.noalive.id/
 
-            cd /www/wwwroot/api-simlab.noalive.id/
-            rm -rf vendor
-            rm -f composer.lock
-            COMPOSER_ALLOW_SUPERUSER=1 composer install --prefer-source --no-dev --optimize-autoloader --no-interaction -vvv
+#             cd /www/wwwroot/api-simlab.noalive.id/
+#             rm -rf vendor
+#             rm -f composer.lock
+#             COMPOSER_ALLOW_SUPERUSER=1 composer install --prefer-source --no-dev --optimize-autoloader --no-interaction -vvv
             
-            php artisan migrate --force
-            php artisan co:ca
+#             php artisan migrate --force
+#             php artisan co:ca
 
-  update-frontend:
-    runs-on: ubuntu-latest
-    needs: deploy
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+#   update-frontend:
+#     runs-on: ubuntu-latest
+#     needs: deploy
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      - name: Deploy React Frontend
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /www/wwwroot/testingci/font-simlab
+#       - name: Deploy React Frontend
+#         uses: appleboy/ssh-action@v1.0.0
+#         with:
+#           host: ${{ secrets.SSH_HOST }}
+#           username: ${{ secrets.SSH_USER }}
+#           key: ${{ secrets.SSH_KEY }}
+#           script: |
+#             cd /www/wwwroot/testingci/font-simlab
 
-            # install dependency & build
-            npm install --legacy-peer-deps
-            npm run build
+#             # install dependency & build
+#             npm install --legacy-peer-deps
+#             npm run build
 
-            # bersihkan public domain frontend
-            rm -rf /www/wwwroot/api-simlab.noalive.id/*
+#             # bersihkan public domain frontend
+#             rm -rf /www/wwwroot/api-simlab.noalive.id/*
 
-            # copy hasil build ke domain live
-            cp -r dist/* /www/wwwroot/api-simlab.noalive.id/
+#             # copy hasil build ke domain live
+#             cp -r dist/* /www/wwwroot/api-simlab.noalive.id/

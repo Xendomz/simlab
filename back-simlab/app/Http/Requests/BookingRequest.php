@@ -72,8 +72,8 @@ class BookingRequest extends ApiRequest
             'supervisor_email.email' => 'Format email penanggung jawab tidak valid.',
             'supervisor_email.required' => 'Email penanggung jawab wajib diisi.',
 
-            'start_time.required' => 'Waktu mulai wajib diisi.',
-            'end_time.required' => 'Waktu selesai wajib diisi.',
+            'start_time.required' => 'Tanggal & Waktu mulai wajib diisi.',
+            'end_time.required' => 'Tanggal & Waktu wajib diisi.',
             'end_time.after_or_equal' => 'Waktu selesai tidak boleh lebih awal dari waktu mulai.',
 
             'booking_type.required' => 'Jenis peminjaman wajib dipilih.',

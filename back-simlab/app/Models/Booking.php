@@ -49,6 +49,16 @@ class Booking extends Model
         'updated_at' => 'datetime',
     ];
 
+    public function setStartTimeAttribute($value)
+    {
+        $this->attributes['start_time'] = Carbon::parse($value)->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s');
+    }
+
+    public function setEndTimeAttribute($value)
+    {
+        $this->attributes['end_time'] = Carbon::parse($value)->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s');
+    }
+
     protected function serializeDate(\DateTimeInterface $date): string
     {
         // Convert stored (likely UTC) datetime into application timezone for output
@@ -58,20 +68,20 @@ class Booking extends Model
 
     public function getKepalaLabApprovalStatusAttribute() {
         return $this->approvals()
-            ->where('role', 'Kepala Lab Terpadu')
+            ->where('role', 'kepala_lab_terpadu')
             ->exists();
     }
 
     public function getKepalaLabApprovalAttribute() {
         $approval = $this->approvals()
-            ->where('role', 'Kepala Lab Terpadu')
+            ->where('role', 'kepala_lab_terpadu')
             ->first();
         return $approval ?: null;
     }
 
     public function getLaboranApprovalAttribute() {
         $approval = $this->approvals()
-            ->where('role', 'Laboran')
+            ->where('role', 'laboran')
             ->first();
         return $approval ?: null;
     }
@@ -79,7 +89,7 @@ class Booking extends Model
     public function getLaboranOffsiteApprovedAttribute()
     {
         return $this->approvals()
-            ->where('role', 'Laboran')
+            ->where('role', 'laboran')
             ->where('approved', 1)
             ->where('is_allowed_offsite', 1)
             ->exists();

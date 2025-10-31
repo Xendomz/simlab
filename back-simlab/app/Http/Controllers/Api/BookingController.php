@@ -32,7 +32,7 @@ class BookingController extends BaseController
     public function __construct()
     {
         $this->activeAcademicYear = AcademicYear::where('status', 'Active')->first();
-        $this->currentKepalaLab = User::where('role', 'Kepala Lab Terpadu')->first();
+        $this->currentKepalaLab = User::where('role', 'kepala_lab_terpadu')->first();
     }
 
     private function isAllowedAccess($bookingData, $user = null)
@@ -188,13 +188,13 @@ class BookingController extends BaseController
             'booking_id' => $booking->id,
             'role' => $user->role,
             'approver_id' => $user->id,
-            'approved' => $isApprove ? 1 : 0,
+            'is_approved' => $isApprove ? 1 : 0,
             'information' => $request->information ?? null,
         ];
 
         // Khusus untuk Laboran yang menyetujui peminjaman alat, kita perlu
         // mencatat izin apakah alat boleh dibawa ke luar lab atau tidak.
-        if ($user->role === 'Laboran' && $isApprove && $booking->booking_type === 'equipment') {
+        if ($user->role === 'laboran' && $isApprove && $booking->booking_type === 'equipment') {
             $approvalData['is_allowed_offsite'] = $request->boolean('is_allowed_offsite');
         }
 
@@ -206,13 +206,13 @@ class BookingController extends BaseController
      */
     private function assignBookingDataByRole($booking, $user, $request, bool $isApprove)
     {
-        if ($user->role === 'Kepala Lab Terpadu' && $isApprove) {
+        if ($user->role === 'kepala_lab_terpadu' && $isApprove) {
             $booking->update(['laboran_id' => $request->laboran_id]);
             $laboran = User::find($request->laboran_id);
             Mail::to($laboran->email)->queue(new BookingNotificationKepalaLabApproved($laboran, $booking));
         }
 
-        if ($user->role === 'Laboran' && $isApprove && $booking->booking_type === 'equipment') {
+        if ($user->role === 'laboran' && $isApprove && $booking->booking_type === 'equipment') {
             $booking->update([
                 'laboratory_room_id' => $request->laboratory_room_id,
             ]);
@@ -221,7 +221,7 @@ class BookingController extends BaseController
         if (!$isApprove) {
             $booking->update(['status' => 'rejected']);
             Mail::to($user->email)->queue(new BookingNotificationRejected($booking->user, $booking, $request->information));
-        } elseif ($user->role == 'Laboran' && $isApprove) {
+        } elseif ($user->role == 'laboran' && $isApprove) {
             $booking->update(['status' => 'approved']);
             Mail::to($booking->user->email)->queue(new BookingNotificationLaboranApproved($booking->user, $booking));
         }
@@ -284,8 +284,8 @@ class BookingController extends BaseController
             $data['user_id'] = $user->id;
             $data['academic_year_id'] = $this->activeAcademicYear->id;
             $data['supporting_file'] = $this->storeFile($request, 'supporting_file', 'berkas-pendukung');
-            $data['start_time'] = Carbon::parse($request->start_time)->format('Y-m-d H:i:s');
-            $data['end_time'] = Carbon::parse($request->end_time)->format('Y-m-d H:i:s');
+            $data['start_time'] = $request->start_time;
+            $data['end_time'] = $request->end_time;
 
             // Set status: pending only for 'room', draft otherwise
             $isRoom = $request->booking_type === 'room';
@@ -297,16 +297,16 @@ class BookingController extends BaseController
             }
 
             // set ruangan_laboratorium_id to null when type is equipment
-            $data['laboratory_room_id'] = $request->booking_type === 'equipment' ? null : $request->ruangan_laboratorium_id;
+            $data['laboratory_room_id'] = $request->booking_type === 'equipment' ? null : $request->laboratory_room_id;
 
             $booking = Booking::create($data);
             if ($isRoom) {
                 // Auto-approve for 'room' bookings
                 BookingApproval::create([
                     'booking_id' => $booking->id,
-                    'role' => 'Peminjam',
+                    'role' => 'pemohon',
                     'approver_id' => $user->id,
-                    'approved' => 1
+                    'is_approved' => 1
                 ]);
             }
 
@@ -348,24 +348,33 @@ class BookingController extends BaseController
     {
         try {
             $booking = Booking::with(['approvals.approver'])->findOrFail($id);
-            $roles = ['Peminjam', 'Kepala Lab Terpadu', 'Laboran'];
+            $roles = ['pemohon', 'kepala_lab_terpadu', 'laboran'];
             $stepper = [];
             $allApproved = true;
             $hasBeenRejected = false;
             foreach ($roles as $role) {
                 $approval = $booking->approvals->where('role', $role)->sortByDesc('created_at')->first();
                 if ($approval) {
-                    $hasBeenRejected = ($approval->approved === 0) && true;
-                    $status = $approval->approved ? 'approved' : 'rejected';
+                    // Normalize status: 1 = approved, 2 = revision, 0 = rejected
+                    if ($approval->is_approved === 1) {
+                        $status = 'approved';
+                    } elseif ($approval->is_approved === 2) {
+                        $status = 'revision';
+                    } elseif ($approval->is_approved === 0) {
+                        $status = 'rejected';
+                        $hasBeenRejected = true;
+                    } else {
+                        $status = 'pending';
+                    }
                 } else {
                     $status = $hasBeenRejected ? 'rejected' : 'pending';
                 }
 
                 $stepper[] = [
-                    'role' => $role,
+                    'role' => ucwords(str_replace('_', ' ', $role)),
                     'status' => $status,
                     'information' => $approval?->information,
-                    'approved_at' => $approval?->created_at,
+                    'approved_at' => $approval?->created_at ? Carbon::parse($approval->created_at)->setTimezone(config('app.timezone'))->toIso8601String() : null,
                     'approver' => $approval?->approver?->name,
                 ];
 
@@ -446,10 +455,10 @@ class BookingController extends BaseController
 
             BookingApproval::firstOrCreate([
                 'booking_id' => $booking->id,
-                'role' => 'Peminjam',
+                'role' => 'pemohon',
                 'approver_id' => auth()->id(),
             ], [
-                'approved' => 1
+                'is_approved' => 1
             ]);
 
             DB::commit();
