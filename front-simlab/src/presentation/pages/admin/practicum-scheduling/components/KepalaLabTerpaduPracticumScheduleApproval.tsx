@@ -52,7 +52,6 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
   const [id, setId] = useState<number | null>(null)
   const [openApprovalDialog, setOpenApprovalDialog] = useState<boolean>(false)
   const [openRejectionDialog, setOpenRejectionDialog] = useState<boolean>(false)
-  const [openRevisionDialog, setOpenRevisionDialog] = useState<boolean>(false)
 
   const openApproval = (id: number) => {
     setId(id)
@@ -64,11 +63,6 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
     setOpenRejectionDialog(true)
   }
 
-  const openRevision = (id: number) => {
-    setId(id)
-    setOpenRevisionDialog(true)
-  }
-
   const handleApproval = async (laboran_id: number, information: string): Promise<void> => {
     if (!id) return
     const res = await practicumSchedulingService.verify(id, {
@@ -78,17 +72,6 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
     })
     toast.success(res.message)
     setOpenApprovalDialog(false)
-    refresh()
-  }
-
-  const handleRevision = async (information: string): Promise<void> => {
-    if (!id) return
-    const res = await practicumSchedulingService.verify(id, {
-      action: 'revision',
-      information: information
-    })
-    toast.success(res.message)
-    setOpenRevisionDialog(false)
     refresh()
   }
 
@@ -128,7 +111,6 @@ const KepalaLabTerpaduPracticumScheduleApproval = () => {
           </CardContent>
         </Card>
         <ApproveWithLaboranSelectDialog open={openApprovalDialog} onOpenChange={setOpenApprovalDialog} handleSave={handleApproval} />
-        {/* <RevisionDialog open={openRevisionDialog} onOpenChange={setOpenRevisionDialog} handleRejection={handleRevision}/> */}
         <RejectionDialog open={openRejectionDialog} onOpenChange={setOpenRejectionDialog} handleRejection={handleRejection} />
       </div>
     </>

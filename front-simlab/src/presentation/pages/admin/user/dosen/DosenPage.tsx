@@ -1,10 +1,9 @@
-import useTable from '@/application/hooks/useTable'
 import { gsap } from 'gsap';
 import Header from '@/presentation/components/Header'
 import Table from '@/presentation/components/Table'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { useGSAP } from '@gsap/react'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { DosenColumn } from './DosenColumn'
 import { ModalType } from '@/shared/Types'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'

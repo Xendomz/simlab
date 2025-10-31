@@ -105,13 +105,11 @@ const LecturerPracticumSchedulingDetailPage = () => {
                     </div>
                 ) : (
                     <div className="flex flex-col gap-4 p-4 pt-0" ref={sectionRef}>
-                        <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-                            <div className={'self-end ml-auto'}>
-                                <Button className="gap-2" onClick={() => navigate(backTo)}>
-                                    <ArrowLeft className="w-4 h-4" />
-                                    Kembali
-                                </Button>
-                            </div>
+                        <div className="flex items-center justify-between flex-col-reverse sm:flex-row mb-2 gap-2">
+                            <Button className="gap-2 w-full sm:w-fit" onClick={() => navigate(backTo)}>
+                                <ArrowLeft className="w-4 h-4" />
+                                Kembali
+                            </Button>
                         </div>
                         <div className='grid grid-cols-1 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-5'>
                             {/* Informasi Umum */}

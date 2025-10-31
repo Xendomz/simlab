@@ -15,8 +15,6 @@ export const Login: React.FC = () => {
     const { errors, setErrors, processErrors } = useValidationErrors()
     const [formData, setFormData] = useState<LoginCredentials>({ email: '', password: '' });
     const [isLoading, setIsLoading] = useState(false);
-    const [registerStatus, setRegisterStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
-    const [loginStatus, setLoginStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -66,16 +64,6 @@ export const Login: React.FC = () => {
                         <h3 className="text-3xl font-medium">Selamat Datang</h3>
                         <h4 className="text-base">Silakan masuk ke akun Anda.</h4>
                     </div>
-                    {registerStatus && (
-                        <div className="w-full px-4 py-3 leading-normal text-green-700 bg-green-100 rounded-lg" role="alert">
-                            <p>{registerStatus.message}</p>
-                        </div>
-                    )}
-                    {loginStatus && (
-                        <div className="w-full px-4 py-3 leading-normal text-red-700 bg-red-100 rounded-lg" role="alert">
-                            <p>{loginStatus.message}</p>
-                        </div>
-                    )}
                     <form className="flex flex-col w-full gap-5" onSubmit={handleSubmit}>
                         <div className="flex flex-col gap-2">
                             <Label htmlFor="email">Email</Label>

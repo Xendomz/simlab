@@ -1,4 +1,3 @@
-import { LaboratoryMaterialInputDTO, LaboratoryMaterialTableParams } from "@/application/laboratory-material/LaboratoryMaterialDTO"
 import { ApiResponse, PaginatedResponse } from "../../shared/Types"
 import { LaboratoryMaterial } from "./LaboratoryMaterial"
 

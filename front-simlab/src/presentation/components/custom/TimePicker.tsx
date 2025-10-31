@@ -26,12 +26,12 @@ interface TimePickerProps {
 
 const TimePicker: React.FC<TimePickerProps> = ({ id, label, value, onChange }) => {
     const [open, setOpen] = useState(false);
-    const [h, m, s] = value.split(":");
+    const [h, m] = value.split(":");
 
     const hours = useMemo(() => Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, "0")), []);
     const minutes = useMemo(() => Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0")), []);
 
-    const update = (nh: string, nm: string, ns: string) => {
+    const update = (nh: string, nm: string) => {
         const next = `${nh}:${nm}:00`;
         onChange(next);
     };
@@ -50,7 +50,7 @@ const TimePicker: React.FC<TimePickerProps> = ({ id, label, value, onChange }) =
                     <div className="grid grid-cols-2 gap-2">
                         <div className="flex flex-col gap-1">
                             <span className="text-xs font-medium px-1">Jam</span>
-                            <Select value={h} onValueChange={(val) => update(val, m, s)}>
+                            <Select value={h} onValueChange={(val) => update(val, m)}>
                                 <SelectTrigger className="h-9 w-full">
                                     <SelectValue />
                                 </SelectTrigger>
@@ -63,7 +63,7 @@ const TimePicker: React.FC<TimePickerProps> = ({ id, label, value, onChange }) =
                         </div>
                         <div className="flex flex-col gap-1">
                             <span className="text-xs font-medium px-1">Menit</span>
-                            <Select value={m} onValueChange={(val) => update(h, val, s)}>
+                            <Select value={m} onValueChange={(val) => update(h, val)}>
                                 <SelectTrigger className="h-9 w-full">
                                     <SelectValue />
                                 </SelectTrigger>

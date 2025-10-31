@@ -1,6 +1,6 @@
 import { LaboratoryMaterialView } from '@/application/laboratory-material/LaboratoryMaterialView'
 import React, { useEffect, useState } from 'react'
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog'
 import { ScrollArea } from '@/presentation/components/ui/scroll-area'
 import Item from '@/presentation/components/Item'
 

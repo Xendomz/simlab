@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Navigate, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { AuthResponse, RegisterCredentials } from "../../types/Auth";
 import { StudyProgram } from "../../domain/study-program/StudyProgram";
 import { useAuth } from "../../application/hooks/useAuth";
 import { StudyProgramRepository } from "../../infrastructure/study-program/StudyProgramRepository";
@@ -11,6 +10,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Button } from "../components/ui/button";
 import { toast, Toaster } from "sonner";
 import { Combobox } from "../components/custom/combobox";
+import { ApiResponse } from "@/shared/Types";
+import { RegisterCredentials } from "@/domain/Auth/Auth";
 
 const studyProgramRepository = new StudyProgramRepository()
 
@@ -19,12 +20,12 @@ export const RegisterPage: React.FC = () => {
         name: '',
         identity_num: '',
         role: '',
-        study_program_id: '',
+        study_program_id: 0,
         email: '',
         password: '',
         c_password: ''
     });
-    const { errors, setErrors, processErrors } = useValidationErrors()
+    const { errors, processErrors } = useValidationErrors()
     const [isLoading, setIsLoading] = useState(false);
     const [studyProgram, setStudyProgram] = useState<StudyProgram[]>([])
     const { user, register } = useAuth();
@@ -54,13 +55,14 @@ export const RegisterPage: React.FC = () => {
         setIsLoading(true);
 
         try {
-            setErrors({})
             await register(formData);
-
             navigate('/login');
             toast.success('Berhasil mendaftar, silahkan login!')
-        } catch (error) {
-            processErrors((error as AuthResponse).errors)
+        } catch (e) {
+            const error = e as ApiResponse
+            if (error.errors) {
+                processErrors(error.errors)
+            }
         } finally {
             setIsLoading(false);
         }
@@ -171,7 +173,7 @@ export const RegisterPage: React.FC = () => {
                                 onChange={(val) => {
                                     setFormData((prev) => ({
                                         ...prev,
-                                        study_program_id: val ? Number(val) : null
+                                        study_program_id: val ? Number(val) : 0
                                     }))
                                 }}
                                 placeholder="Pilih Prodi"

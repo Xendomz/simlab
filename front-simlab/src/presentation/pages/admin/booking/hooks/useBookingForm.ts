@@ -33,6 +33,7 @@ export const useBookingForm = () => {
 
     const handleDateTimeChange = (e: { target: { name: "start_time" | "end_time"; value: Date } }) => {
         const { name, value } = e.target;
+        
         setFormData(prev => ({
             ...prev,
             [name]: value

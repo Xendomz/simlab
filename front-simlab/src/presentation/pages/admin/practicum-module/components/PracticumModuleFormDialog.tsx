@@ -1,7 +1,6 @@
 import { PracticumModuleInputDTO } from '@/application/practicum-module/PracticumModuleDTO'
 import { PracticumModuleView } from '@/application/practicum-module/PracticumModuleView'
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog'
-import { PracticumView } from '@/application/practicum/PracticumView'
 import { useValidationErrors } from '@/presentation/hooks/useValidationError'
 import { ApiResponse } from '@/shared/Types'
 import React, { useEffect, useState } from 'react'

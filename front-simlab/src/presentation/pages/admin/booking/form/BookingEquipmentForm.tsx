@@ -1,12 +1,10 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
 import { useNavigate, useParams } from 'react-router-dom'
 // import { useLaboratoryEquipment } from '@/application/laboratory-equipment/hooks/useLaboratoryEquipment'
-import useTable from '@/application/hooks/useTable'
 import Table from '@/presentation/components/Table'
 import { LaboratoryEquipmentColumn } from '../column/LaboratoryEquipmentColumn'
-import { LaboratoryEquipmentView } from '@/application/laboratory-equipment/LaboratoryEquipmentView'
 import { Input } from '@/presentation/components/ui/input'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
@@ -14,6 +12,8 @@ import { toast } from 'sonner'
 import { useBooking } from '@/application/booking/hooks/useBooking'
 import { useValidationErrors } from '@/presentation/hooks/useValidationError'
 import { Skeleton } from '@/presentation/components/ui/skeleton'
+import { useLaboratoryEquipmentDataTable } from '../../laboratory-equipment/hooks/useLaboratoryEquipmentDataTable'
+import { useBookingEquipmentMaterialForm } from '../hooks/useBookingEquipmentMaterialForm'
 
 const BookingEquipmentForm = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -28,42 +28,30 @@ const BookingEquipmentForm = () => {
     const { storeBookingEquipment } = useBooking({})
     const { errors, processErrors } = useValidationErrors()
 
-    const [equipments, setEquipments] = useState<{ id: number, name: string, quantity: number, unit: string }[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const table = useTable()
-    const { laboratoryEquipment, isLoading, getData } = useLaboratoryEquipment({
-        currentPage: table.currentPage,
-        perPage: table.perPage,
-        searchTerm: table.searchTerm,
-        filter_laboratory_room: 0,
-        setTotalPages: table.setTotalPages,
-        setTotalItems: table.setTotalItems
-    })
+    const {
+        formData,
+        handleChangeItem,
+        handleRemoveItem,
+        handleSelectItem,
+    } = useBookingEquipmentMaterialForm()
 
-    // selection handlers
-    const toggleSelect = (data: LaboratoryEquipmentView) => {
-        setEquipments(prev => {
-            const exists = prev.find(e => e.id === data.id)
-            if (exists) return prev.filter(e => e.id !== data.id)
-            return [...prev, { id: data.id, name: data.equipmentName, quantity: 0, unit: data.unit }]
-        })
-    }
-
-    const changeQuantity = (id: number, quantity: number) => setEquipments(prev => prev.map(e => e.id === id ? { ...e, quantity } : e))
-    const removeItem = (id: number) => setEquipments(prev => prev.filter(e => e.id !== id))
-
-    useEffect(() => { getData() }, [getData])
+    const {
+        laboratoryEquipments,
+        isLoading: isEquipmentLoading,
+        ...equipmentTable
+    } = useLaboratoryEquipmentDataTable({ filter_laboratory_room: 0 })
 
     const handleSubmit = async () => {
         if (!bookingId) return
-        if (equipments.length === 0) {
+        if (formData.laboratoryEquipments.length === 0) {
             toast.error('Minimal satu alat dipilih')
             return
         }
         setIsSubmitting(true)
         try {
-            await storeBookingEquipment(bookingId, equipments.map(e => ({ id: e.id, quantity: e.quantity })))
+            await storeBookingEquipment(bookingId, formData.laboratoryEquipments.map(e => ({ id: e.id, quantity: e.quantity })))
             toast.success('Alat berhasil diajukan')
             navigate('/panel/peminjaman')
         } catch (e: any) {
@@ -88,7 +76,7 @@ const BookingEquipmentForm = () => {
                     <div className='grid lg:grid-cols-2 xl:grid-cols-3 gap-5'>
                         <div className='xl:col-span-2 overflow-x-auto'>
                             <div className='font-semibold text-sm mb-5'>List Alat Laboratorium</div>
-                            {isLoading ? (
+                            {isEquipmentLoading ? (
                                 <div className='flex flex-col gap-3'>
                                     <Skeleton className='w-full h-9 rounded-md' />
                                     <Skeleton className='w-full h-9 rounded-md' />
@@ -98,17 +86,17 @@ const BookingEquipmentForm = () => {
                                 </div>
                             ) : (
                                 <Table
-                                    data={laboratoryEquipment}
-                                    columns={LaboratoryEquipmentColumn({ handleSelectLaboratoryEquipment: toggleSelect, selectedIds: equipments.map(e => e.id) })}
-                                    loading={isLoading}
-                                    searchTerm={table.searchTerm}
-                                    handleSearch={table.handleSearch}
-                                    perPage={table.perPage}
-                                    handlePerPageChange={table.handlePerPageChange}
-                                    totalPages={table.totalPages}
-                                    totalItems={table.totalItems}
-                                    currentPage={table.currentPage}
-                                    handlePageChange={table.handlePageChange}
+                                    data={laboratoryEquipments}
+                                    columns={LaboratoryEquipmentColumn({ handleSelectItem, selectedIds: formData.laboratoryEquipments.map(e => e.id) })}
+                                    loading={isEquipmentLoading}
+                                    searchTerm={equipmentTable.searchTerm}
+                                    handleSearch={equipmentTable.handleSearch}
+                                    perPage={equipmentTable.perPage}
+                                    handlePerPageChange={equipmentTable.handlePerPageChange}
+                                    totalPages={equipmentTable.totalPages}
+                                    totalItems={equipmentTable.totalItems}
+                                    currentPage={equipmentTable.currentPage}
+                                    handlePageChange={equipmentTable.handlePageChange}
                                 />
                             )}
                         </div>
@@ -119,8 +107,8 @@ const BookingEquipmentForm = () => {
                                 <p className='text-xs italic text-red-500 mb-2'>Periksa kembali input alat yang dipilih.</p>
                             )}
                             <div className='flex flex-col gap-3'>
-                                {equipments.length === 0 && <p className='text-sm text-muted-foreground'>Belum ada alat dipilih.</p>}
-                                {equipments.map((eq, index) => {
+                                {formData.laboratoryEquipments.length === 0 && <p className='text-sm text-muted-foreground'>Belum ada alat dipilih.</p>}
+                                {formData.laboratoryEquipments.map((eq, index) => {
                                     const rowError = getRowError(index)
                                     return (
                                         <div key={eq.id} className='flex flex-col gap-1 border rounded-md px-4 py-3 bg-background'>
@@ -130,13 +118,14 @@ const BookingEquipmentForm = () => {
                                                     <Input
                                                         type='number'
                                                         min={0}
-                                                        value={eq.quantity}
-                                                        onChange={(e) => changeQuantity(eq.id, Number(e.target.value))}
+                                                        value={eq.quantity  || ''}
+                                                        placeholder='Jumlah'
+                                                        onChange={(e) => handleChangeItem('laboratory_equipment', eq.id, Number(e.target.value))}
                                                         className={rowError ? 'border-red-500 focus-visible:ring-red-500' : ''}
                                                     />
                                                     <span className='text-sm font-medium w-fit text-nowrap'>{eq.unit}</span>
                                                 </div>
-                                                <Button type='button' variant='destructive' size='sm' className='w-full md:w-fit' onClick={() => removeItem(eq.id)}>Hapus</Button>
+                                                <Button type='button' variant='destructive' size='sm' className='w-full md:w-fit' onClick={() => handleRemoveItem('laboratory_equipment', eq.id)}>Hapus</Button>
                                             </div>
                                             {rowError && <p className='text-[10px] italic text-red-500'>{rowError}</p>}
                                         </div>

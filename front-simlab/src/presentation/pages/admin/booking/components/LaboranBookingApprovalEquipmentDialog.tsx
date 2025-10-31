@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { ApiResponse } from '@/shared/Types';
 import { Combobox } from '@/presentation/components/custom/combobox';
 import { Textarea } from '@/presentation/components/ui/textarea';
+import { useLaboratoryRoomSelect } from '../../laboratory-room/hooks/useLaboratoryRoomSelect';
 
 interface LaboranBookingApprovalEquipmentDialogProps {
     open: boolean,
@@ -31,24 +32,12 @@ const LaboranBookingApprovalEquipmentDialog: React.FC<LaboranBookingApprovalEqui
     const [isAllowedOffsite, setIsAllowedOffsite] = useState<boolean>(false);
     const { errors, processErrors } = useValidationErrors()
 
-    const {
-        laboratoryRoom: rooms,
-        getData: getRooms
-    } = useLaboratoryRoom({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages: () => { },
-        setTotalItems: () => { }
-    });
+    const { laboratoryRooms, selectedLaboratoryRoom, setSelectedLaboratoryRoom } = useLaboratoryRoomSelect()
 
     useEffect(() => {
-        if (open) getRooms();
-        if (!open) {
-            setSelectedRoom('');
-            setIsAllowedOffsite(false);
-        }
-    }, [open, getRooms]);
+        setSelectedRoom('');
+        setIsAllowedOffsite(false);
+    }, [open]);
 
     const onSubmit = async () => {
         setIsSubmitting(true);
@@ -81,9 +70,9 @@ const LaboranBookingApprovalEquipmentDialog: React.FC<LaboranBookingApprovalEqui
                         <Label htmlFor="ruangan">Ruangan Laboratorium</Label>
                         <div>
                             <Combobox
-                                options={rooms}
-                                value={selectedRoom}
-                                onChange={(val) => setSelectedRoom(String(val))}
+                                options={laboratoryRooms}
+                                value={selectedLaboratoryRoom.toString() || ''}
+                                onChange={(val) => setSelectedLaboratoryRoom(Number(val))}
                                 placeholder="Pilih Ruangan Laboratorium"
                                 optionLabelKey='name'
                                 optionValueKey='id'

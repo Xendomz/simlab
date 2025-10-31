@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react'
-import useTable from '@/application/hooks/useTable';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
 import Table from '@/presentation/components/Table';
 import { PracticumScheduleVerificationColumn } from '../column/PracticumScheduleVerificationColumn';
-import { PracticumSchedulingService } from '@/application/practicum-scheduling/PracticumSchedulingService';
 import { PracticumSchedulingView } from '@/application/practicum-scheduling/PracticumSchedulingView';
 import { userRole } from '@/domain/User/UserRole';
 import RejectionDialog from '@/presentation/components/custom/RejectionDialog';
 import ApproveWithLaboratoryMaterialRealizationDialog from '@/presentation/components/custom/ApproveWithLaboratoryMaterialRealizationDialog';
+import { usePracticumSchedulingVerificationDataTable } from '../hooks/usePracticumSchedulingVerificationDataTable';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
 
 const LaboranPracticumScheduleApproval = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -32,109 +32,61 @@ const LaboranPracticumScheduleApproval = () => {
         )
     }, [])
 
+    const { practicumSchedulingService } = useDepedencies()
+
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        practicumSchedulings,
+        isLoading,
         searchTerm,
-
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        refresh,
+    
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+      } = usePracticumSchedulingVerificationDataTable()
 
-
-    const practicumSchedulingService = new PracticumSchedulingService()
-    const [practicumSchedulings, setPracticumSchedulings] = useState<PracticumSchedulingView[]>([])
-    const [isLoading, setIsLoading] = useState<boolean>(false)
-
-    const getDataForVerification = async () => {
-        setIsLoading(true)
-        const response = await practicumSchedulingService.getPracticumSchedulingForVerification({
-            page: currentPage,
-            per_page: perPage,
-            search: searchTerm
-        })
-        setPracticumSchedulings(response.data ?? [])
-        setTotalPages(response.last_page ?? 0)
-        setTotalItems(response.total ?? 0)
-        setIsLoading(false)
-    }
-
-    useEffect(() => {
-        getDataForVerification()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getDataForVerification()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
-
-    const [id, setId] = useState<number | null>(null)
+    const [practicumSchedulingId, setPracticumSchedulingId] = useState<number | null>(null)
     const [openApprovalDialog, setOpenApprovalDialog] = useState<boolean>(false)
     const [openRejectionDialog, setOpenRejectionDialog] = useState<boolean>(false)
     const [selectedPracticumScheduling, setSelectedPracticumScheduling] = useState<PracticumSchedulingView>()
 
     const openApproval = (id: number) => {
-        setId(id)
+        setPracticumSchedulingId(id)
         setSelectedPracticumScheduling(practicumSchedulings.find((practicumScheduling) => practicumScheduling.id === id))
         setOpenApprovalDialog(true)
     }
 
     const openRejection = (id: number) => {
-        setId(id)
+        setPracticumSchedulingId(id)
         setOpenRejectionDialog(true)
     }
 
-    useEffect(() => {
-        getDataForVerification()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getDataForVerification()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
-
     const handleApproval = async (information: string, materials: number[]): Promise<void> => {
-        if (!id) return;
-        const res = await practicumSchedulingService.verify(id, {
+        if (!practicumSchedulingId) return;
+        const res = await practicumSchedulingService.verify(practicumSchedulingId, {
             action: 'approve',
             information: information,
             materials: materials
         })
         toast.success(res.message)
         setOpenApprovalDialog(false)
-        getDataForVerification()
+        refresh()
     }
 
     const handleRejection = async (information: string): Promise<void> => {
-        if (!id) return;
-        const res = await practicumSchedulingService.verify(id, {
+        if (!practicumSchedulingId) return;
+        const res = await practicumSchedulingService.verify(practicumSchedulingId, {
             action: 'reject',
             information: information
         })
         toast.success(res.message)
         setOpenRejectionDialog(false)
-        getDataForVerification()
+        refresh()
     }
 
     return (

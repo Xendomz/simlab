@@ -1,5 +1,3 @@
-import { UserSelectView } from '@/application/user/UserSelectView';
-import { UserService } from '@/application/user/UserService';
 import { userRole } from '@/domain/User/UserRole';
 import {
   Dialog,
@@ -12,12 +10,13 @@ import {
 } from '@/presentation/components/ui/dialog'
 import { Button } from '@/presentation/components/ui/button'
 import { Combobox } from '@/presentation/components/custom/combobox';
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { useValidationErrors } from '@/presentation/hooks/useValidationError';
 import { ApiResponse } from '@/shared/Types';
 import { toast } from 'sonner';
+import { useUserSelect } from '@/presentation/pages/admin/user/hooks/useUserSelect';
 
 interface ApproveWithLaboranSelectDialogProps {
   open: boolean,
@@ -30,28 +29,11 @@ const ApproveWithLaboranSelectDialog: React.FC<ApproveWithLaboranSelectDialogPro
   onOpenChange,
   handleSave
 }) => {
-  const [selectedLaboran, setSelectedLaboran] = useState<string>('');
   const [information, setInformation] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const { errors, processErrors } = useValidationErrors()
 
-  const userService = new UserService()
-  const [laborans, setLaborans] = useState<UserSelectView[]>([])
-
-  const getData = async () => {
-    const response = await userService.getDataForSelect(userRole.Laboran)
-    setLaborans(response?.data ?? [])
-  }
-
-  useEffect(() => {
-    getData()
-  }, [])
-
-  useEffect(() => {
-    setSelectedLaboran('')
-  }, [open])
-
+  const { users: laborans, selectedUser: selectedLaboran, setSelectedUser: setSelectedLaboran } = useUserSelect({ role: userRole.Laboran })
   const onSubmit = async () => {
     if (!selectedLaboran) return;
     setIsSubmitting(true);
@@ -83,8 +65,8 @@ const ApproveWithLaboranSelectDialog: React.FC<ApproveWithLaboranSelectDialogPro
             <div className="flex flex-col gap-1">
               <Combobox
                 options={laborans}
-                value={selectedLaboran}
-                onChange={(val) => setSelectedLaboran(String(val))}
+                value={selectedLaboran.toString() || ''}
+                onChange={(val) => setSelectedLaboran(Number(val))}
                 placeholder="Pilih Laboran"
                 optionLabelKey='name'
                 optionValueKey='id'

@@ -7,7 +7,7 @@ export type BookingApprovalAPI = {
   booking_id: number;
   role: string;
   approver_id: number | null;
-  approved: number | boolean;
+  is_approved: number;
   information: string;
   created_at: string;
   updated_at: string;
@@ -20,7 +20,7 @@ export function toDomain(api: BookingApprovalAPI): BookingApproval {
     api.booking_id,
     api.role,
     api.approver_id ?? 0,
-    Boolean(api.approved),
+    api.is_approved,
     api.information,
     new Time(api.created_at),
     new Time(api.updated_at),

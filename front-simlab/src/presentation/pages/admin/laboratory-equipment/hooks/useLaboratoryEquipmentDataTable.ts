@@ -40,7 +40,7 @@ export const useLaboratoryEquipmentDataTable = ({
         setTotalItems(response.total ?? 0)
         setTotalPages(response.last_page ?? 0)
         setIsLoading(false)
-    }, [])
+    }, [currentPage, perPage, debounceSearchTerm, filter_laboratory_room])
 
     useEffect(() => {
         getData();

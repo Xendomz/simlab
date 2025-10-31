@@ -1,18 +1,19 @@
 import { BookingView } from "@/application/booking/BookingView";
 import { BookingType } from "@/domain/booking/BookingType";
+import { userRole } from "@/domain/User/UserRole";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { NavLink } from "react-router-dom";
 
 interface ColumnProps {
-    role: 'Kepala Lab Terpadu' | 'Laboran';
-    openApproval: (booking: BookingView) => void;
-    openRejection: (booking: BookingView) => void;
+    role: userRole;
+    openApproval: (id: number) => void;
+    openRejection: (id: number) => void;
 }
 
 export const BookingVerificationColumn = ({ role, openApproval, openRejection }: ColumnProps): ColumnDef<BookingView>[] => [
-    { header: 'Tahun Akademik', accessorKey: 'academicYear', cell: ({ row }) => row.original.academicYear?.academicYear },
+    { header: 'Tahun Akademik', accessorKey: 'academicYear', cell: ({ row }) => row.original.academicYear?.name },
     {
         header: 'Identitas Peminjam', accessorKey: 'user',
         cell: ({ row }) => (
@@ -56,34 +57,48 @@ export const BookingVerificationColumn = ({ role, openApproval, openRejection }:
     },
     {
         header: 'Verifikasi Peminjaman', accessorKey: 'id', cell: ({ row }) => {
-            const renderApprovalBadge = (approval: any) => {
-                if (!approval) return null;
-                return approval.approved ? (
-                    <Badge>Peminjaman Distujui</Badge>
-                ) : (
-                    <Badge variant={'destructive'}>Peminjaman Ditolak</Badge>
-                );
+            const renderApprovalBadge = (is_approved: number | null | undefined) => {
+                if (is_approved === 1) {
+                    return <Badge>Pengajuan Disetujui</Badge>;
+                }
+
+                if (is_approved === 2) {
+                    return <Badge variant={'warning'}>Pengajuan Dalam Proses Revisi</Badge>;
+                }
+
+                if (is_approved === 0) {
+                    return <Badge variant={'destructive'}>Pengajuan Ditolak</Badge>;
+                }
             };
 
             const kepalaLabApproval = row.original.kepalaLabApproval;
             const laboranApproval = row.original.laboranApproval;
 
             // If kepala lab rejected, laboran is also considered rejected
-            if (role === 'Laboran' && kepalaLabApproval && kepalaLabApproval.approved === false) {
-                return renderApprovalBadge({ approved: false });
+            if (role === userRole.Laboran && kepalaLabApproval && kepalaLabApproval.isApproved === 0) {
+                return renderApprovalBadge(0);
             }
 
-            // Determine approval object based on role
-            const approval = role === 'Kepala Lab Terpadu' ? kepalaLabApproval : laboranApproval;
-            const isPending = !approval;
+            // Determine approval object based on role (nullable)
+            let approval: number | null = null;
+            if (role === userRole.KepalaLabTerpadu) {
+                approval = kepalaLabApproval?.isApproved ?? null;
+                console.log(kepalaLabApproval);
+                
+            } else {
+                approval = laboranApproval?.isApproved ?? null;
+            }
+
+            const isPending = approval === null || approval === undefined;
 
             return (
                 <>
                     {renderApprovalBadge(approval)}
                     {isPending && (
                         <div className='flex gap-2'>
-                            <Button size="sm" onClick={() => openApproval(row.original)}>Terima</Button>
-                            <Button size="sm" onClick={() => openRejection(row.original)} variant="destructive">Tolak</Button>
+                            <Button size="sm" onClick={() => openApproval(row.original.id)}>Terima</Button>
+                            {/* <Button size="sm" onClick={() => openRevision(row.original.id)} variant="warning">Revisi</Button> */}
+                            <Button size="sm" onClick={() => openRejection(row.original.id)} variant="destructive">Tolak</Button>
                         </div>
                     )}
                 </>

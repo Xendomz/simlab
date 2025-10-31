@@ -3,11 +3,11 @@ import { Button } from "@/presentation/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 
 interface columnProps {
-    handleSelectLaboratoryEquipment: (data: LaboratoryEquipmentView) => void,
+    handleSelectItem: (type: 'laboratory_equipment' | 'laboratory_material', data: LaboratoryEquipmentView) => void,
     selectedIds?: number[]
 }
 
-export const LaboratoryEquipmentColumn = ({ handleSelectLaboratoryEquipment, selectedIds = [] }: columnProps): ColumnDef<LaboratoryEquipmentView>[] => [
+export const LaboratoryEquipmentColumn = ({ handleSelectItem, selectedIds = [] }: columnProps): ColumnDef<LaboratoryEquipmentView>[] => [
     { header: 'Kode Asset', accessorKey: 'assetCode' as keyof LaboratoryEquipmentView},
     { header: 'Nama Alat', accessorKey: 'equipmentName' as keyof LaboratoryEquipmentView},
     { header: 'Jumlah', accessorKey: 'quantity' as keyof LaboratoryEquipmentView, cell: ({ row }) => ( <div>{row.original.quantity} {row.original.unit}</div> )},
@@ -23,7 +23,7 @@ export const LaboratoryEquipmentColumn = ({ handleSelectLaboratoryEquipment, sel
                         size={'sm'}
                         variant={alreadySelected ? 'secondary' : 'default'}
                         disabled={alreadySelected}
-                        onClick={() => !alreadySelected && handleSelectLaboratoryEquipment(row.original)}
+                        onClick={() => !alreadySelected && handleSelectItem('laboratory_equipment', row.original)}
                     >
                         {alreadySelected ? 'Dipilih' : 'Pilih'}
                     </Button>

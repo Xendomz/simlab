@@ -1,3 +1,4 @@
+import { BookingStepperStatus } from "@/domain/booking/BookingStepperStatus";
 import { TimeView } from "../time/TimeView";
 import { BookingStepper } from "@/domain/booking/BookingStepper";
 
@@ -6,9 +7,9 @@ export class BookingStepperView {
     constructor(
         readonly id: number,
         readonly role: string,
-        readonly status: "approved" | "rejected" | "pending" | "revision",
+        readonly status: BookingStepperStatus,
         readonly information: string,
-        readonly approved_at?: TimeView,
+        readonly approvedAt?: TimeView,
         readonly approver?: string
     ){}
 

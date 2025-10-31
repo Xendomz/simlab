@@ -21,15 +21,10 @@ const PracticumSchedulingStepperDialog: React.FC<PracticumSchedulingStepperDialo
     const [practicumStepsLoading, setPracticumStepsLoading] = useState<boolean>(false)
     useEffect(() => {
         const loadSteps = async () => {
-            try {
-                setPracticumStepsLoading(true);
-                const res = await service.getPracticumSteps(practicumSchedulingId);
-                setPracticumSteps(res.data || []);
-            } catch (error) {
-                console.error("Failed to load practicum steps", error);
-            } finally {
-                setPracticumStepsLoading(false);
-            }
+            setPracticumStepsLoading(true);
+            const res = await service.getPracticumSteps(practicumSchedulingId);
+            setPracticumSteps(res.data || []);
+            setPracticumStepsLoading(false);
         };
         loadSteps();
     }, [practicumSchedulingId]);
@@ -77,83 +72,81 @@ const PracticumSchedulingStepperDialog: React.FC<PracticumSchedulingStepperDialo
     return (
         <>
             <Dialog>
-                <form>
-                    <DialogTrigger asChild>
-                        <Button disabled={practicumStepsLoading}>
-                            <Info />
-                            {practicumStepsLoading ? 'Loading...' : 'Proses Pengajuan'}
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-lg">
-                        <DialogHeader>
-                            <DialogTitle>Proses Pengajuan</DialogTitle>
-                            <DialogDescription>
-                                Lihat tahapan dan status persetujuan pengajuan Anda di bawah ini.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <ScrollArea className='h-full max-h-[70vh]'>
-                            <div className="relative mx-auto max-w-4xl">
-                                {practicumSteps.map((step, index) => (
-                                    <div key={index} className="relative pl-8 pb-8">
-                                        {practicumSteps.length > index + 1 && (
-                                            <Separator
-                                                orientation="vertical"
-                                                className="bg-muted absolute left-2 top-4"
-                                            />
-                                        )}
-                                        {getStepperStatus(step.status)}
-                                        <div className='flex flex-col'>
-                                            <span className="pt-2 text-lg font-bold tracking-tight flex items-center gap-2">
-                                                {step.role} {step.role !== 'Selesai' && renderStepperBadge(step.status)}
-                                            </span>
-                                            {step.role !== 'Selesai' ? (
-                                                <>
-                                                    <span className="text-sm text-muted-foreground rounded-xl tracking-tight">
-                                                        {step.approvedAt ? String(step.approvedAt.formatForInformation()) : ''}
-                                                    </span>
-
-                                                    {(step.status !== PracticumStepperStatus.Pending) ? (
-                                                        <>
-                                                            <div className="text-sm">
-                                                                <span className='font-semibold'>
-                                                                    {step.role === 'Pemohon' ? 'Diajukan oleh' : 'Diverifikasi oleh'}
-                                                                </span>
-                                                                : {step.approver ?? '—'}
-                                                            </div>
-                                                            {step.role !== 'Pemohon' && (
-                                                                <div className='flex flex-col mt-2'>
-                                                                    <span className='text-sm font-semibold'>
-                                                                        {step.status === PracticumStepperStatus.Rejected ? 'Alasan: ' : 'Catatan:'}
-                                                                    </span>
-                                                                    <span className='text-sm'>
-                                                                        {step.information || 'Tidak ada catatan'}
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    ) : (
-                                                        <span className='text-sm'>
-                                                            Menunggu Persetujuan...
-                                                        </span>
-                                                    )}
-                                                </>
-                                            ) : (
-                                                <span className='text-sm'>
-                                                    Pengajuan akan dinyatakan selesai setelah semua tahap disetujui.
+                <DialogTrigger asChild>
+                    <Button disabled={practicumStepsLoading} className='w-full sm:w-fit'>
+                        <Info />
+                        {practicumStepsLoading ? 'Loading...' : 'Proses Pengajuan'}
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Proses Pengajuan</DialogTitle>
+                        <DialogDescription>
+                            Lihat tahapan dan status persetujuan pengajuan Anda di bawah ini.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <ScrollArea className='h-full max-h-[70vh]'>
+                        <div className="relative mx-auto max-w-4xl">
+                            {practicumSteps.map((step, index) => (
+                                <div key={index} className="relative pl-8 pb-8">
+                                    {practicumSteps.length > index + 1 && (
+                                        <Separator
+                                            orientation="vertical"
+                                            className="bg-muted absolute left-2 top-4"
+                                        />
+                                    )}
+                                    {getStepperStatus(step.status)}
+                                    <div className='flex flex-col'>
+                                        <span className="pt-2 text-lg font-bold tracking-tight flex items-center gap-2">
+                                            {step.role} {step.role !== 'Selesai' && renderStepperBadge(step.status)}
+                                        </span>
+                                        {step.role !== 'Selesai' ? (
+                                            <>
+                                                <span className="text-sm text-muted-foreground rounded-xl tracking-tight">
+                                                    {step.approvedAt ? String(step.approvedAt.formatForInformation()) : ''}
                                                 </span>
-                                            )}
-                                        </div>
+
+                                                {(step.status !== PracticumStepperStatus.Pending) ? (
+                                                    <>
+                                                        <div className="text-sm">
+                                                            <span className='font-semibold'>
+                                                                {step.role === 'Pemohon' ? 'Diajukan oleh' : 'Diverifikasi oleh'}
+                                                            </span>
+                                                            : {step.approver ?? '—'}
+                                                        </div>
+                                                        {step.role !== 'Pemohon' && (
+                                                            <div className='flex flex-col mt-2'>
+                                                                <span className='text-sm font-semibold'>
+                                                                    {step.status === PracticumStepperStatus.Rejected ? 'Alasan: ' : 'Catatan:'}
+                                                                </span>
+                                                                <span className='text-sm'>
+                                                                    {step.information || 'Tidak ada catatan'}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <span className='text-sm'>
+                                                        Menunggu Persetujuan...
+                                                    </span>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <span className='text-sm'>
+                                                Pengajuan akan dinyatakan selesai setelah semua tahap disetujui.
+                                            </span>
+                                        )}
                                     </div>
-                                ))}
-                            </div>
-                        </ScrollArea>
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button variant="secondary">Tutup</Button>
-                            </DialogClose>
-                        </DialogFooter>
-                    </DialogContent>
-                </form>
+                                </div>
+                            ))}
+                        </div>
+                    </ScrollArea>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button variant="secondary">Tutup</Button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
             </Dialog>
         </>
     )

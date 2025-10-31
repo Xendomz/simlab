@@ -21,7 +21,7 @@ import { Input } from '../ui/input'
 
 interface ApproveWithLaboratoryMaterialRealizationDialogProps {
   open: boolean,
-  onOpenChange: (open: boolean) => Promise<void>,
+  onOpenChange: (open: boolean) => void,
   handleSave: (information: string, materials: number[]) => Promise<void>,
   practicumScheduling: PracticumSchedulingView | undefined
 }

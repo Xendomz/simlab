@@ -5,13 +5,13 @@ import { Button } from '@/presentation/components/ui/button'
 import { ArrowLeft, Info } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate, useParams } from 'react-router-dom'
-import { useBooking } from '@/application/booking/hooks/useBooking';
 import { BookingView } from '@/application/booking/BookingView';
 import BookingDetailDialog from './components/BookingDetailDialog';
 import { BookingType } from '@/domain/booking/BookingType';
 import BookingRoomNEquipmentForm from './form/BookingRoomNEquipmentForm';
 import { BookingStatus } from '@/domain/booking/BookingStatus';
 import BookingEquipmentForm from './form/BookingEquipmentForm';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
 
 const BookingManagePage = () => {
   const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -34,10 +34,7 @@ const BookingManagePage = () => {
   }, [])
 
   const { id } = useParams();
-
-  const {
-    getBookingDetail
-  } = useBooking({})
+  const {bookingService} = useDepedencies()
 
   const [booking, setBooking] = useState<BookingView>()
   const [isOpenDetail, setIsOpenDetail] = useState<boolean>(false)
@@ -47,7 +44,7 @@ const BookingManagePage = () => {
   const retreiveBookingDetail = useCallback(async () => {
     setIsRetreiveBooking(true)
     try {
-      const response = await getBookingDetail(Number(id))
+      const response = await bookingService.getBookingDetail(Number(id))
       setBooking(response.data)
       setIsRetreiveBooking(false)
     } catch (error: any) {
@@ -57,7 +54,7 @@ const BookingManagePage = () => {
         navigate('/404')
       }
     }
-  }, [getBookingDetail, id, navigate])
+  }, [bookingService, id])
 
   useEffect(() => { retreiveBookingDetail() }, [])
 

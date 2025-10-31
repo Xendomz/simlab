@@ -1,22 +1,15 @@
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useValidationErrors } from '@/presentation/hooks/useValidationError'
-import useTable from '@/application/hooks/useTable'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Skeleton } from '@/presentation/components/ui/skeleton'
 import Table from '@/presentation/components/Table'
 import { Button } from '@/presentation/components/ui/button'
 import { Input } from '@/presentation/components/ui/input'
-import { LaboratoryEquipmentView } from '@/application/laboratory-equipment/LaboratoryEquipmentView'
-import { LaboratoryMaterialView } from '@/application/laboratory-material/LaboratoryMaterialView'
-import { LaboratoryEquipmentService } from '@/application/laboratory-equipment/LaboratoryEquipmentService'
-import { LaboratoryMaterialService } from '@/application/laboratory-material/LaboratoryMaterialService'
 import { usePracticumScheduling } from '../context/PracticumSchedulingContext'
-import { PracticumSchedulingService } from '@/application/practicum-scheduling/PracticumSchedulingService'
-import { useDebounce } from '@/presentation/hooks/useDebounce'
 import { usePracticumSchedulingEquipmentMaterial } from '../hooks/usePracticumSchedulingEquipmentMaterial'
 import { LaboratoryEquipmentSelectColumn } from '../../laboratory-equipment/LaboratoryEquipmentSelectColumn'
 import { LaboratoryMaterialSelectColumn } from '../../laboratory-material/LaboratoryMaterialSelectColumn'
@@ -25,6 +18,9 @@ import { Label } from '@/presentation/components/ui/label'
 import Header from '@/presentation/components/Header'
 import PracticumScheduleDetailDialog from './PracticumScheduleDetailDialog'
 import { PracticumSchedulingView } from '@/application/practicum-scheduling/PracticumSchedulingView'
+import { useLaboratoryEquipmentDataTable } from '../../laboratory-equipment/hooks/useLaboratoryEquipmentDataTable'
+import { useLaboratoryMaterialDataTable } from '../../laboratory-material/hooks/useLaboratoryMaterialDataTable'
+import { useDepedencies } from '@/presentation/contexts/useDepedencies'
 
 interface PracticumScheduleEquipmentNMaterialFormProps {
     practicumScheduling: PracticumSchedulingView | undefined
@@ -58,69 +54,23 @@ const PracticumScheduleEquipmentNMaterialForm: React.FC<PracticumScheduleEquipme
     const { errors, processErrors } = useValidationErrors()
 
     // Table states
-    const equipmentTable = useTable()
-    const materialTable = useTable()
+    const {
+        laboratoryEquipments,
+        isLoading: isEquipmentLoading,
+        ...equipmentTable
+    } = useLaboratoryEquipmentDataTable({ filter_laboratory_room: 0 })
 
-    const laboratoryEquipmentService = new LaboratoryEquipmentService()
-    const [laboratoryEquipments, setLaboratoryEquipments] = useState<LaboratoryEquipmentView[]>([])
-    const [isEquipmentLoading, setIsEqupmentLoading] = useState<boolean>(false)
-    const equipmentDebounceSearchTerm = useDebounce(equipmentTable.searchTerm, 500)
+    const {
+        laboratoryMaterials,
+        isLoading: isMaterialLoading,
+        ...materialTable
+    } = useLaboratoryMaterialDataTable({ filter_laboratory_room: 0 })
 
-    const getLaboratoryEquipments = useCallback(async () => {
-        setIsEqupmentLoading(true)
-        const response = await laboratoryEquipmentService.getLaboratoryEquipmentData({
-            page: equipmentTable.currentPage,
-            per_page: equipmentTable.perPage,
-            search: equipmentTable.searchTerm,
-            filter_laboratory_room: 0
-        })
-        setLaboratoryEquipments(response.data ?? [])
-        equipmentTable.setTotalItems(response.total ?? 0)
-        equipmentTable.setTotalPages(response.last_page ?? 0)
-        setIsEqupmentLoading(false)
-    }, [equipmentTable.currentPage, equipmentTable.perPage, equipmentDebounceSearchTerm])
-
-    const laboratoryMaterialService = new LaboratoryMaterialService()
-    const [laboratoryMaterials, setLaboratoryMaterials] = useState<LaboratoryMaterialView[]>([])
-    const [isMaterialLoading, setIsMaterialLoading] = useState<boolean>(false)
-    const materialDebounceSearchTerm = useDebounce(materialTable.searchTerm, 500)
-
-    const getLaboratoryMaterials = useCallback(async () => {
-        setIsMaterialLoading(true)
-        const response = await laboratoryMaterialService.getLaboratoryMaterialData({
-            page: materialTable.currentPage,
-            per_page: materialTable.perPage,
-            search: materialTable.searchTerm,
-        })
-        setLaboratoryMaterials(response.data ?? [])
-        materialTable.setTotalItems(response.total ?? 0)
-        materialTable.setTotalPages(response.last_page ?? 0)
-        setIsMaterialLoading(false)
-    }, [materialTable.currentPage, materialTable.perPage, materialDebounceSearchTerm])
-
-    useEffect(() => {
-        getLaboratoryEquipments();
-    }, [getLaboratoryEquipments]);
-
-    useEffect(() => {
-        getLaboratoryMaterials();
-    }, [getLaboratoryMaterials]);
-
-    useEffect(() => {
-        equipmentTable.setCurrentPage(1);
-    }, [equipmentDebounceSearchTerm]);
-
-
-    useEffect(() => {
-        materialTable.setCurrentPage(1);
-    }, [materialDebounceSearchTerm]);
-
-    const practicumSchedulingService = new PracticumSchedulingService()
+    const {practicumSchedulingService} = useDepedencies()
     const handleSubmit = async () => {
         if (!practicumScheduling) return;
         setIsSubmitting(true);
         try {
-
             const res = await practicumSchedulingService.storePracticumSchedulingEquipmentMaterial(practicumScheduling.id, formData);
             toast.success(res.message);
             navigate('/panel/penjadwalan-praktikum');
@@ -206,7 +156,7 @@ const PracticumScheduleEquipmentNMaterialForm: React.FC<PracticumScheduleEquipme
                                                             <p className='md:max-w-40 w-full text-sm font-medium break-words'>{eq.name}</p>
                                                             <div className='flex gap-2 w-full items-center sm:col-span-2'>
                                                                 <Input type='number' min={0} value={eq.quantity || ''} placeholder='Jumlah' onChange={(e) => {
-                                                                    handleChangeItem('laboratory_equipment', eq.id, e.target.value ? Number(e.target.value) : null)
+                                                                    handleChangeItem('laboratory_equipment', eq.id, Number(e.target.value))
                                                                 }} />
                                                                 <span className='text-sm font-medium w-fit text-nowrap'>{eq.unit}</span>
                                                             </div>

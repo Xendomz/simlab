@@ -67,7 +67,7 @@ const BookingStepper: React.FC<BookingStepperProps> = ({ bookingId }) => {
                                     <div className={`text-xs text-muted-foreground ${(step.status === 'approved' || step.status === 'rejected') && step.approver ? '' : 'invisible'}`} >
                                         {step.status === 'approved' ? 'Diverifikasi oleh: ' : 'Ditolak oleh: '}
                                         <span className="font-medium">{step.approver}</span>
-                                        {step.approved_at ? ' pada ' + step.approved_at.formatForInformation() : ''}
+                                        {step.approvedAt ? ' pada ' + step.approvedAt.formatForInformation() : ''}
                                         {step.information && (
                                             <><br /><span className={`italic ${step.status === 'rejected' ? 'text-red-500': (step.status ? 'text-green-700' : 'text-orange-500')}`}>{step.status === 'approved' ? 'Catatan' : 'Alasan'}: {step.information}</span></>
                                         )}

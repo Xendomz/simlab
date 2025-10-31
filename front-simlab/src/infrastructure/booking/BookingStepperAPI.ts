@@ -1,4 +1,5 @@
 import { BookingStepper } from '@/domain/booking/BookingStepper';
+import { BookingStepperStatus } from '@/domain/booking/BookingStepperStatus';
 import { Time } from '@/domain/time/Time';
 
 export type BookingStepperAPI = {
@@ -14,7 +15,7 @@ export function toDomain(api: BookingStepperAPI): BookingStepper {
   return new BookingStepper(
     api.id,
     api.role,
-    api.status as "approved" | "rejected" | "pending" | "revision",
+    api.status as BookingStepperStatus,
     api.information,
     api.approved_at ? new Time(api.approved_at) : undefined,
     api.approver ?? undefined

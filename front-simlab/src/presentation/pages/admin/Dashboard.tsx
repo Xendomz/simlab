@@ -1,9 +1,6 @@
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import { useRef } from "react"
-import { SidebarTrigger } from '@/presentation/components/ui/sidebar';
-import { Separator } from '@radix-ui/react-separator';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/presentation/components/ui/breadcrumb';
 import Header from '@/presentation/components/Header';
 
 const Dashboard = () => {

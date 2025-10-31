@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react"
 import { UserView } from "../UserView"
 import { UserService } from "../UserService"
-import { Role } from "@/shared/Types"
 import { UserInputDTO } from "../UserDTO"
+import { userRole } from "@/domain/User/UserRole"
 
 export const useUser = ({
     currentPage,
@@ -17,7 +17,7 @@ export const useUser = ({
     perPage: number
     searchTerm: string,
     filter_study_program?: number,
-    role: Role,
+    role: userRole,
     setTotalPages: (v: number) => void
     setTotalItems: (v: number) => void
 }) => {
@@ -31,7 +31,7 @@ export const useUser = ({
             page: currentPage,
             per_page: perPage,
             search: searchTerm,
-            filter_prodi: filter_study_program,
+            filter_study_program: filter_study_program,
             role: role
         })
         setUser(response.data ?? [])
