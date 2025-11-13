@@ -1,21 +1,22 @@
-import { ChangeEvent, useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import Table from "../../../components/Table";
 import { LaboratoryMaterialColumn } from "./LaboratoryMaterialColumn";
-import useTable from "@/application/hooks/useTable";
-import { useLaboratoryRoom } from "@/application/laboratory-room/hooks/useLaboratoryRoom";
 import { ModalType } from "@/shared/Types";
 import { toast } from "sonner";
-import { LaboratoryMaterialInputDTO } from "@/application/laboratory-material/dto/LaboratoryMaterialDTO";
+import { LaboratoryMaterialInputDTO } from "@/application/laboratory-material/LaboratoryMaterialDTO";
 import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Button } from "@/presentation/components/ui/button";
 import { Plus } from "lucide-react";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
-import { useLaboratoryMaterial } from "@/application/laboratory-material/hooks/useLaboratoryMaterial";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import LaboratoryMaterialFormDialog from "./components/LaboratoryMaterialFormDialog";
+import { Combobox } from "@/presentation/components/custom/combobox";
+import LaboratoryMaterialDetailDialog from "./components/LaboratoryMaterialDetailDialog";
+import { useLaboratoryRoomSelect } from "../laboratory-room/hooks/useLaboratoryRoomSelect";
+import { useDepedencies } from "@/presentation/contexts/useDepedencies";
+import { useLaboratoryMaterialDataTable } from "./hooks/useLaboratoryMaterialDataTable";
 
 const LaboratoryMaterialPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -37,85 +38,33 @@ const LaboratoryMaterialPage = () => {
         )
     }, [])
 
+    const { laboratoryRooms, selectedLaboratoryRoom, setSelectedLaboratoryRoom } = useLaboratoryRoomSelect()
+
+    const { laboratoryMaterialService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
-        searchTerm,
-
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
-        handleSearch,
-        handlePerPageChange,
-        handlePageChange,
-    } = useTable()
-
-    const {
-        laboratoryRoom,
-        getData: getLaboratoryRoomData,
-    } = useLaboratoryRoom({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages() { },
-        setTotalItems() { }
-    })
-
-    const [selectedLaboratoryRoom, setSelectedLaboratoryRoom] = useState<number>(0)
-
-    const handleFilterLaboratoryRoom = (e: ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-
-        setSelectedLaboratoryRoom(value ? Number(value) : 0);
-        setCurrentPage(1);
-    }
-
-    const {
-        laboratoryMaterial,
+        laboratoryMaterials,
         isLoading,
-        getData,
-        create,
-        update,
-        remove,
-    } = useLaboratoryMaterial({
-        currentPage,
-        perPage,
         searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
+        refresh,
+
+        // TableHandler
+        perPage,
+        handleSearch,
+        handlePageChange,
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+        setCurrentPage
+    } = useLaboratoryMaterialDataTable({ filter_laboratory_room: selectedLaboratoryRoom })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [isDetailOpen, setIsDetailOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
     const [type, setType] = useState<ModalType>('Add')
-
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
-    useEffect(() => {
-        getLaboratoryRoomData()
-    }, [])
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedLaboratoryRoom])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
-
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -126,26 +75,30 @@ const LaboratoryMaterialPage = () => {
         setConfirmOpen(true)
     }
 
+    const openModalDetail = (id: number) => {
+        setId(id)
+        setIsDetailOpen(true)
+    }
 
     const handleSave = async (formData: LaboratoryMaterialInputDTO): Promise<void> => {
         if (id) {
-            const res = await update(id, formData)
+            const res = await laboratoryMaterialService.updateData(id, formData)
             toast.success(res.message)
         } else {
-            const res = await create(formData)
+            const res = await laboratoryMaterialService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setId(null)
         setIsOpen(false)
     }
 
     const handleDelete = async () => {
         if (!id) return
-        const res = await remove(id)
+        const res = await laboratoryMaterialService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 
@@ -166,31 +119,23 @@ const LaboratoryMaterialPage = () => {
                     <CardContent>
                         <div className="w-full mb-3 md:w-1/3">
                             <div className="relative">
-                                <Select name='ruangan_laboratorium_id' onValueChange={(value) =>
-                                    handleFilterLaboratoryRoom({
-                                        target: {
-                                            name: 'ruangan_laboratorium_id',
-                                            value: value
-                                        }
-                                    } as React.ChangeEvent<HTMLSelectElement>)}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Pilih Ruangan" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Ruangan</SelectLabel>
-                                            <SelectItem value=" ">All</SelectItem>
-                                            {laboratoryRoom?.map((option) => (
-                                                <SelectItem key={option.id} value={option.id.toString()}>{option.name}</SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                <Combobox
+                                    options={laboratoryRooms}
+                                    value={selectedLaboratoryRoom?.toString() || ''}
+                                    onChange={(val) => {
+                                        setSelectedLaboratoryRoom(val ? Number(val) : 0)
+                                        setCurrentPage(1)
+                                    }}
+                                    placeholder="Pilih Ruangan Laboratorium"
+                                    optionLabelKey='name'
+                                    optionValueKey='id'
+                                    isFilter
+                                />
                             </div>
                         </div>
                         <Table
-                            data={laboratoryMaterial}
-                            columns={LaboratoryMaterialColumn({ openModal, openConfirm })}
+                            data={laboratoryMaterials}
+                            columns={LaboratoryMaterialColumn({ openModal, openConfirm, openModalDetail })}
                             loading={isLoading}
                             searchTerm={searchTerm}
                             handleSearch={(e) => handleSearch(e)}
@@ -207,12 +152,17 @@ const LaboratoryMaterialPage = () => {
             <LaboratoryMaterialFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={laboratoryMaterial}
-                laboratoryRoom={laboratoryRoom}
+                data={laboratoryMaterials}
+                laboratoryRooms={laboratoryRooms}
                 dataId={id}
                 handleSave={handleSave}
                 title={type == 'Add' ? 'Tambah Bahan Laboratorium' : 'Edit Bahan Laboratorium'}
             />
+            <LaboratoryMaterialDetailDialog
+                laboratoryMaterials={laboratoryMaterials}
+                laboratoryMaterialId={id}
+                open={isDetailOpen}
+                onOpenChange={setIsDetailOpen} />
         </>
     )
 }

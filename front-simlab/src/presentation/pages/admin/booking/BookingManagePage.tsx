@@ -5,13 +5,14 @@ import { Button } from '@/presentation/components/ui/button'
 import { ArrowLeft, Info } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate, useParams } from 'react-router-dom'
-import { useBooking } from '@/application/booking/hooks/useBooking';
 import { BookingView } from '@/application/booking/BookingView';
 import BookingDetailDialog from './components/BookingDetailDialog';
 import { BookingType } from '@/domain/booking/BookingType';
 import BookingRoomNEquipmentForm from './form/BookingRoomNEquipmentForm';
 import { BookingStatus } from '@/domain/booking/BookingStatus';
 import BookingEquipmentForm from './form/BookingEquipmentForm';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
+import { Skeleton } from '@/presentation/components/ui/skeleton';
 
 const BookingManagePage = () => {
   const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -34,10 +35,7 @@ const BookingManagePage = () => {
   }, [])
 
   const { id } = useParams();
-
-  const {
-    getBookingDetail
-  } = useBooking({})
+  const { bookingService } = useDepedencies()
 
   const [booking, setBooking] = useState<BookingView>()
   const [isOpenDetail, setIsOpenDetail] = useState<boolean>(false)
@@ -47,22 +45,24 @@ const BookingManagePage = () => {
   const retreiveBookingDetail = useCallback(async () => {
     setIsRetreiveBooking(true)
     try {
-      const response = await getBookingDetail(Number(id))
+      const response = await bookingService.getBookingDetail(Number(id))
       setBooking(response.data)
       setIsRetreiveBooking(false)
     } catch (error: any) {
       if (error.code == 404) {
         navigate('/404')
+      } else if (error.code == 403) {
+        navigate('/404')
       }
     }
-  }, [getBookingDetail, id, navigate])
+  }, [bookingService, id])
 
   useEffect(() => { retreiveBookingDetail() }, [])
 
   useEffect(() => {
     if (!booking) return
     const disallow = () => navigate('/404')
-    
+
     if (![BookingStatus.Draft].includes(booking.status)) {
       disallow();
       return;
@@ -97,20 +97,28 @@ const BookingManagePage = () => {
             </Button>
           </NavLink>
         </div>
-        {/* Add a coditional base on booking type */}
-        {!isRetreiveBooking && booking && (
+        {/* Conditional Content */}
+        {isRetreiveBooking ? (
+          <div className="flex flex-col gap-4 pt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Skeleton className="h-64 w-full" />
+              <div className="flex flex-col gap-4">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+              </div>
+            </div>
+          </div>
+        ) : booking ? (
           <>
-            {/* this for booking type equipment */}
             {booking.bookingType === BookingType.Equipment && (
               <BookingEquipmentForm />
             )}
 
-            {/* this for booking type room n equipment */}
             {booking.bookingType === BookingType.RoomNEquipment && (
               <BookingRoomNEquipmentForm />
             )}
           </>
-        )}
+        ) : null}
       </div >
     </>
   )

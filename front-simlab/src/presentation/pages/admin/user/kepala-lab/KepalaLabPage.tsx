@@ -1,18 +1,18 @@
-import useTable from '@/application/hooks/useTable'
-import { UserInputDTO } from '@/application/user/dto/UserDTO'
-import { useUser } from '@/application/user/hooks/useUser'
+import { UserInputDTO } from '@/application/user/UserDTO'
 import Header from '@/presentation/components/Header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
-import { ModalType } from '@/shared/Types'
 import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
 import Table from '@/presentation/components/Table'
-import { useStudyProgram } from '@/application/study-program/hooks/useStudyProgram'
 import { KepalaLabColumn } from './KepalaLabColumn'
 import KepalaLabFormDialog from './components/KepalaLabFormDialog'
+import { userRole } from '@/domain/User/UserRole'
+import { useDepedencies } from '@/presentation/contexts/useDepedencies'
+import { useUserDataTable } from '../hooks/useUserDataTable'
+import { useStudyProgramSelect } from '../../study-program/hooks/useStudyProgramSelect'
 
 const KepalaLabPage = () => {
     const sectionRef = useRef(null)
@@ -34,77 +34,29 @@ const KepalaLabPage = () => {
         )
     }, [])
 
+    const { userService } =  useDepedencies()
+    const { studyPrograms } = useStudyProgramSelect()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
+        users,
+        isLoading,
         searchTerm,
+        refresh,
 
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
+        // TableHandler
+        perPage,
         handleSearch,
-        handlePerPageChange,
         handlePageChange,
-    } = useTable()
-
-    const {
-        studyProgram,
-        getData: getStudyProgramData,
-    } = useStudyProgram({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages() { },
-        setTotalItems() { }
-    })
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage
+    } = useUserDataTable({ filter_study_program: 0, role: userRole.KepalaLabTerpadu })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
-    const [type, setType] = useState<ModalType>('Add')
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
-    const {
-        user,
-        isLoading,
-        getData,
-        update,
-        restoreToDosen
-    } = useUser({
-        currentPage,
-        perPage,
-        role: 'Kepala Lab Terpadu',
-        filter_study_program: 0,
-        searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
-
-    useEffect(() => {
-        getStudyProgramData()
-    }, [])
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
-
-    const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
-        setType(modalType)
+    const openModal = (id: number | null = null) => {
         setId(id)
         setIsOpen(true)
     }
@@ -116,18 +68,19 @@ const KepalaLabPage = () => {
 
     const handleSave = async (formData: UserInputDTO): Promise<void> => {
         if (!id) return
-        const res = await update(id, formData)
+        const res = await userService.updateData(id, formData)
         toast.success(res.message)
-        getData()
+
+        refresh()
         setIsOpen(false)
     }
 
     const handleRestoreDosen = async () => {
         if (!id) return
-        const res = await restoreToDosen(id)
+        const res = await userService.restoreToDosen(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 
@@ -141,7 +94,7 @@ const KepalaLabPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={user}
+                            data={users}
                             columns={KepalaLabColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -158,11 +111,11 @@ const KepalaLabPage = () => {
                 <KepalaLabFormDialog
                     open={isOpen}
                     onOpenChange={setIsOpen}
-                    data={user}
-                    studyProgram={studyProgram}
+                    data={users}
+                    studyPrograms={studyPrograms}
                     dataId={id}
                     handleSave={handleSave}
-                    title={type == 'Add' ? 'Tambah Dosen' : 'Edit Dosen'}
+                    title={'Edit Kepala Lab Terpadu'}
                 />
             </div>
         </>

@@ -2,7 +2,7 @@ import { BookingRepository } from "@/infrastructure/booking/BookingRepository";
 import { BookingInputDTO, BookingReportTableParam, BookingRoomNEquipmentInputDTO, BookingTableParam, BookingVerifyDTO } from "./dto/BookingDTO";
 import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { BookingView } from "./BookingView";
-import { BookingStepperView } from "./BookingStepperView";
+import { BookingApprovalView } from "./BookingApprovalView";
 
 export class BookingService {
     private readonly bookingRepository = new BookingRepository()
@@ -55,22 +55,22 @@ export class BookingService {
         }
     }
 
-    async getBookingSteps(id: number): Promise<ApiResponse<BookingStepperView[]>> {
-        const response = await this.bookingRepository.getBookingSteps(id);
+    async getBookingApprovals(id: number): Promise<ApiResponse<BookingApprovalView[]>> {
+        const response = await this.bookingRepository.getBookingApprovals(id);
         return {
             ...response,
-            data: response.data ? response.data.map(BookingStepperView.fromDomain) : []
+            data: response.data ? response.data.map(BookingApprovalView.fromDomain) : []
         };
     }
 
-    async storeBookingRoomNEquipment(id: number, data: BookingRoomNEquipmentInputDTO): Promise<ApiResponse> {
+    async storeBookingEquipmentMaterial(id: number, data: BookingRoomNEquipmentInputDTO): Promise<ApiResponse> {
         // Reduce payload to only needed fields for equipments/materials
         const payload = {
             laboratoryEquipments: data.laboratoryEquipments.map(e => ({ id: e.id, quantity: e.quantity })),
             laboratoryMaterials: data.laboratoryMaterials.map(m => ({ id: m.id, quantity: m.quantity })),
         }
 
-        return await this.bookingRepository.storeBookingRoomNEquipment(id, payload)
+        return await this.bookingRepository.storeBookingEquipmentMaterial(id, payload)
     }
 
     async storeBookingEquipment(id: number, equipments: { id: number, quantity: number }[]): Promise<ApiResponse> {
@@ -79,5 +79,9 @@ export class BookingService {
 
     async verifyBooking(booking_id: number, data: BookingVerifyDTO): Promise<ApiResponse> {
         return await this.bookingRepository.verifyBooking(booking_id, data);
+    }
+
+    async verifyBookingReturn(booking_id: number, information: string): Promise<ApiResponse> {
+        return await this.bookingRepository.verifyBookingReturn(booking_id, information)
     }
 }

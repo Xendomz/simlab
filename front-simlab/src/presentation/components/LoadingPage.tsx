@@ -1,4 +1,3 @@
-import React from 'react'
 import ItkLogo from '../assets/itk_logo.png'
 
 const LoadingPage = () => {

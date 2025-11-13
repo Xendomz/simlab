@@ -1,29 +1,28 @@
 import { BookingApproval } from '@/domain/booking/BookingApproval';
 import { Time } from '@/domain/time/Time';
-import { UserApi, toDomain as toUser } from '../user/UserApi';
+import { BookingApprovalAction } from '@/domain/booking/BookingApprovalAction';
+import { BookingApprovalStatus } from '@/domain/booking/BookingApprovalStatus';
 
 export type BookingApprovalAPI = {
   id: number;
-  booking_id: number;
   role: string;
-  approver_id: number | null;
-  approved: number | boolean;
+  action: string;
+  status: string;
+  description: string;
   information: string;
-  created_at: string;
-  updated_at: string;
-  approver?: UserApi;
+  approved_at?: string;
+  approver?: string;
 }
 
 export function toDomain(api: BookingApprovalAPI): BookingApproval {
   return new BookingApproval(
     api.id,
-    api.booking_id,
     api.role,
-    api.approver_id ?? 0,
-    Boolean(api.approved),
+    api.action as BookingApprovalAction,
+    api.status as BookingApprovalStatus,
+    api.description,
     api.information,
-    new Time(api.created_at),
-    new Time(api.updated_at),
-    api.approver ? toUser(api.approver) : undefined
+    api.approved_at ? new Time(api.approved_at) : undefined,
+    api.approver ?? undefined
   );
 }

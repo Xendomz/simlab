@@ -1,24 +1,28 @@
-import DatePickerButton from '@/presentation/components/custom/DatePickerButton';
 import { gsap } from 'gsap';
 import { useAuth } from '@/application/hooks/useAuth'
 import { useGSAP } from '@gsap/react'
 import React, { useEffect, useRef, useState } from 'react'
 import Header from '@/presentation/components/Header';
-import { useLaboratoryRoom } from '@/application/laboratory-room/hooks/useLaboratoryRoom';
-import { usePracticumScheduling } from '@/application/practicum-scheduling/hooks/usePracticumScheduling';
-import { PracticumSchedulingInputDTO } from '@/application/practicum-scheduling/dto/PracticumSchedulingDTO';
 import { Label } from '@/presentation/components/ui/label';
 import { Button } from '@/presentation/components/ui/button';
 import { Input } from '@/presentation/components/ui/input';
-import TimePicker from '@/presentation/components/custom/TimePicker';
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
-import { Navigate, NavLink, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Copy, Plus, Trash } from 'lucide-react';
 import { useValidationErrors } from '@/presentation/hooks/useValidationError';
-import { usePracticalWork } from '@/application/practical-work/hooks/usePracticalWork';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presentation/components/ui/select';
 import { toast } from 'sonner';
 import { ApiResponse } from '@/shared/Types';
+import { Combobox } from '@/presentation/components/custom/combobox';
+import { DateTimePicker } from '@/presentation/components/ui/datetime-picker';
+import { usePracticumSchedulingForm } from './hooks/usePracticumSchedulingForm';
+import { PracticumModuleSelectView } from '@/application/practicum-module/PracticumModuleSelectView';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/presentation/components/ui/table';
+import { userRole } from '@/domain/User/UserRole';
+import { usePracticumScheduling } from './context/PracticumSchedulingContext';
+import { useDepedencies } from '@/presentation/contexts/useDepedencies';
+import { useLaboratoryRoomSelect } from '../laboratory-room/hooks/useLaboratoryRoomSelect';
+import { usePracticumSelect } from '../practicum/hooks/usePracticumSelect';
+import { useUserSelect } from '../user/hooks/useUserSelect';
 
 
 const PracticumSchedulingCreatePage = () => {
@@ -40,427 +44,349 @@ const PracticumSchedulingCreatePage = () => {
             },
         )
     }, [])
-
+    const { isHasDraftPracticum, refreshIsHasDraftPracticum } = usePracticumScheduling()
     const { user } = useAuth()
-
-    const [formData, setFormData] = useState<PracticumSchedulingInputDTO>({
-        praktikum_id: null,
-        ruangan_laboratorium_id: null,
-        phone_number: "",
-        groups: [
-            {
-                group_name: "",
-                practicum_assistant: "",
-                practicum_session: "",
-                start_time: undefined,
-                end_time: undefined,
-                total_participant: 0
-            }
-        ]
-    })
-
-    // Tambahkan baris kelompok baru ke tabel
-    const handleAddGroup = () => {
-        // Definisikan struktur default untuk satu kelompok praktikum
-        const newGroup = {
-            group_name: "",
-            practicum_assistant: "",
-            practicum_session: "",
-            start_time: undefined,
-            end_time: undefined,
-            total_participant: 0
-        };
-
-        // Tambahkan kelompok baru ke array groups di formData
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            groups: [
-                ...prevFormData.groups,
-                newGroup
-            ]
-        }));
-    }
-
-    const handleRemoveGroup = (idx: number) => {
-        setFormData(f => ({
-            ...f,
-            groups: f.groups.filter((_, i) => i !== idx)
-        }))
-    }
+    const {
+        formData,
+        setFormData,
+        handleChange,
+        handleClassChange,
+        handleAddClass,
+        handleRemoveClass,
+        handleAddSession,
+        handleRemoveSession,
+        updateSessionDateTime,
+        getPracticumModule,
+        updateSessionModule,
+        duplicateClassByIndex
+    } = usePracticumSchedulingForm()
 
     const { errors, processErrors } = useValidationErrors()
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
 
-    const {
-        laboratoryRoom,
-        getData: getLaboratories
-    } = useLaboratoryRoom({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages() { },
-        setTotalItems() { }
-    });
-
-    // Practical work (practicum) select data
-    const {
-        practicalWork,
-        getData: getPracticalWorks
-    } = usePracticalWork({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        filter_study_program: user?.studyProgramId,
-        setTotalPages() { },
-        setTotalItems() { }
-    });
-
-    const {
-        create,
-    } = usePracticumScheduling({})
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-
-    };
-
+    const { laboratoryRooms } = useLaboratoryRoomSelect()
+    const { practicums } = usePracticumSelect()
+    const { users: lecturers } = useUserSelect({ role: userRole.Dosen })
+    const { practicumSchedulingService } = useDepedencies()
+    
+    const [practicumModules, setPracticumModules] = useState<PracticumModuleSelectView[]>([])
+    useEffect(() => {
+        setPracticumModules(getPracticumModule(practicums))
+    }, [formData.practicum_id])
 
     useEffect(() => {
-        getLaboratories();
-        getPracticalWorks();
-    }, []);
+        if (isHasDraftPracticum) {
+            navigate('/404')
+        }
+    }, [isHasDraftPracticum])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-
+        
         try {
-            const res = await create(formData);
+            const res = await practicumSchedulingService.create(formData);
             toast.success(res.message)
             navigate(`/panel/penjadwalan-praktikum/${res.data?.id}/manage`)
+            refreshIsHasDraftPracticum()
         } catch (e) {
             const error = e as ApiResponse
             if (error.errors) {
                 processErrors(error.errors);
             }
+            toast.error(error.message)
         } finally {
             setIsSubmitting(false);
         }
     }
 
-
     return (
         <>
             <Header title="Menu Penjadwalan Praktikum" />
             <div className="flex flex-1 flex-col gap-4 p-4 pt-0" ref={sectionRef}>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Ajukan Peminjaman</CardTitle>
-                        <CardAction>
-                            <NavLink to={'/panel/penjadwalan-praktikum'}>
-                                <Button>
-                                    Kembali
-                                    <ArrowLeft />
-                                </Button>
-                            </NavLink>
-                        </CardAction>
-                    </CardHeader>
-                    <CardContent>
-                        <form className='grid md:grid-cols-2 gap-x-5 gap-y-4' onSubmit={handleSubmit}>
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor='phone_number'>Nama Peminjam <span className="text-red-500">*</span></Label>
-                                <Input
-                                    type='text'
-                                    value={user?.name}
-                                    disabled
-                                />
+                <div className='flex justify-end'>
+                    <NavLink to={'/panel/penjadwalan-praktikum'}>
+                        <Button>
+                            Kembali
+                            <ArrowLeft />
+                        </Button>
+                    </NavLink>
+                </div>
+                <form className='flex flex-col gap-5' onSubmit={handleSubmit}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Ajukan Peminjaman</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className='flex flex-col gap-5'>
+                                <div className='flex flex-col md:flex-row gap-5'>
+                                    <div className="flex flex-col gap-2 w-full">
+                                        <Label htmlFor='phone_number'>Nama Pemohon <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            type='text'
+                                            value={user?.name}
+                                            disabled
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-2 w-full">
+                                        <Label htmlFor='phone_number'>Nomor Identitas <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            type='text'
+                                            value={user?.identityNum}
+                                            disabled
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-2 w-full md:col-span-2">
+                                        <Label htmlFor='phone_number'>Program Studi  <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            type='text'
+                                            value={user?.studyProgram?.name}
+                                            disabled
+                                        />
+                                    </div>
+
+                                </div>
+                                <div className='flex flex-col md:flex-row gap-5'>
+                                    <div className="flex flex-col gap-2 w-full">
+                                        <Label htmlFor='practicum_id'>Praktikum <span className="text-red-500">*</span></Label>
+                                        <div>
+                                            <Combobox
+                                                options={practicums}
+                                                value={formData.practicum_id?.toString() || ''}
+                                                onChange={(val) => {
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        practicum_id: Number(val)
+                                                    }))
+                                                }}
+                                                placeholder="Pilih praktikum"
+                                                optionLabelKey='name'
+                                                optionValueKey='id'
+                                            />
+                                            {errors.practicum_id && (
+                                                <span className="text-xs text-red-500 mt-1">{errors.practicum_id}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-2 w-full">
+                                        <Label htmlFor='phone_number'>Nomor HP <span className="text-red-500">*</span></Label>
+                                        <div>
+                                            <Input
+                                                type='text'
+                                                id='phone_number'
+                                                name='phone_number'
+                                                value={formData.phone_number}
+                                                onChange={handleChange}
+                                                placeholder='Nomor HP'
+                                            />
+                                            {errors.phone_number && (
+                                                <span className="text-xs text-red-500 mt-1">{errors.phone_number}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor='phone_number'>Nomo Identitas <span className="text-red-500">*</span></Label>
-                                <Input
-                                    type='text'
-                                    value={user?.identityNum}
-                                    disabled
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2 md:col-span-2">
-                                <Label htmlFor='phone_number'>Program Studi  <span className="text-red-500">*</span></Label>
-                                <Input
-                                    type='text'
-                                    value={user?.studyProgram?.name}
-                                    disabled
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor='praktikum_id'>Praktikum <span className="text-red-500">*</span></Label>
-                                <Select
-                                    value={formData.praktikum_id ? String(formData.praktikum_id) : ''}
-                                    onValueChange={val => setFormData(f => ({ ...f, praktikum_id: Number(val) }))}
-                                >
-                                    <SelectTrigger id='praktikum_id' className='w-full'>
-                                        <SelectValue placeholder="Pilih Praktikum" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {practicalWork?.map((item: any) => (
-                                            <SelectItem key={item.id} value={String(item.id)}>{item.name || item.nama || `Praktikum #${item.id}`}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.praktikum_id && (
-                                    <span className="text-xs text-red-500 mt-1">{errors.praktikum_id}</span>
-                                )}
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor='ruangan_laboratorium_id'>Ruangan Laboratorium <span className="text-red-500">*</span></Label>
-                                <Select
-                                    value={formData.ruangan_laboratorium_id ? String(formData.ruangan_laboratorium_id) : ''}
-                                    onValueChange={val => setFormData(f => ({ ...f, ruangan_laboratorium_id: Number(val) }))}
-                                >
-                                    <SelectTrigger id='ruangan_laboratorium_id' className='w-full'>
-                                        <SelectValue placeholder="Pilih Ruangan" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {laboratoryRoom?.map((item: any) => (
-                                            <SelectItem key={item.id} value={String(item.id)}>{item.name || item.nama || `Ruangan #${item.id}`}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.ruangan_laboratorium_id && (
-                                    <span className="text-xs text-red-500 mt-1">{errors.ruangan_laboratorium_id}</span>
-                                )}
-                            </div>
-                            <div className="flex flex-col gap-2 md:col-span-2">
-                                <Label htmlFor='phone_number'>Nomor HP <span className="text-red-500">*</span></Label>
-                                <Input
-                                    type='text'
-                                    id='phone_number'
-                                    name='phone_number'
-                                    value={formData.phone_number}
-                                    onChange={handleChange}
-                                    placeholder='Nomor HP'
-                                />
-                                {errors.phone_number && (
-                                    <span className="text-xs text-red-500 mt-1">{errors.phone_number}</span>
-                                )}
-                            </div>
-                            {/* Groups input - dynamic multi-form */}
-                            <div className="flex flex-col gap-2 md:col-span-2">
-                                <Label>Kelompok Praktikum <span className="text-red-500">*</span></Label>
-                                <div className="overflow-x-auto w-full">
-                                    <table className="min-w-fit border text-sm rounded-lg w-full">
-                                        <thead>
-                                            <tr className="bg-muted">
-                                                <th className="border px-2 py-1 min-w-[200px]">Nama Kelompok</th>
-                                                <th className="border px-2 py-1 min-w-[200px]">Asisten Praktikum</th>
-                                                <th className="border px-2 py-1 min-w-[200px]">Sesi Praktikum</th>
-                                                <th className="border px-2 py-1 min-w-[180px]">Waktu Mulai & Selesai</th>
-                                                <th className="border px-2 py-1 min-w-[140px]">Jumlah Peserta</th>
-                                                <th className="border px-2 py-1 min-w-[100px]">Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {formData.groups.map((group, idx) => (
-                                                <tr key={idx}>
-                                                    <td className="border px-2 py-1 min-w-[200px]">
-                                                        <Input
-                                                            type='text'
-                                                            name='group_name'
-                                                            value={group.group_name}
-                                                            onChange={e => {
-                                                                const newValue = e.target.value;
-                                                                setFormData(prevFormData => {
-                                                                    // Update hanya group_name pada index yang sesuai
-                                                                    const updatedGroups = prevFormData.groups.map((g, i) =>
-                                                                        i === idx ? { ...g, group_name: newValue } : g
-                                                                    );
-                                                                    return {
-                                                                        ...prevFormData,
-                                                                        groups: updatedGroups
-                                                                    };
-                                                                });
-                                                            }}
-                                                            placeholder='Nama Kelompok'
-                                                        />
-                                                        {errors[`groups.${idx}.group_name`] && (
-                                                            <span className="text-xs text-red-500 mt-1">{errors[`groups.${idx}.group_name`]}</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="border px-2 py-1 min-w-[200px]">
-                                                        <Input
-                                                            type='text'
-                                                            name='practicum_assistant'
-                                                            value={group.practicum_assistant}
-                                                            onChange={e => {
-                                                                const newValue = e.target.value;
-                                                                setFormData(prevFormData => {
-                                                                    // Update hanya practicum_assistant pada index yang sesuai
-                                                                    const updatedGroups = prevFormData.groups.map((g, i) =>
-                                                                        i === idx ? { ...g, practicum_assistant: newValue } : g
-                                                                    );
-                                                                    return {
-                                                                        ...prevFormData,
-                                                                        groups: updatedGroups
-                                                                    };
-                                                                });
-                                                            }}
-                                                            placeholder='Asisten Praktikum'
-                                                        />
-                                                        {errors[`groups.${idx}.practicum_assistant`] && (
-                                                            <span className="text-xs text-red-500 mt-1">{errors[`groups.${idx}.practicum_assistant`]}</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="border px-2 py-1 min-w-[200px]">
-                                                        <Input
-                                                            type='text'
-                                                            name='practicum_session'
-                                                            value={group.practicum_session}
-                                                            onChange={e => {
-                                                                const newValue = e.target.value;
-                                                                setFormData(prevFormData => {
-                                                                    // Update hanya practicum_session pada index yang sesuai
-                                                                    const updatedGroups = prevFormData.groups.map((g, i) =>
-                                                                        i === idx ? { ...g, practicum_session: newValue } : g
-                                                                    );
-                                                                    return {
-                                                                        ...prevFormData,
-                                                                        groups: updatedGroups
-                                                                    };
-                                                                });
-                                                            }}
-                                                            placeholder='Sesi Praktikum'
-                                                        />
-                                                        {errors[`groups.${idx}.practicum_session`] && (
-                                                            <span className="text-xs text-red-500 mt-1">{errors[`groups.${idx}.practicum_session`]}</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="border px-2 py-1 min-w-[180px]">
-                                                        <div className="flex flex-col gap-1">
-                                                            {/* Date Picker (shadcn/ui style) */}
-                                                            <div className="w-full">
-                                                                <DatePickerButton
-                                                                    date={group.start_time ? new Date(group.start_time) : undefined}
-                                                                    onChange={date => {
-                                                                        if (!date) return;
-                                                                        setFormData(prevFormData => {
-                                                                            const updatedGroups = prevFormData.groups.map((g, i) => {
-                                                                                if (i === idx) {
-                                                                                    // Set both start_time and end_time to the selected date, keep time if already set
-                                                                                    const startTime = g.start_time ? new Date(g.start_time) : date;
-                                                                                    const endTime = g.end_time ? new Date(g.end_time) : date;
-                                                                                    startTime.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
-                                                                                    endTime.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
-                                                                                    return {
-                                                                                        ...g,
-                                                                                        start_time: startTime,
-                                                                                        end_time: endTime
-                                                                                    };
-                                                                                }
-                                                                                return g;
-                                                                            });
-                                                                            return {
-                                                                                ...prevFormData,
-                                                                                groups: updatedGroups
-                                                                            };
-                                                                        });
-                                                                    }}
-                                                                />
+                        </CardContent>
+                    </Card>
+                    {formData.classes.map((classes, cidx) => (
+                        <Card key={cidx}>
+                            <CardHeader>
+                                <CardTitle>{classes.name || 'Input Nama Kelas'}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-5'>
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor='name'>Nama Kelas <span className="text-red-500">*</span></Label>
+                                        <div>
+                                            <Input
+                                                type='text'
+                                                id='name'
+                                                name='name'
+                                                value={classes.name}
+                                                onChange={(e) => handleClassChange(e, cidx)}
+                                                placeholder='Nama Kelas'
+                                            />
+                                            {errors[`classes.${cidx}.name`] && (
+                                                <span className="text-xs text-red-500 mt-1">{errors[`classes.${cidx}.name`]}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor=''>Dosen Pengampu <span className="text-red-500">*</span></Label>
+                                        <div>
+                                            <Combobox
+                                                options={lecturers}
+                                                value={classes.lecturer_id?.toString() || ''}
+                                                onChange={val => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        classes: prev.classes.map((cls, idx) =>
+                                                            idx === cidx ? { ...cls, lecturer_id: Number(val) } : cls
+                                                        )
+                                                    }));
+                                                }}
+                                                placeholder="Pilih Dosen Pengampu"
+                                                optionLabelKey='name'
+                                                optionValueKey='id'
+                                            />
+                                            {errors[`classes.${cidx}.lecturer_id`] && (
+                                                <span className="text-xs text-red-500 mt-1">{errors[`classes.${cidx}.lecturer_id`]}</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor=''>Asisten Praktikum</Label>
+                                        <div>
+                                            <Input
+                                                type='text'
+                                                name='practicum_assistant'
+                                                value={classes.practicum_assistant}
+                                                onChange={(e) => handleClassChange(e, cidx)}
+                                                placeholder='Asisten Praktikum'
+                                            />
+                                            {errors[`classes.${cidx}.practicum_assistant`] && (
+                                                <span className="text-xs text-red-500 mt-1">{errors[`classes.${cidx}.practicum_assistant`]}</span>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor=''>Ruangan Laboratorium <span className="text-red-500">*</span></Label>
+                                        <div>
+                                            <Combobox
+                                                options={laboratoryRooms}
+                                                value={classes.laboratory_room_id?.toString() || ''}
+                                                onChange={val => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        classes: prev.classes.map((cls, idx) =>
+                                                            idx === cidx ? { ...cls, laboratory_room_id: Number(val) } : cls
+                                                        )
+                                                    }));
+                                                }}
+                                                placeholder="Pilih Ruangan Laboratorium"
+                                                optionLabelKey='name'
+                                                optionValueKey='id'
+                                            />
+                                            {errors[`classes.${cidx}.laboratory_room_id`] && (
+                                                <span className="text-xs text-red-500 mt-1">{errors[`classes.${cidx}.laboratory_room_id`]}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor=''>Total Partisipan <span className="text-red-500">*</span></Label>
+                                        <div>
+                                            <Input
+                                                type='number'
+                                                name='total_participant'
+                                                value={classes.total_participant ?? ''}
+                                                onChange={(e) => handleClassChange(e, cidx)}
+                                                placeholder='Total Partisipan'
+                                            />
+                                            {errors[`classes.${cidx}.total_participant`] && (
+                                                <span className="text-xs text-red-500 mt-1">{errors[`classes.${cidx}.total_participant`]}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor=''>Total Kelompok <span className="text-red-500">*</span></Label>
+                                        <div>
+                                            <Input
+                                                type='text'
+                                                name='total_group'
+                                                value={classes.total_group ?? ''}
+                                                onChange={(e) => handleClassChange(e, cidx)}
+                                                placeholder='Total Kelompok'
+                                            />
+                                            {errors[`classes.${cidx}.total_group`] && (
+                                                <span className="text-xs text-red-500 mt-1">{errors[`classes.${cidx}.total_group`]}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className='md:col-span-2 lg:col-span-3 border rounded-lg overflow-hidden'>
+                                        <Table>
+                                            <TableHeader className='bg-primary hover:bg-primary/80 group'>
+                                                <TableRow>
+                                                    <TableHead className='text-white group-hover:text-secondary'>Pertemuan</TableHead>
+                                                    <TableHead className='text-white group-hover:text-secondary'>Modul</TableHead>
+                                                    <TableHead className='text-white group-hover:text-secondary'>Waktu Praktikum</TableHead>
+                                                    <TableHead className='text-white group-hover:text-secondary text-center'>Aksi</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {classes.sessions.map((session, sidx) => (
+                                                    <TableRow key={sidx}>
+                                                        <TableCell>Pertemuan - {sidx + 1}</TableCell>
+                                                        <TableCell>
+                                                            <div className='flex flex-col justify-start'>
+                                                                {formData.practicum_id ? (
+                                                                    <Combobox
+                                                                        options={practicumModules}
+                                                                        value={session.practicum_module_id?.toString() || ''}
+                                                                        onChange={(val) => updateSessionModule(cidx, sidx, Number(val))}
+                                                                        placeholder="Pilih Modul Praktikum"
+                                                                        optionLabelKey='name'
+                                                                        optionValueKey='id'
+                                                                    />
+                                                                ) : (
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        type='button'
+                                                                        className='w-full justify-between font-normal' disabled
+                                                                    >
+                                                                        Harap pilih praktikum terlebih dahulu
+                                                                    </Button>
+                                                                )}
+                                                                {errors[`classes.${cidx}.sessions.${sidx}.practicum_module_id`] && (
+                                                                    <span className="text-xs text-red-500 mt-1">{errors[`classes.${cidx}.sessions.${sidx}.practicum_module_id`]}</span>
+                                                                )}
                                                             </div>
-                                                            <div className="flex gap-2 mt-1 justify-center">
-                                                                {/* Time Picker for Start Time */}
-                                                                <TimePicker
-                                                                    id={`start_time_${idx}`}
-                                                                    value={group.start_time ? new Date(group.start_time).toTimeString().slice(0, 8) : "08:00:00"}
-                                                                    onChange={val => {
-                                                                        setFormData(prevFormData => {
-                                                                            const [h, m, s] = val.split(":").map(Number);
-                                                                            const updatedGroups = prevFormData.groups.map((g, i) => {
-                                                                                if (i === idx) {
-                                                                                    const date = g.start_time ? new Date(g.start_time) : new Date();
-                                                                                    date.setHours(h, m, s, 0);
-                                                                                    return { ...g, start_time: date };
-                                                                                }
-                                                                                return g;
-                                                                            });
-                                                                            return { ...prevFormData, groups: updatedGroups };
-                                                                        });
-                                                                    }}
-                                                                />
-                                                                {/* Time Picker for End Time */}
-                                                                <TimePicker
-                                                                    id={`end_time_${idx}`}
-                                                                    value={group.end_time ? new Date(group.end_time).toTimeString().slice(0, 8) : "17:00:00"}
-                                                                    onChange={val => {
-                                                                        setFormData(prevFormData => {
-                                                                            const [h, m, s] = val.split(":").map(Number);
-                                                                            const updatedGroups = prevFormData.groups.map((g, i) => {
-                                                                                if (i === idx) {
-                                                                                    const date = g.end_time ? new Date(g.end_time) : new Date();
-                                                                                    date.setHours(h, m, s, 0);
-                                                                                    return { ...g, end_time: date };
-                                                                                }
-                                                                                return g;
-                                                                            });
-                                                                            return { ...prevFormData, groups: updatedGroups };
-                                                                        });
-                                                                    }}
-                                                                />
-                                                            </div>
-                                                            {/* Error for start_time or end_time */}
-                                                            {(errors[`groups.${idx}.start_time`] || errors[`groups.${idx}.end_time`]) && (
+                                                        </TableCell>
+                                                        <TableCell className='flex flex-col'>
+                                                            <DateTimePicker
+                                                                value={{
+                                                                    date: session.start_time ? new Date(session.start_time) : undefined,
+                                                                    startTime: session.start_time ? new Date(session.start_time).toTimeString().slice(0, 5) : '08:00',
+                                                                    endTime: session.end_time ? new Date(session.end_time).toTimeString().slice(0, 5) : '17:00',
+                                                                }}
+                                                                onChange={({ date, startTime, endTime }) =>
+                                                                    updateSessionDateTime(cidx, sidx, date, startTime, endTime)
+                                                                }
+                                                            />
+                                                            {(errors[`classes.${cidx}.sessions.${sidx}.start_time`] || errors[`classes.${cidx}.sessions.${sidx}.end_time`]) && (
                                                                 <span className="text-xs text-red-500 mt-1">
-                                                                    {errors[`groups.${idx}.start_time`] || errors[`groups.${idx}.end_time`]}
+                                                                    {errors[`classes.${cidx}.sessions.${sidx}.start_time`] || errors[`classes.${cidx}.sessions.${sidx}.end_time`]}
                                                                 </span>
                                                             )}
-                                                        </div>
-                                                    </td>
-                                                    <td className="border px-2 py-1 min-w-[140px]">
-                                                        <Input
-                                                            type='number'
-                                                            name='total_participant'
-                                                            value={group.total_participant}
-                                                            onChange={e => {
-                                                                const newValue = Number(e.target.value);
-                                                                setFormData(prevFormData => {
-                                                                    // Update hanya total_participant pada index yang sesuai
-                                                                    const updatedGroups = prevFormData.groups.map((g, i) =>
-                                                                        i === idx ? { ...g, total_participant: newValue } : g
-                                                                    );
-                                                                    return {
-                                                                        ...prevFormData,
-                                                                        groups: updatedGroups
-                                                                    };
-                                                                });
-                                                            }}
-                                                            placeholder='Jumlah Peserta'
-                                                        />
-                                                        {errors[`groups.${idx}.total_participant`] && (
-                                                            <span className="text-xs text-red-500 mt-1">{errors[`groups.${idx}.total_participant`]}</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="border px-2 py-1 min-w-[100px] text-center">
-                                                        {formData.groups.length > 1 && (
-                                                            <Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveGroup(idx)} title="Hapus Kelompok"><Trash /></Button>
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                                        </TableCell>
+                                                        <TableCell className='text-center'>
+                                                            {classes.sessions.length > 1 && (
+                                                                <Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveSession(cidx, sidx)} title="Hapus Sesi"><Trash /></Button>
+                                                            )}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                    <div className='flex gap-3 items-center'>
+                                        <Button type="button" variant="secondary" onClick={() => handleAddSession(cidx)}>Tambah Sesi <Plus /></Button>
+                                        {formData.classes.length > 1 && (
+                                            <Button type="button" variant="destructive" onClick={() => handleRemoveClass(cidx)} title="Hapus Kelas">Hapus Kelas<Trash /></Button>
+                                        )}
+                                        <Button type="button" variant="default" onClick={() => duplicateClassByIndex(cidx)} title="Duplikat">Duplicate<Copy /></Button>
+                                    </div>
                                 </div>
-                                <Button type="button" variant="secondary" onClick={handleAddGroup} className="mt-2 w-fit">Tambah Kelompok</Button>
-                            </div>
-                            <div className=' flex'>
-                                <Button type='submit' disabled={isSubmitting}>{isSubmitting ? 'Menyimpan...' : 'Simpan'}</Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
+                            </CardContent>
+                        </Card>
+                    ))}
+                    <div className='flex justify-end gap-3'>
+                        <Button type='button' variant={'secondary'} onClick={handleAddClass}>Tambah Kelas <Plus /></Button>
+                        <Button type='submit' disabled={isSubmitting}>{isSubmitting ? 'Menyimpan...' : 'Simpan'}</Button>
+                    </div>
+                </form>
             </div>
         </>
     )

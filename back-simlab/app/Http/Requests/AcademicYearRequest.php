@@ -11,23 +11,23 @@ class AcademicYearRequest extends ApiRequest
 
     public function rules(): array
     {
-        $id = $this->route('id');
+        $id = $this->route('academic_year');
 
-        $uniqueRule = "unique:tahun_akademiks,academic_year";
+        $uniqueRule = "unique:academic_years,name";
         if ($id) {
             $uniqueRule .= ",{$id},id";
         }
 
         return [
-            'academic_year' => ['required', 'string', 'max:255', $uniqueRule],
+            'name' => ['required', 'string', 'max:255', $uniqueRule],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'academic_year.required' => 'Tahun Akademik is required',
-            'academic_year.unique' => 'Tahun Akademik already exists',
+            'name.required' => 'Tahun Akademik wajib diisi',
+            'name.unique' => 'Tahun Akademik sudah terdaftar',
         ];
     }
 }

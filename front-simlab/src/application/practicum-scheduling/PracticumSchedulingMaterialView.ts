@@ -8,6 +8,7 @@ export class PracticumSchedulingMaterialView {
         readonly practicumSchedulingId: number,
         readonly laboratoryMaterialId: number,
         readonly quantity: number,
+        readonly realization: number,
         readonly createdAt: TimeView,
         readonly updatedAt: TimeView,
         readonly laboratoryMaterial?: LaboratoryMaterialView
@@ -19,6 +20,7 @@ export class PracticumSchedulingMaterialView {
             entity.practicumSchedulingId,
             entity.laboratoryMaterialId,
             entity.quantity,
+            entity.realization,
             TimeView.fromDomain(entity.createdAt),
             TimeView.fromDomain(entity.updatedAt),
             entity.laboratoryMaterial ? LaboratoryMaterialView.fromDomain(entity.laboratoryMaterial) : undefined

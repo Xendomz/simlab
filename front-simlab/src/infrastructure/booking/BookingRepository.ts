@@ -4,18 +4,13 @@ import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { fetchApi, jsonToFormData } from "../ApiClient";
 import { BookingAPI, toDomain } from "./BookingAPI";
 import { BookingType } from "@/domain/booking/BookingType";
-import { BookingStepper } from "@/domain/booking/BookingStepper";
 import { BookingStepperAPI, toDomain as toBookingStepperDomain } from "./BookingStepperAPI";
+import { BookingApproval } from "@/domain/booking/BookingApproval";
+import { generateQueryStringFromObject } from "../Helper";
 
 export class BookingRepository implements IBookingRepository {
-    async getAll(params: { page: number; per_page: number; search: string; }): Promise<PaginatedResponse<Booking>> {
-        const queryString = new URLSearchParams(
-            Object.entries(params).reduce((acc, [key, value]) => {
-                acc[key] = String(value);
-                return acc;
-            }, {} as Record<string, string>)
-        ).toString();
-
+    async getAll(params: { page: number; per_page: number; search: string; filter_status?: string; }): Promise<PaginatedResponse<Booking>> {
+        const queryString = generateQueryStringFromObject(params);
         const response = await fetchApi(`/bookings?${queryString}`, { method: 'GET' })
         const json = await response.json()
         if (response.ok) {
@@ -29,14 +24,8 @@ export class BookingRepository implements IBookingRepository {
         throw json['message']
     }
 
-    async getBookingsForVerification(params: { page: number; per_page: number; search: string; }): Promise<PaginatedResponse<Booking>> {
-        const queryString = new URLSearchParams(
-            Object.entries(params).reduce((acc, [key, value]) => {
-                acc[key] = String(value);
-                return acc;
-            }, {} as Record<string, string>)
-        ).toString();
-
+    async getBookingsForVerification(params: { page: number; per_page: number; search: string; filter_status?: string; }): Promise<PaginatedResponse<Booking>> {
+        const queryString = generateQueryStringFromObject(params);
         const response = await fetchApi(`/bookings/verification?${queryString}`, { method: 'GET' });
         const json = await response.json();
         if (response.ok) {
@@ -122,8 +111,8 @@ export class BookingRepository implements IBookingRepository {
         throw json
     }
 
-    async getBookingSteps(id: number): Promise<ApiResponse<BookingStepper[]>> {
-        const response = await fetchApi(`/bookings/${id}/steps`, { method: 'GET' });
+    async getBookingApprovals(id: number): Promise<ApiResponse<BookingApproval[]>> {
+        const response = await fetchApi(`/bookings/${id}/approvals`, { method: 'GET' });
         const json = await response.json();
         if (response.ok) {
             const list = json['data'] as BookingStepperAPI[];
@@ -135,9 +124,9 @@ export class BookingRepository implements IBookingRepository {
         throw json;
     }
 
-    async storeBookingRoomNEquipment(id: number, data: { laboratoryEquipments: { id: number; quantity: number; }[]; laboratoryMaterials: { id: number; quantity: number; }[]; }): Promise<ApiResponse> {
+    async storeBookingEquipmentMaterial(id: number, data: { laboratoryEquipments: { id: number; quantity: number; }[]; laboratoryMaterials: { id: number; quantity: number; }[]; }): Promise<ApiResponse> {
         // Transform to backend expected payload (strip name/unit if present before calling service; service will pass reduced objects)
-        const response = await fetchApi(`/bookings/${id}/room-n-equipment`, {
+        const response = await fetchApi(`/bookings/${id}/equipment-material`, {
             method: 'POST',
             body: JSON.stringify(data)
         })
@@ -161,12 +150,26 @@ export class BookingRepository implements IBookingRepository {
         throw json
     }
 
-    async verifyBooking(booking_id: number, data: { action: "approve" | "reject"; laboran_id?: number; information?: string; ruangan_laboratorium_id?: number; is_allowed_offsite?: boolean | null }): Promise<ApiResponse> {
+    async verifyBooking(booking_id: number, data: { action: "approve" | "reject" | "revision"; laboran_id?: number; information?: string; laboratory_room_id?: number | null; is_allowed_offsite?: boolean }): Promise<ApiResponse> {
 
         const response = await fetchApi(`/bookings/${booking_id}/verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
+        });
+        
+        const json = await response.json();
+        if (response.ok) {
+            return json
+        }
+        throw json;
+    }
+
+    async verifyBookingReturn(booking_id: number, information: string): Promise<ApiResponse> {
+        const response = await fetchApi(`/bookings/${booking_id}/verify-return`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({information: information})
         });
         
         const json = await response.json();

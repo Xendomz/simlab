@@ -1,7 +1,8 @@
 import { LaboratoryRoomRepository } from "@/infrastructure/laboratory-room/LaboratoryRoomRepository";
-import { LaboratoryRoomInputDTO, LaboratoryRoomParam } from "./dto/LaboratoryRoomDTO";
-import { PaginatedResponse } from "@/shared/Types";
+import { LaboratoryRoomInputDTO, LaboratoryRoomParam } from "./LaboratoryRoomDTO";
+import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { LaboratoryRoomView } from "./LaboratoryRoomView";
+import { LaboratoryRoomSelectView } from "./LaboratoryRoomSelectView";
 
 export class LaboratoryRoomService {
     private readonly laboratoryRoomRepository = new LaboratoryRoomRepository()
@@ -25,5 +26,14 @@ export class LaboratoryRoomService {
 
     async deleteData(id: number) {
         return await this.laboratoryRoomRepository.deleteData(id)
+    }
+
+    async getDataForSelect(): Promise<ApiResponse<LaboratoryRoomSelectView[]>> {
+        const laboratoryRooms = await this.laboratoryRoomRepository.getDataForSelect()
+
+        return {
+            ...laboratoryRooms,
+            data: laboratoryRooms.data ? laboratoryRooms.data.map(LaboratoryRoomSelectView.fromDomain) : undefined
+        }
     }
 }

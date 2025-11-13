@@ -1,22 +1,18 @@
 import { useAuth } from '@/application/hooks/useAuth'
 import Header from '@/presentation/components/Header'
-import React from 'react'
-import KoorprodiPraticumScheduleApproval from './components/KoorprodiPraticumScheduleApproval'
 import KepalaLabTerpaduPracticumScheduleApproval from './components/KepalaLabTerpaduPracticumScheduleApproval'
 import LaboranPracticumScheduleApproval from './components/LaboranPracticumScheduleApproval'
+import { userRole } from '@/domain/User/UserRole'
 
 const PracticumSchedulingVerification = () => {
     const { user } = useAuth()
     return (
         <>
             <Header title="Menu Penjadwalan Praktikum" />
-            { user?.role === 'Koorprodi' && (
-                <KoorprodiPraticumScheduleApproval/>
-            )}
-            { user?.role === 'Kepala Lab Terpadu' && (
+            { user?.role === userRole.KepalaLabTerpadu && (
                 <KepalaLabTerpaduPracticumScheduleApproval/>
             )}
-            { user?.role === 'Laboran' && (
+            { user?.role === userRole.Laboran && (
                 <LaboranPracticumScheduleApproval/>
             )}
         </>

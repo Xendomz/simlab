@@ -1,16 +1,20 @@
 import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
-import { ChangeEvent, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Table from '../../../../components/Table'
 import { MahasiswaColumn } from './MahasiswaColumn'
 import useTable from '@/application/hooks/useTable'
-import { useUser } from '@/application/user/hooks/useUser'
-import { useStudyProgram } from '@/application/study-program/hooks/useStudyProgram'
 import { toast } from 'sonner'
 import Header from '@/presentation/components/Header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
+import { StudyProgramService } from '@/application/study-program/StudyProgramService'
+import { StudyProgramSelectView } from '@/application/study-program/StudyProgramSelectView'
+import { Combobox } from '@/presentation/components/custom/combobox'
+import { useDebounce } from '@/presentation/hooks/useDebounce'
+import { UserService } from '@/application/user/UserService'
+import { UserView } from '@/application/user/UserView'
+import { userRole } from '@/domain/User/UserRole'
 
 const MahasiswaPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -32,6 +36,19 @@ const MahasiswaPage = () => {
         )
     }, [])
 
+    const studyProgramService = new StudyProgramService()
+    const [studyPrograms, setStudyPrograms] = useState<StudyProgramSelectView[]>([])
+    const [selectedStudyProgram, setSelectedStudyProgram] = useState<number>(0)
+
+    useEffect(() => {
+        const getStudyPrograms = async () => {
+            const response = await studyProgramService.getDataForSelect()
+            setStudyPrograms(response.data ?? [])
+        }
+
+        getStudyPrograms()
+    }, [])
+
     const {
         currentPage,
         perPage,
@@ -48,63 +65,36 @@ const MahasiswaPage = () => {
         handlePageChange,
     } = useTable()
 
-    const {
-        studyProgram,
-        getData: getStudyProgramData,
-    } = useStudyProgram({
-        currentPage: 1,
-        perPage: 9999,
-        searchTerm: '',
-        setTotalPages() { },
-        setTotalItems() { }
-    })
+    const userService = new UserService()
+    const [users, setUsers] = useState<UserView[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    const [selectedStudyProgram, setSelectedStudyProgram] = useState<number>(0)
-
-    const handleFilterStudyProgram = (e: ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-
-        setSelectedStudyProgram(value ? Number(value) : 0);
-        setCurrentPage(1);
+    const getData = async () => {
+        setIsLoading(true)
+        const response = await userService.getUserData({
+            page: currentPage,
+            per_page: perPage,
+            search: searchTerm,
+            filter_study_program: selectedStudyProgram,
+            role: userRole.Mahasiswa
+        })
+        setUsers(response.data ?? [])
+        setTotalPages(response.last_page ?? 0)
+        setTotalItems(response.total ?? 0)
+        setIsLoading(false)
     }
 
-    const {
-        user,
-        isLoading,
-        getData,
-        remove
-    } = useUser({
-        currentPage,
-        perPage,
-        role: 'Mahasiswa',
-        filter_study_program: selectedStudyProgram,
-        searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
+    const debounceSearchTerm = useDebounce(searchTerm, 500)
+    useEffect(() => {
+        getData();
+    }, [currentPage, perPage, selectedStudyProgram, debounceSearchTerm]);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debounceSearchTerm]);
 
     const [id, setId] = useState<number | null>(null)
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
-
-    useEffect(() => {
-        getStudyProgramData()
-    }, [])
-
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage, selectedStudyProgram])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
 
     const openConfirm = (id: number) => {
         setId(id)
@@ -113,7 +103,7 @@ const MahasiswaPage = () => {
 
     const handleDelete = async () => {
         if (!id) return
-        const res = await remove(id)
+        const res = await userService.deleteData(id)
         toast.success(res.message)
 
         getData()
@@ -131,30 +121,22 @@ const MahasiswaPage = () => {
                     <CardContent>
                         <div className="w-full mb-3 md:w-1/3">
                             <div className="relative">
-                                <Select name='filter_prodi' onValueChange={(value) =>
-                                    handleFilterStudyProgram({
-                                        target: {
-                                            name: 'filter_prodi',
-                                            value: value
-                                        }
-                                    } as React.ChangeEvent<HTMLSelectElement>)}>
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Pilih Program Studi" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Program Studi</SelectLabel>
-                                            <SelectItem value=" ">All</SelectItem>
-                                            {studyProgram?.map((option) => (
-                                                <SelectItem key={option.id} value={option.id.toString()}>{option.name}</SelectItem>
-                                            ))}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
+                                <Combobox
+                                    options={studyPrograms}
+                                    value={selectedStudyProgram?.toString() || ''}
+                                    onChange={(val) => {
+                                        setSelectedStudyProgram(val ? Number(val) : 0)
+                                        setCurrentPage(1)
+                                    }}
+                                    placeholder="Pilih Prodi"
+                                    optionLabelKey='name'
+                                    optionValueKey='id'
+                                    isFilter
+                                />
                             </div>
                         </div>
                         <Table
-                            data={user}
+                            data={users}
                             columns={MahasiswaColumn({ openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}

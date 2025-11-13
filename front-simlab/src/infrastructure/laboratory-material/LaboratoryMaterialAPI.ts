@@ -4,7 +4,6 @@ import { LaboratoryRoomAPI, toDomain as toLaboratoryRoom } from "../laboratory-r
 export type LaboratoryMaterialAPI = {
     id: number;
     code: string;
-    ruangan_laboratorium_id: number;
     material_name: string;
     brand: string;
     stock: number;
@@ -13,16 +12,18 @@ export type LaboratoryMaterialAPI = {
     expiry_date: Date;
     description: string;
     refill_date: Date;
+    student_price: number;
+    lecturer_price: number;
+    external_price: number;
     created_at: Date | null;
     updated_at: Date | null;
-    ruangan_laboratorium: LaboratoryRoomAPI
+    laboratory_room: LaboratoryRoomAPI
 }
 
 export function toDomain(api: LaboratoryMaterialAPI): LaboratoryMaterial {
     return new LaboratoryMaterial(
         api.id,
         api.code,
-        api.ruangan_laboratorium_id,
         api.material_name,
         api.brand,
         api.stock,
@@ -31,8 +32,11 @@ export function toDomain(api: LaboratoryMaterialAPI): LaboratoryMaterial {
         api.expiry_date,
         api.description,
         api.refill_date,
+        api.student_price,
+        api.lecturer_price,
+        api.external_price,
         api.created_at,
         api.updated_at,
-        api.ruangan_laboratorium ? toLaboratoryRoom(api.ruangan_laboratorium) : undefined
+        api.laboratory_room ? toLaboratoryRoom(api.laboratory_room) : undefined
     );
 }

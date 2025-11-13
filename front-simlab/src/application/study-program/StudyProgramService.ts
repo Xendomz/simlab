@@ -1,6 +1,7 @@
 import { StudyProgramRepository } from "../../infrastructure/study-program/StudyProgramRepository";
-import { PaginatedResponse } from "../../shared/Types";
-import { StudyProgramInputDTO, StudyProgramTableParam } from "./dto/StudyProgramDTO";
+import { ApiResponse, PaginatedResponse } from "../../shared/Types";
+import { StudyProgramInputDTO, StudyProgramTableParam } from "./StudyProgramDTO";
+import { StudyProgramSelectView } from "./StudyProgramSelectView";
 import { StudyProgramView } from "./StudyProgramView";
 
 export class StudyProgramService {
@@ -25,5 +26,14 @@ export class StudyProgramService {
 
     async deleteData(id: number) {
         return await this.studyProgramRepository.deleteData(id)
+    }
+
+    async getDataForSelect(): Promise<ApiResponse<StudyProgramSelectView[]>> {
+        const studyPrograms = await this.studyProgramRepository.getDataForSelect()
+
+        return {
+            ...studyPrograms,
+            data: studyPrograms.data ? studyPrograms.data.map(StudyProgramSelectView.fromDomain) : undefined
+        }
     }
 }

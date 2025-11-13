@@ -81,6 +81,14 @@ export class TimeView {
         return TimeView.TIMEZONE[this.timezone]
     }
 
+    formatForDay(): string {
+        return this.formatToDisplay({ day: 'long' })
+    }
+
+    formatForTime(): string {
+        return this.formatToDisplay({ day: 'hide', month: 'hide', year: 'hide', date: 'hide' })
+    }
+
     formatForHeaderSubtitle(): string {
         return this.formatToDisplay({ day: 'hide', time: 'hide', timezone: 'hide' })
     }

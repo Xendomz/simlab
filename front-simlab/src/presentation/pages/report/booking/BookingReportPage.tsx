@@ -1,75 +1,75 @@
-import { gsap } from 'gsap';
-import { useGSAP } from '@gsap/react';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
-import Header from '@/presentation/components/Header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
-import Table from '@/presentation/components/Table';
-import useTable from '@/application/hooks/useTable';
-import { useBooking } from '@/application/booking/hooks/useBooking';
-import { ReportBookingColumn } from './column/ReportBookingColumn';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select';
-import { BookingType } from '@/domain/booking/BookingType';
-import { ReportBookingRoomColumn } from './column/ReportBookingRoomColumn';
-import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog';
+// import { gsap } from 'gsap';
+// import { useGSAP } from '@gsap/react';
+// import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+// import Header from '@/presentation/components/Header';
+// import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card';
+// import Table from '@/presentation/components/Table';
+// import useTable from '@/application/hooks/useTable';
+// import { useBooking } from '@/application/booking/hooks/useBooking';
+// import { ReportBookingColumn } from './column/ReportBookingColumn';
+// import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/presentation/components/ui/select';
+// import { BookingType } from '@/domain/booking/BookingType';
+// import { ReportBookingRoomColumn } from './column/ReportBookingRoomColumn';
+// import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog';
 
 const BookingReportPage: React.FC = () => {
-    const sectionRef = useRef<HTMLDivElement | null>(null);
+    // const sectionRef = useRef<HTMLDivElement | null>(null);
 
-    useGSAP(() => {
-        if (!sectionRef.current) return;
-        gsap.fromTo(sectionRef.current, { opacity: 0, y: 100 }, { opacity: 1, y: 0, duration: 0.75 });
-    }, []);
+    // useGSAP(() => {
+    //     if (!sectionRef.current) return;
+    //     gsap.fromTo(sectionRef.current, { opacity: 0, y: 100 }, { opacity: 1, y: 0, duration: 0.75 });
+    // }, []);
 
-    const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
-        searchTerm,
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-        handleSearch,
-        handlePerPageChange,
-        handlePageChange,
-    } = useTable();
+    // const {
+    //     currentPage,
+    //     perPage,
+    //     totalPages,
+    //     totalItems,
+    //     searchTerm,
+    //     setTotalPages,
+    //     setTotalItems,
+    //     setCurrentPage,
+    //     handleSearch,
+    //     handlePerPageChange,
+    //     handlePageChange,
+    // } = useTable();
 
-    const [selectedBookingType, setSelectedBookingType] = useState<BookingType>(BookingType.Room)
-    const handleFilterBooking = (e: ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
+    // const [selectedBookingType, setSelectedBookingType] = useState<BookingType>(BookingType.Room)
+    // const handleFilterBooking = (e: ChangeEvent<HTMLSelectElement>) => {
+    //     const value = e.target.value;
 
-        setSelectedBookingType(value as BookingType);
-        setCurrentPage(1);
-    }
-
-    const { booking, isLoading, getReportData } = useBooking({
-        currentPage,
-        perPage,
-        searchTerm,
-        setTotalPages,
-        setTotalItems,
-        bookingType: selectedBookingType
-    });
-
-    const [confirmOpen, setConfirmOpen] = useState(false)
-
-    // const handleConrfirm = () {
-
+    //     setSelectedBookingType(value as BookingType);
+    //     setCurrentPage(1);
     // }
-    useEffect(() => {
-        getReportData();
-    }, [currentPage, perPage, selectedBookingType]);
 
-    useEffect(() => {
-        const t = setTimeout(() => {
-            if (currentPage === 1) getReportData(); else setCurrentPage(1);
-        }, 400);
-        return () => clearTimeout(t);
-    }, [searchTerm]);
+    // const { booking, isLoading, getReportData } = useBooking({
+    //     currentPage,
+    //     perPage,
+    //     searchTerm,
+    //     setTotalPages,
+    //     setTotalItems,
+    //     bookingType: selectedBookingType
+    // });
+
+    // const [confirmOpen, setConfirmOpen] = useState(false)
+
+    // // const handleConrfirm = () {
+
+    // // }
+    // useEffect(() => {
+    //     getReportData();
+    // }, [currentPage, perPage, selectedBookingType]);
+
+    // useEffect(() => {
+    //     const t = setTimeout(() => {
+    //         if (currentPage === 1) getReportData(); else setCurrentPage(1);
+    //     }, 400);
+    //     return () => clearTimeout(t);
+    // }, [searchTerm]);
 
     return (
         <>
-            <Header title="Laporan Peminjaman" />
+            {/* <Header title="Laporan Peminjaman" />
             <div ref={sectionRef} className="flex flex-1 flex-col gap-4 p-4 pt-0">
                 <Card>
                     <CardHeader>
@@ -155,7 +155,7 @@ const BookingReportPage: React.FC = () => {
 
                     </CardContent>
                 </Card>
-            </div>
+            </div> */}
         </>
     );
 };

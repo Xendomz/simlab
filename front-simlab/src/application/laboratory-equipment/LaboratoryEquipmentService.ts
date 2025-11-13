@@ -1,5 +1,5 @@
 import { LaboratoryEquipmentRepository } from "@/infrastructure/laboratory-equipment/LaboratoryEquipmentRepository";
-import { LaboratoryEquipmentInputDTO, LaboratoryEquipmentTableParams } from "./dto/LaboratoryEquipmentDTO";
+import { LaboratoryEquipmentInputDTO, LaboratoryEquipmentTableParams } from "./LaboratoryEquipmentDTO";
 import { PaginatedResponse } from "@/shared/Types";
 import { LaboratoryEquipmentView } from "./LaboratoryEquipmentView";
 

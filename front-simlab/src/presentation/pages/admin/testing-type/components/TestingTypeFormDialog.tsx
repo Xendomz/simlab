@@ -4,6 +4,7 @@ import { Button } from '@/presentation/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/presentation/components/ui/dialog';
 import { Input } from '@/presentation/components/ui/input';
 import { Label } from '@/presentation/components/ui/label';
+import { ScrollArea } from '@/presentation/components/ui/scroll-area';
 import { useValidationErrors } from '@/presentation/hooks/useValidationError';
 import { ApiResponse } from '@/shared/Types';
 import React, { useEffect, useState } from 'react'
@@ -11,7 +12,7 @@ import React, { useEffect, useState } from 'react'
 interface TestingTypeFormDialogProps {
     title: string,
     open: boolean,
-    data: any
+    data: TestingTypeView[]
     dataId: number | null,
     onOpenChange: (open: boolean) => void,
     handleSave: (data: any) => Promise<void>
@@ -25,29 +26,46 @@ const TestingTypeFormDialog: React.FC<TestingTypeFormDialogProps> = ({
     onOpenChange,
     handleSave
 }) => {
-    const [formData, setFormData] = useState<TestingTypeInputDTO>({
-        testing_type: '',
-    });
+    const defaultFormData: TestingTypeInputDTO = {
+        name: '',
+        unit: '',
+        student_price: null,
+        lecturer_price: null,
+        external_price: null
+    }
+
+    const [formData, setFormData] = useState<TestingTypeInputDTO>(defaultFormData);
     const { errors, setErrors, processErrors } = useValidationErrors()
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         setErrors({})
+        if (dataId) {
+            const testingType = data.find((data: TestingTypeView) => data.id == dataId)
+            setFormData({
+                name: testingType?.name ?? '',
+                unit: testingType?.unit ?? '',
+                student_price: testingType?.studentPrice.amount ?? null,
+                lecturer_price: testingType?.lecturerPrice.amount ?? null,
+                external_price: testingType?.externalPrice.amount ?? null
+            })
+        } else {
+            setFormData(defaultFormData)
+        }
     }, [open])
 
-    useEffect(() => {
-        if (dataId) {
-            setFormData({ testing_type: data.find((data: TestingTypeView) => data.id == dataId).testingType })
-        } else {
-            setFormData({ testing_type: '' }) // Replace with appropriate default values
-        }
-    }, [dataId])
-
     const handleChange = (e: React.ChangeEvent) => {
-        const { name, value } = e.target as HTMLInputElement;
+        const { type, name, value } = e.target as HTMLInputElement;
+        let newValue = value;
+        if (type === "number") {
+            if (newValue.length > 1 && newValue.startsWith('0')) {
+                newValue = newValue.replace(/^0+/, '');
+                if (newValue === '') newValue = '0';
+            }
+        }
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: newValue
         }));
     };
 
@@ -73,35 +91,112 @@ const TestingTypeFormDialog: React.FC<TestingTypeFormDialogProps> = ({
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription></DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit}>
-                    <div className="flex flex-col gap-2">
-                        <Label htmlFor='testing_type'>
-                            Jenis Pengujian <span className="text-red-500">*</span>
-                        </Label>
-                        <Input
-                            type='text'
-                            id='testing_type'
-                            name='testing_type'
-                            value={formData['testing_type'] || ''}
-                            onChange={handleChange}
-                            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                            placeholder='Jenis Pengujian'
-                        />
-                        {errors['testing_type'] && (
-                            <p className="mt-1 text-xs italic text-red-500">{errors['testing_type']}</p>
-                        )}
-                    </div>
-                </form>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">
-                            Close
+                <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+                    <ScrollArea className='h-full max-h-[70vh]'>
+                        <div className='flex flex-col gap-5 p-1'>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='name'>
+                                    Jenis Pengujian <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='text'
+                                        id='name'
+                                        name='name'
+                                        value={formData['name'] || ''}
+                                        onChange={handleChange}
+                                        placeholder='Jenis Pengujian'
+                                    />
+                                    {errors['name'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['name']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='unit'>
+                                    Satuan Pengujian <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='text'
+                                        id='unit'
+                                        name='unit'
+                                        value={formData['unit'] || ''}
+                                        onChange={handleChange}
+                                        placeholder='Satuan Pengujian'
+                                    />
+                                    {errors['unit'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['unit']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='student_price'>
+                                    Harga Mahasiswa <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='number'
+                                        id='student_price'
+                                        name='student_price'
+                                        value={formData['student_price'] ?? ''}
+                                        onChange={handleChange}
+                                        placeholder='Harga mahasiswa'
+                                    />
+                                    {errors['student_price'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['student_price']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='lecturer_price'>
+                                    Harga Dosen <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='number'
+                                        id='lecturer_price'
+                                        name='lecturer_price'
+                                        value={formData['lecturer_price'] ?? ''}
+                                        onChange={handleChange}
+                                        placeholder='Harga Dosen'
+                                    />
+                                    {errors['lecturer_price'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['lecturer_price']}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor='external_price'>
+                                    Harga Pihak External <span className="text-red-500">*</span>
+                                </Label>
+                                <div>
+                                    <Input
+                                        type='number'
+                                        id='external_price'
+                                        name='external_price'
+                                        value={formData['external_price'] ?? ''}
+                                        onChange={handleChange}
+                                        placeholder='Harga Pihak External'
+                                    />
+                                    {errors['external_price'] && (
+                                        <p className="mt-1 text-xs italic text-red-500">{errors['external_price']}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </ScrollArea>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button type="button" variant="secondary">
+                                Tutup
+                            </Button>
+                        </DialogClose>
+                        <Button type="submit" onClick={handleSubmit} disabled={isSubmitting}>
+                            {isSubmitting ? 'Menyimpan...' : 'Simpan'}
                         </Button>
-                    </DialogClose>
-                    <Button type="button" onClick={handleSubmit}>
-                        {isSubmitting ? 'Saving...' : 'Save'}
-                    </Button>
-                </DialogFooter>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     )

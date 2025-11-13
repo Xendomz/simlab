@@ -24,8 +24,8 @@ class BookingRequest extends ApiRequest
             'purpose' => 'required|max:225',
             'supporting_file' => 'mimes:doc,docx,pdf|max:5046',
             'activity_name' => 'required|max:225',
-            'supervisor' => 'max:225',
-            'supervisor_email' => 'max:225|email',
+            'supervisor' => 'max:225|required',
+            'supervisor_email' => 'required|max:225|email',
             'start_time' => 'required',
             'end_time' => 'required|after_or_equal:start_time',
             'booking_type' => 'required',
@@ -36,16 +36,16 @@ class BookingRequest extends ApiRequest
         // Add ruangan_laboratorium_id required if booking_type is not null and not 'equipment'
         $bookingType = $this->input('booking_type');
         if (!is_null($bookingType) && $bookingType !== 'equipment') {
-            $rules['ruangan_laboratorium_id'] = 'required';
+            $rules['laboratory_room_id'] = 'required';
         }
 
-        // If supervisor is filled, supervisor_email is required, and vice versa
-        if ($this->filled('supervisor') && !$this->filled('supervisor_email')) {
-            $rules['supervisor_email'] .= '|required';
-        }
-        if ($this->filled('supervisor_email') && !$this->filled('supervisor')) {
-            $rules['supervisor'] .= '|required';
-        }
+        // // If supervisor is filled, supervisor_email is required, and vice versa
+        // if ($this->filled('supervisor') && !$this->filled('supervisor_email')) {
+        //     $rules['supervisor_email'] .= '|required';
+        // }
+        // if ($this->filled('supervisor_email') && !$this->filled('supervisor')) {
+        //     $rules['supervisor'] .= '|required';
+        // }
 
         return $rules;
     }
@@ -66,14 +66,14 @@ class BookingRequest extends ApiRequest
             'activity_name.max' => 'Nama kegiatan tidak boleh lebih dari 225 karakter.',
 
             'supervisor.max' => 'Nama penanggung jawab tidak boleh lebih dari 225 karakter.',
-            'supervisor.required' => 'Nama penanggung jawab wajib diisi jika email penanggung jawab diisi.',
+            'supervisor.required' => 'Nama penanggung jawab wajib diisi.',
 
             'supervisor_email.max' => 'Email penanggung jawab tidak boleh lebih dari 225 karakter.',
             'supervisor_email.email' => 'Format email penanggung jawab tidak valid.',
-            'supervisor_email.required' => 'Email penanggung jawab wajib diisi jika nama penanggung jawab diisi.',
+            'supervisor_email.required' => 'Email penanggung jawab wajib diisi.',
 
-            'start_time.required' => 'Waktu mulai wajib diisi.',
-            'end_time.required' => 'Waktu selesai wajib diisi.',
+            'start_time.required' => 'Tanggal & Waktu mulai wajib diisi.',
+            'end_time.required' => 'Tanggal & Waktu wajib diisi.',
             'end_time.after_or_equal' => 'Waktu selesai tidak boleh lebih awal dari waktu mulai.',
 
             'booking_type.required' => 'Jenis peminjaman wajib dipilih.',
@@ -84,7 +84,7 @@ class BookingRequest extends ApiRequest
 
             'participant_list.string' => 'Daftar peserta harus berupa teks.',
 
-            'ruangan_laboratorium_id.required' => 'Ruangan laboratorium wajib dipilih.',
+            'laboratory_room_id.required' => 'Ruangan laboratorium wajib dipilih.',
         ];
     }
 }

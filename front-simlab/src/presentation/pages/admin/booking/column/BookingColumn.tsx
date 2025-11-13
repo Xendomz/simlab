@@ -5,8 +5,13 @@ import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { NavLink } from "react-router-dom";
+import BookingBadgeStatus from "../components/BookingBadgeStatus";
 
 export const BookingColumn = (): ColumnDef<BookingView>[] => [
+    {
+        header: 'Tahun Akademik',
+        accessorKey: 'academicYear'
+    },
     {
         header: 'Kebutuhan Peminjaman',
         accessorKey: 'purpose',
@@ -52,26 +57,9 @@ export const BookingColumn = (): ColumnDef<BookingView>[] => [
         header: "Status Peminjaman",
         accessorKey: 'BookingStatus',
         cell: ({ row }) => {
-            switch (row.original.status) {
-                case BookingStatus.Draft:
-                    return (
-                        <Badge className="bg-slate-500">Draft</Badge>
-                    )
-                case BookingStatus.Pending:
-                    return (
-                        <Badge className="bg-sky-500">Pending</Badge>
-                    )
-
-                case BookingStatus.Approved:
-                    return (
-                        <Badge className="bg-emerald-500">Disetujui</Badge>
-                    )
-
-                case BookingStatus.Rejected:
-                    return (
-                        <Badge className="bg-red-500">Ditolak</Badge>
-                    )
-            }
+            return (
+                <BookingBadgeStatus status={row.original.status}/>
+            )
         }
     },
     {

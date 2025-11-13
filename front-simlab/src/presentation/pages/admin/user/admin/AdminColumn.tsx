@@ -1,21 +1,22 @@
 import { ColumnDef } from '@tanstack/react-table';
-import { User } from '../../../../../domain/User/User';
+import { UserView } from '@/application/user/UserView';
+import { Button } from '@/presentation/components/ui/button';
 
 interface ColumnProps {
-    openModal: (type: 'Add' | 'Edit', id?: number) => void;
+    openModal: (id?: number) => void;
 }
 
-export const AdminColumn = ({ openModal }: ColumnProps): ColumnDef<User>[] => [
-    { header: 'Email', accessorKey: 'email' as keyof User},
-    { header: 'Nama', accessorKey: 'name' as keyof User},
+export const AdminColumn = ({ openModal }: ColumnProps): ColumnDef<UserView>[] => [
+    { header: 'Email', accessorKey: 'email'},
+    { header: 'Nama', accessorKey: 'name'},
     {
         header: 'Action',
-        accessorKey: 'id' as keyof User,
+        accessorKey: 'id',
         cell: ({row}) => (
             <>
-                <button className="mr-2 text-warning text-indigo-600 hover:text-indigo-900" onClick={() => openModal('Edit',row.original.id)}>
+                <Button size={'sm'} onClick={() => openModal(row.original.id)}>
                     Edit
-                </button>
+                </Button>
             </>
         )
     },

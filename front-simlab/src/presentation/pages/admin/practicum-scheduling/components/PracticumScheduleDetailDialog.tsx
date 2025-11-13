@@ -10,6 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/presentation/components/ui/dialog"
+import Item from '@/presentation/components/Item'
 
 
 interface PracticumScheduleDetailDialogProps {
@@ -33,30 +34,12 @@ const PracticumScheduleDetailDialog: React.FC<PracticumScheduleDetailDialogProps
                         <>
                             <div className="space-y-4">
                                 <div className="grid md:grid-cols-2 gap-5">
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Nama Peminjam</label>
-                                        <span className="text-sm font-medium text-gray-800">{practicumScheduling.user?.name}</span>
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Nomor Identitas Peminjam</label>
-                                        <span className="text-sm font-medium text-gray-800">{practicumScheduling.user?.identityNum}</span>
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Program Studi</label>
-                                        <span className="text-sm font-medium text-gray-800">{practicumScheduling.user?.studyProgram?.name}</span>
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Nomor Hp (Whatsapp)</label>
-                                        <span className="text-sm font-medium text-gray-800">{practicumScheduling.phoneNumber}</span>
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Ruangan</label>
-                                        <span className="text-sm font-medium text-gray-800">{practicumScheduling.laboratoryRoom?.name}</span>
-                                    </div>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Mata Kuliah Praktikum</label>
-                                        <span className="text-sm font-medium text-gray-800">{practicumScheduling.practicum?.name}</span>
-                                    </div>
+                                    <Item title='Nama Pemohon' value={practicumScheduling.user?.name}/>
+                                    <Item title='Nama Identitas Peminjam' value={practicumScheduling.user?.identityNum}/>
+                                    <Item title='Program Studi' value={practicumScheduling.user?.studyProgram?.name}/>
+                                    <Item title='Nomor Hp (Whatsapp)' value={practicumScheduling.phoneNumber}/>
+                                    <Item title='Mata Kuliah / Praktikum' value={practicumScheduling.practicum?.name}/>
+                                    <Item title='Total Kelas yang Diajukan' value={practicumScheduling.practicumClasses?.length} />
                                 </div>
                             </div>
                         </>

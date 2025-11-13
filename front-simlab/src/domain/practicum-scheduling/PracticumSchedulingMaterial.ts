@@ -7,6 +7,7 @@ export class PracticumSchedulingMaterial {
         readonly practicumSchedulingId: number,
         readonly laboratoryMaterialId: number,
         readonly quantity: number,
+        readonly realization: number,
         readonly createdAt: Time,
         readonly updatedAt: Time,
         readonly laboratoryMaterial?: LaboratoryMaterial

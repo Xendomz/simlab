@@ -1,19 +1,20 @@
 import { useGSAP } from '@gsap/react'
 import { gsap } from 'gsap'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import Table from '../../../../components/Table'
 import { LaboranColumn } from './LaboranColumn'
-import useTable from '@/application/hooks/useTable'
-import { useUser } from '@/application/user/hooks/useUser'
 import { toast } from 'sonner'
 import { ModalType } from '@/shared/Types'
-import { UserInputDTO } from '@/application/user/dto/UserDTO'
+import { UserInputDTO } from '@/application/user/UserDTO'
 import Header from '@/presentation/components/Header'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Button } from '@/presentation/components/ui/button'
 import { Plus } from 'lucide-react'
 import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
 import LaboranFormDialog from './components/LaboranFormDialog'
+import { userRole } from '@/domain/User/UserRole'
+import { useUserDataTable } from '../hooks/useUserDataTable'
+import { useDepedencies } from '@/presentation/contexts/useDepedencies'
 
 const LaboranPage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -35,62 +36,29 @@ const LaboranPage = () => {
         )
     }, [])
 
+    const { userService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
-        searchTerm,
-
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
-        handleSearch,
-        handlePerPageChange,
-        handlePageChange,
-    } = useTable()
-
-    const {
-        user,
+        users,
         isLoading,
-        getData,
-        create,
-        update,
-        remove
-    } = useUser({
-        currentPage,
-        perPage,
-        role: 'Laboran',
-        filter_study_program: 0,
         searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
+        refresh,
+
+        // TableHandler
+        perPage,
+        handleSearch,
+        handlePageChange,
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+    } = useUserDataTable({ filter_study_program: 0, role: userRole.Laboran })
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
     const [type, setType] = useState<ModalType>('Add')
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
-
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -103,22 +71,22 @@ const LaboranPage = () => {
 
     const handleSave = async (formData: UserInputDTO): Promise<void> => {
         if (id) {
-            const res = await update(id, formData)
+            const res = await userService.updateData(id, formData)
             toast.success(res.message)
         } else {
-            const res = await create(formData)
+            const res = await userService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setIsOpen(false)
     }
 
     const handleDelete = async () => {
         if (!id) return
-        const res = await remove(id)
+        const res = await userService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 
@@ -138,7 +106,7 @@ const LaboranPage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={user}
+                            data={users}
                             columns={LaboranColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -155,7 +123,7 @@ const LaboranPage = () => {
                 <LaboranFormDialog
                     open={isOpen}
                     onOpenChange={setIsOpen}
-                    data={user}
+                    data={users}
                     dataId={id}
                     handleSave={handleSave}
                     title={type == 'Add' ? 'Tambah Laboran' : 'Edit Laboran'}

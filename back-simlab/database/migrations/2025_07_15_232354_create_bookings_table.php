@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('academic_year_id')->constrained('tahun_akademiks')->onDelete('cascade');
+            $table->foreignId('academic_year_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('laboran_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->foreignId('ruangan_laboratorium_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('laboratory_room_id')->nullable()->constrained()->onDelete('cascade');
             $table->char('phone_number', 14);
             $table->string('purpose');
             $table->string('supporting_file')->nullable();
@@ -25,10 +25,11 @@ return new class extends Migration
             $table->string('supervisor_email')->nullable();
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->enum('status', ['draft', 'pending', 'approved', 'rejected']);
+            $table->enum('status', ['draft', 'pending', 'approved', 'rejected', 'revision', 'returned']);
             $table->enum('booking_type', ['room', 'room_n_equipment', 'equipment']);
             $table->integer('total_participant');
             $table->text('participant_list')->nullable();
+            $table->boolean('is_allowed_offsite')->default(0);
             $table->timestamps();
         });
     }

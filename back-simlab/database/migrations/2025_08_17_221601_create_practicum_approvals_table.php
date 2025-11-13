@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('practicum_approvals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('practicum_scheduling_id')->constrained()->onDelete('cascade');
-            $table->enum('role', ['Pengaju', 'Koorprodi', 'Kepala Lab Terpadu', 'Laboran']);
+            $table->enum('role', ['pemohon', 'kepala_lab_terpadu', 'laboran']);
             $table->foreignId('approver_id')->constrained('users')->onDelete('cascade');
-            $table->boolean('approved');
+            $table->boolean('is_approved');
             $table->string('information')->nullable();
             $table->timestamps();
         });

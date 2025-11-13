@@ -1,24 +1,29 @@
 import { BookingView } from "@/application/booking/BookingView";
 import { BookingType } from "@/domain/booking/BookingType";
+import { userRole } from "@/domain/User/UserRole";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { NavLink } from "react-router-dom";
+import BookingBadgeStatus from "../components/BookingBadgeStatus";
+import BookingVerificationAction from "../components/BookingVerificationAction";
 
 interface ColumnProps {
-    role: 'Kepala Lab Terpadu' | 'Laboran';
-    openApproval: (booking: any) => void;
-    openRejection: (booking: any) => void;
+    role: userRole;
+    openApproval: (id: number) => void;
+    openRejection: (id: number) => void;
+    openReturnVerification?: (id: number) => void;
+    openReturnConfirmation?: (id: number) => void;
 }
 
-export const BookingVerificationColumn = ({ role, openApproval, openRejection }: ColumnProps): ColumnDef<BookingView>[] => [
-    { header: 'Tahun Akademik', accessorKey: 'academicYear', cell: ({ row }) => row.original.academicYear?.academicYear },
+export const BookingVerificationColumn = ({ role, openApproval, openRejection, openReturnVerification, openReturnConfirmation }: ColumnProps): ColumnDef<BookingView>[] => [
+    { header: 'Tahun Akademik', accessorKey: 'academicYear', cell: ({ row }) => row.original.academicYear },
     {
         header: 'Identitas Peminjam', accessorKey: 'user',
         cell: ({ row }) => (
             <div className='flex flex-col'>
-                <span className='font-semibold'>{row.original.user?.name} | {row.original.user?.identityNum}</span>
-                <span className='text-sm'>Prodi: {row.original.user?.studyProgram?.name}</span>
+                <span className='font-semibold'>{row.original.requestor?.name}</span>
+                <span className='text-sm'>Email: {row.original.requestor?.email}</span>
             </div>
         )
     },
@@ -48,6 +53,12 @@ export const BookingVerificationColumn = ({ role, openApproval, openRejection }:
         }
     },
     {
+        header: 'Status Peminjaman', accessorKey: 'status',
+        cell: ({ row }) => (
+            <BookingBadgeStatus status={row.original.status} />
+        )
+    },
+    {
         header: 'Informasi Peminjaman', accessorKey: 'activityName', cell: ({ row }) => (
             <NavLink to={`/panel/peminjaman/${row.original.id}/detail`}>
                 <Button size="sm" variant="secondary">Detail</Button>
@@ -55,39 +66,15 @@ export const BookingVerificationColumn = ({ role, openApproval, openRejection }:
         )
     },
     {
-        header: 'Verifikasi Peminjaman', accessorKey: 'id', cell: ({ row }) => {
-            const renderApprovalBadge = (approval: any) => {
-                if (!approval) return null;
-                return approval.approved ? (
-                    <Badge>Peminjaman Distujui</Badge>
-                ) : (
-                    <Badge variant={'destructive'}>Peminjaman Ditolak</Badge>
-                );
-            };
-
-            const kepalaLabApproval = row.original.kepalaLabApproval;
-            const laboranApproval = row.original.laboranApproval;
-
-            // If kepala lab rejected, laboran is also considered rejected
-            if (role === 'Laboran' && kepalaLabApproval && kepalaLabApproval.approved === false) {
-                return renderApprovalBadge({ approved: false });
-            }
-
-            // Determine approval object based on role
-            const approval = role === 'Kepala Lab Terpadu' ? kepalaLabApproval : laboranApproval;
-            const isPending = !approval;
-
-            return (
-                <>
-                    {renderApprovalBadge(approval)}
-                    {isPending && (
-                        <div className='flex gap-2'>
-                            <Button size="sm" onClick={() => openApproval(row.original.id)}>Terima</Button>
-                            <Button size="sm" onClick={() => openRejection(row.original.id)} variant="destructive">Tolak</Button>
-                        </div>
-                    )}
-                </>
-            );
-        }
+        header: 'Verifikasi Peminjaman', accessorKey: 'id', cell: ({ row }) => (
+            <BookingVerificationAction
+                booking={row.original}
+                role={role}
+                openApproval={openApproval}
+                openRejection={openRejection}
+                openReturnVerification={openReturnVerification}
+                openReturnConfirmation={openReturnConfirmation}
+            />
+        )
     }
 ];

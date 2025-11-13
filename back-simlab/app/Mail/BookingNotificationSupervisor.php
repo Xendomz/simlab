@@ -19,6 +19,7 @@ class BookingNotificationSupervisor extends Mailable implements ShouldQueue
     protected $booking;
     public function __construct($booking)
     {
+        $this->afterCommit();
         $this->booking = $booking;
     }
 
@@ -28,7 +29,7 @@ class BookingNotificationSupervisor extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Booking Notification for Supervisor',
+            subject: 'Notifikasi Sebagai Dosen Penanggung Jawab',
         );
     }
 

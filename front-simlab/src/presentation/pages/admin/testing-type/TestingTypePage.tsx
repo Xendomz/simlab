@@ -1,19 +1,19 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { gsap } from 'gsap';
 import { useGSAP } from "@gsap/react"
 import Table from "../../../components/Table";
 import { TestingTypeColumn } from "./TestingTypeColumn";
-import useTable from "../../../../application/hooks/useTable";
 import { ModalType } from "../../../../shared/Types";
 import { TestingTypeInputDTO } from "../../../../application/testing-type/dtos/TestingTypeDTO";
 import Header from "@/presentation/components/Header";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Button } from "@/presentation/components/ui/button";
 import { Plus } from "lucide-react";
-import { useTestingType } from "@/application/testing-type/hooks/useTestingType";
 import { toast } from "sonner";
 import ConfirmationDialog from "@/presentation/components/custom/ConfirmationDialog";
 import TestingTypeFormDialog from "./components/TestingTypeFormDialog";
+import { useTestingTypeDataTable } from "./hooks/useTestingTypeDataTable";
+import { useDepedencies } from "@/presentation/contexts/useDepedencies";
 
 const TestingTypePage = () => {
     const sectionRef = useRef<HTMLDivElement | null>(null)
@@ -35,61 +35,29 @@ const TestingTypePage = () => {
         )
     }, [])
 
+    const { testingTypeService } = useDepedencies()
     const {
-        currentPage,
-        perPage,
-        totalPages,
-        totalItems,
-        searchTerm,
-
-        setTotalPages,
-        setTotalItems,
-        setCurrentPage,
-
-        handleSearch,
-        handlePerPageChange,
-        handlePageChange,
-    } = useTable()
-
-    const {
-        testingType,
+        testingTypes,
         isLoading,
-        getData,
-        create,
-        update,
-        remove,
-    } = useTestingType({
-        currentPage,
-        perPage,
         searchTerm,
-        setTotalPages,
-        setTotalItems
-    })
+        refresh,
+
+        // TableHandler
+        perPage,
+        handleSearch,
+        handlePageChange,
+        handlePerPageChange,
+        totalItems,
+        totalPages,
+        currentPage,
+    } = useTestingTypeDataTable()
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [id, setId] = useState<number | null>(null)
     const [type, setType] = useState<ModalType>('Add')
-
     const [confirmOpen, setConfirmOpen] = useState<boolean>(false)
 
-    useEffect(() => {
-        getData()
-    }, [currentPage, perPage])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage === 1) {
-                getData()
-            } else {
-                setCurrentPage(1)
-            }
-        }, 500)
-
-        return () => clearTimeout(timer)
-    }, [searchTerm])
-
     const openModal = (modalType: ModalType, id: number | null = null) => {
-        setId(null)
         setType(modalType)
         setId(id)
         setIsOpen(true)
@@ -102,22 +70,22 @@ const TestingTypePage = () => {
 
     const handleSave = async (formData: TestingTypeInputDTO): Promise<void> => {
         if (id) {
-            const res = await update(id, formData)
+            const res = await testingTypeService.updateData(id, formData)
             toast.success(res.message)
         } else {
-            const res = await create(formData)
+            const res = await testingTypeService.createData(formData)
             toast.success(res.message)
         }
-        getData()
+        refresh()
         setIsOpen(false)
     }
 
     const handleDelete = async () => {
         if (!id) return
-        const res = await remove(id)
+        const res = await testingTypeService.deleteData(id)
         toast.success(res.message)
 
-        getData()
+        refresh()
         setConfirmOpen(false)
     }
 
@@ -137,7 +105,7 @@ const TestingTypePage = () => {
                     </CardHeader>
                     <CardContent>
                         <Table
-                            data={testingType}
+                            data={testingTypes}
                             columns={TestingTypeColumn({ openModal, openConfirm })}
                             loading={isLoading}
                             searchTerm={searchTerm}
@@ -155,7 +123,7 @@ const TestingTypePage = () => {
             <TestingTypeFormDialog
                 open={isOpen}
                 onOpenChange={setIsOpen}
-                data={testingType}
+                data={testingTypes}
                 dataId={id}
                 handleSave={handleSave}
                 title={type == 'Add' ? 'Tambah jenis pengujian' : 'Edit jenis pengujian'}

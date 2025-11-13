@@ -1,27 +1,26 @@
-import { StudyProgramInputDTO, StudyProgramTableParam } from "../../application/study-program/dto/StudyProgramDTO";
+import { StudyProgramSelect } from "@/domain/study-program/StudyProgramSelect";
 import { IStudyProgramRepository } from "../../domain/study-program/IStudyProgramRepository";
 import { StudyProgram } from "../../domain/study-program/StudyProgram";
 import { ApiResponse, PaginatedResponse } from "../../shared/Types";
 import { fetchApi } from "../ApiClient";
+import { generateQueryStringFromObject } from "../Helper";
 import { StudyProgramAPI, toDomain } from "./StudyProgramAPI";
+import { StudyProgramSelectAPI, toDomain as toStudyProgramSelect } from "./StudyProgramSelectAPI";
 
 export class StudyProgramRepository implements IStudyProgramRepository {
-    async getAll(params: StudyProgramTableParam): Promise<PaginatedResponse<StudyProgram>> {
-        const queryString = new URLSearchParams(
-            Object.entries(params).reduce((acc, [key, value]) => {
-                if (value !== undefined) {
-                    acc[key] = String(value);
-                }
-                return acc;
-            }, {} as Record<string, string>)
-        ).toString();
-
+    async getAll(params: {
+        page: number,
+        per_page: number,
+        search: string,
+        filter_major?: number
+    }): Promise<PaginatedResponse<StudyProgram>> {
+        const queryString = generateQueryStringFromObject(params)
         const response = await fetchApi(`/study-programs?${queryString}`, { method: 'GET' });
         const json = await response.json();
 
         if (response.ok) {
             const data = json['data'] as PaginatedResponse<StudyProgramAPI>
-            
+
             return {
                 ...data,
                 data: data?.data?.map(toDomain) || []
@@ -31,7 +30,10 @@ export class StudyProgramRepository implements IStudyProgramRepository {
         throw json['message'];
     }
 
-    async createData(data: StudyProgramInputDTO): Promise<ApiResponse> {
+    async createData(data: {
+        major_id: number | null,
+        name: string,
+    }): Promise<ApiResponse> {
         const response = await fetchApi('/study-programs', {
             method: 'POST',
             body: JSON.stringify(data),
@@ -44,7 +46,10 @@ export class StudyProgramRepository implements IStudyProgramRepository {
         throw json
     }
 
-    async updateData(id: number, data: StudyProgramInputDTO): Promise<ApiResponse> {
+    async updateData(id: number, data: {
+        major_id: number | null,
+        name: string,
+    }): Promise<ApiResponse> {
         const response = await fetchApi(`/study-programs/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
@@ -57,7 +62,7 @@ export class StudyProgramRepository implements IStudyProgramRepository {
 
         throw json
     }
-    
+
     async deleteData(id: number): Promise<ApiResponse> {
         const response = await fetchApi(`/study-programs/${id}`, {
             method: 'DELETE',
@@ -83,5 +88,19 @@ export class StudyProgramRepository implements IStudyProgramRepository {
             ...json,
             data: json.data?.map(toDomain)
         };
+    }
+
+    async getDataForSelect(): Promise<ApiResponse<StudyProgramSelect[]>> {
+        const response = await fetchApi(`/study-programs/select`, { method: 'GET' });
+
+        const json = await response.json() as ApiResponse
+        if (response.ok) {
+            const data = json.data as StudyProgramSelectAPI[]
+            return {
+                ...json,
+                data: data.map(toStudyProgramSelect)
+            }
+        }
+        throw json
     }
 }

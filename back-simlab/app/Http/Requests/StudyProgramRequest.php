@@ -20,16 +20,20 @@ class StudyProgramRequest extends ApiRequest
     public function rules(): array
     {
         return [
-            'jurusan_id' => 'required',
-            'name' => "required|string|max:255|min:4",
+            'major_id' => 'required|exists:majors,id',
+            'name' => 'required|string|max:255|min:4',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'jurusan_id.required' => 'Kode Jurusan is required',
-            'name.required' => 'Nama Jurusan is required',
+            'major_id.required' => 'Jurusan wajib diisi',
+            'major_id.exists' => 'Jurusan tidak ditemukan',
+            'name.required' => 'Nama Program Studi wajib diisi',
+            'name.string' => 'Nama Program Studi harus berupa teks',
+            'name.max' => 'Nama Program Studi maksimal 255 karakter',
+            'name.min' => 'Nama Program Studi minimal 4 karakter',
         ];
     }
 }

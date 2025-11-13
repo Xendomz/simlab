@@ -15,13 +15,16 @@ interface ConfirmationDialogProps {
     onOpenChange: (open: boolean) => void,
     onConfirm: () => Promise<void>
     confirmVariant?: "default" | "destructive"
+    title?: string,
+    message?: string
 }
 
-export default function ConfirmationDialog({ open, onOpenChange, onConfirm, confirmVariant }: ConfirmationDialogProps) {
+export default function ConfirmationDialog({ open, onOpenChange, onConfirm, confirmVariant, title, message }: ConfirmationDialogProps) {
     const [isLoading, setIsLoading] = useState(false)
     async function submit() {
         setIsLoading(true)
         try {
+            
             await onConfirm()
         } finally {
             setIsLoading(false)
@@ -32,19 +35,19 @@ export default function ConfirmationDialog({ open, onOpenChange, onConfirm, conf
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogTitle>{ title ?? 'Apakah kamu yakin?' }</DialogTitle>
                     <DialogDescription>
-                        This action cannot be undone. Proceeding will permanently affect your data.
+                        { message ?? 'Tindakan ini tidak dapat dibatalkan. Melanjutkan akan secara permanen memengaruhi data kamu.' }
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button type="button" variant='secondary'>
-                            Close
+                            Tutup
                         </Button>
                     </DialogClose>
-                    <Button type="button" variant={confirmVariant} onClick={submit}>
-                        { isLoading ? 'Submitting...' : 'Continue' }
+                    <Button type="button" variant={confirmVariant} disabled={isLoading} onClick={submit}>
+                        { isLoading ? 'Memproses...' : 'Lanjut' }
                     </Button>
                 </DialogFooter>
             </DialogContent>

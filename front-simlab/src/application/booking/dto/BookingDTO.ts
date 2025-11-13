@@ -4,6 +4,7 @@ export interface BookingTableParam {
     page: number,
     per_page: number,
     search: string,
+    filter_status?: string
 }
 
 export interface BookingReportTableParam {
@@ -23,7 +24,7 @@ export interface BookingInputDTO {
     start_time: Date | undefined;
     end_time: Date | undefined;
     booking_type: string;
-    ruangan_laboratorium_id: number | undefined;
+    laboratory_room_id: number | null;
     total_participant: number;
     participant_list: string;
 }
@@ -44,9 +45,9 @@ export interface BookingRoomNEquipmentInputDTO {
 }
 
 export interface BookingVerifyDTO {
-    action: 'approve' | 'reject',
+    action: 'approve' | 'reject' | 'revision',
     laboran_id?: number,
     information?: string,
-    ruangan_laboratorium_id?: number,
-    is_allowed_offsite?: boolean | null
+    laboratory_room_id?: number | null,
+    is_allowed_offsite?: boolean
 }

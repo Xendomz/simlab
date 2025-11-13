@@ -2,8 +2,16 @@ import { PracticumSchedulingView } from "@/application/practicum-scheduling/Prac
 import { Button } from "@/presentation/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { NavLink } from "react-router-dom";
+import PracticumSchedulingBadgeStatus from "../components/PracticumSchedulingBadgeStatus";
 
 export const PracticumSchedulingColumn = (): ColumnDef<PracticumSchedulingView>[] => [
+    {
+        header: 'Tahun Akademik',
+        accessorKey: 'academicYear',
+        cell: ({ row }) => (
+            `${row.original.academicYear?.name}`
+        )
+    },
     {
         header: 'Praktikum',
         accessorKey: 'praktikumId',
@@ -12,18 +20,20 @@ export const PracticumSchedulingColumn = (): ColumnDef<PracticumSchedulingView>[
         )
     },
     {
-        header: "Ruangan",
-        accessorKey: 'laboratoryRoomId',
-        cell: ({ row }) => (
-            `${row.original.laboratoryRoom?.name}`
-        )
-    },
-    {
         header: "Tanggal Pengajuan",
         accessorKey: 'createdAt',
         cell: ({ row }) => (
             `${row.original.createdAt.formatForInformation()}`
         )
+    },
+    {
+        header: "Status Pengajuan",
+        accessorKey: 'PracticumSchedulingStatus',
+        cell: ({ row }) => {
+            return (
+                <PracticumSchedulingBadgeStatus status={row.original.status}/>
+            )
+        }
     },
     {
         header: "Action",

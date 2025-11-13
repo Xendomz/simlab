@@ -13,9 +13,8 @@ class PracticumScheduling extends Model
     protected $fillable = [
         'academic_year_id',
         'user_id',
-        'ruangan_laboratorium_id',
         'laboran_id',
-        'praktikum_id',
+        'practicum_id',
         'phone_number',
         'status'
     ];
@@ -33,23 +32,23 @@ class PracticumScheduling extends Model
     }
 
     public function practicum() {
-        return $this->belongsTo(Praktikum::class, 'praktikum_id');
+        return $this->belongsTo(Practicum::class, 'practicum_id');
     }
 
     public function academicYear() {
-        return $this->belongsTo(TahunAkademik::class, 'academic_year_id');
+        return $this->belongsTo(AcademicYear::class, 'academic_year_id');
     }
 
     public function user() {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function laboratoryRoom() {
-        return $this->belongsTo(RuanganLaboratorium::class, 'ruangan_laboratorium_id');
+    public function laboran() {
+        return $this->belongsTo(User::class, 'laboran_id');
     }
 
-    public function practicumGroups() {
-        return $this->hasMany(PracticumGroup::class, 'practicum_scheduling_id');
+    public function practicumClasses() {
+        return $this->hasMany(PracticumClass::class, 'practicum_scheduling_id');
     }
 
     public function practicumSchedulingEquipments() {
@@ -64,23 +63,28 @@ class PracticumScheduling extends Model
         return $this->hasMany(PracticumApproval::class, 'practicum_scheduling_id');
     }
 
-    public function getKooprodiApprovalAttribute() {
-        $approval = $this->practicumApprovals()
-            ->where('role', 'Koorprodi')
-            ->first();
-        return $approval ?: null;
+    public function getTotalGroupsAttribute()
+    {
+        // If the relationship is already loaded, sum in-memory to avoid an extra query
+        if ($this->relationLoaded('practicumClasses')) {
+            return (int) $this->practicumClasses->sum('total_group');
+        }
+
+        // Otherwise perform a SQL SUM which is efficient for large datasets
+        return (int) $this->practicumClasses()->sum('total_group');
     }
 
     public function getKepalaLabApprovalAttribute() {
         $approval = $this->practicumApprovals()
-            ->where('role', 'Kepala Lab Terpadu')
+            ->where('role', 'kepala_lab_terpadu')
             ->first();
-        return $approval ?: null;
+
+        return $approval;
     }
 
     public function getLaboranApprovalAttribute() {
         $approval = $this->practicumApprovals()
-            ->where('role', 'Laboran')
+            ->where('role', 'laboran')
             ->first();
         return $approval ?: null;
     }

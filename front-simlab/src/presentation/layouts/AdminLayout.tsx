@@ -14,8 +14,6 @@ import { useAuth } from "@/application/hooks/useAuth"
 import { ThemeProvider } from "@/application/context/ThemeContext"
 import { filterNavByRole, navItems } from "../utils/SidebarConfig"
 
-// 'Admin','Kepala Lab Terpadu','Dosen','Koorprodi','Kepala Lab Unit','Laboran','Mahasiswa','Pihak Luar'
-
 export default function AdminLayout() {
   const { user, logout } = useAuth();
 

@@ -1,6 +1,6 @@
-import { PaginatedResponse } from "@/shared/Types";
+import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { AcademicYearView } from "./AcademicYearView";
-import { AcademicYearInputDTO, AcademicYearTableParam } from "./dtos/AcademicYearDTO";
+import { AcademicYearInputDTO, AcademicYearTableParam } from "./AcademicYearDTO";
 import { AcademicYearRepository } from "@/infrastructure/academic-year/AcademicYearRepository";
 
 export class AcademicYearService {
@@ -15,16 +15,31 @@ export class AcademicYearService {
         };
     }
 
-    async createData(data: AcademicYearInputDTO) {
-        return await this.academicYearRepository.createData(data)
+    async createData(data: AcademicYearInputDTO): Promise<ApiResponse<AcademicYearView>> {
+        const academicYear = await this.academicYearRepository.createData(data)
+
+        return {
+            ...academicYear,
+            data: academicYear.data ? AcademicYearView.fromDomain(academicYear.data) : undefined
+        }
     }
 
-    async updateData(id: number, data: AcademicYearInputDTO) {
-        return await this.academicYearRepository.updateData(id, data)
+    async updateData(id: number, data: AcademicYearInputDTO): Promise<ApiResponse<AcademicYearView>> {
+        const academicYear = await this.academicYearRepository.updateData(id, data)
+
+        return {
+            ...academicYear,
+            data: academicYear.data ? AcademicYearView.fromDomain(academicYear.data) : undefined
+        }
     }
 
-    async toggleStatus(id: number): Promise<any> {
-        return await this.academicYearRepository.toggleStatus(id);
+    async toggleStatus(id: number): Promise<ApiResponse<AcademicYearView>> {
+        const academicYear = await this.academicYearRepository.toggleStatus(id);
+
+        return {
+            ...academicYear,
+            data: academicYear.data ? AcademicYearView.fromDomain(academicYear.data) : undefined
+        }
     }
 
     async deleteData(id: number) {

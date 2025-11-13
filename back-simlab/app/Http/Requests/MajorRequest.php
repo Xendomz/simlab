@@ -19,8 +19,14 @@ class MajorRequest extends ApiRequest
      */
     public function rules(): array
     {
+        $id = $this->route('major');
+        $uniqueRule = 'unique:majors,code';
+        if ($id) {
+            $uniqueRule .= ",{$id},id";
+        }
         return [
-            'major_code' => "required|string|max:255|min:4",
+            'faculty_id' => 'required',
+            'code' => ["string", "max:255", "min:4", $uniqueRule],
             'name' => "required|string|max:255|min:4"
         ];
     }
@@ -28,8 +34,15 @@ class MajorRequest extends ApiRequest
     public function messages(): array
     {
         return [
-            'major_code.required' => 'Kode Jurusan is required',
-            'name.required' => 'Nama Jurusan is required',
+            'faculty_id.required' => 'Fakultas tidak boleh kosong',
+            'code.string' => 'Kode Jurusan harus berupa teks',
+            'code.max' => 'Kode Jurusan maksimal 255 karakter',
+            'code.min' => 'Kode Jurusan minimal 4 karakter',
+            'code.unique' => 'Kode Jurusan sudah terdaftar',
+            'name.required' => 'Nama Jurusan wajib diisi',
+            'name.string' => 'Nama Jurusan harus berupa teks',
+            'name.max' => 'Nama Jurusan maksimal 255 karakter',
+            'name.min' => 'Nama Jurusan minimal 4 karakter',
         ];
     }
 }
