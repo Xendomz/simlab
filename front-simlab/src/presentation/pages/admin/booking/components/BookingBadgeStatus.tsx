@@ -30,6 +30,11 @@ const BookingBadgeStatus = ({ status }: BookingBadgeStatusProps) => {
             return (
                 <Badge variant={'destructive'}>Ditolak</Badge>
             )
+
+        case BookingStatus.Returned:
+            return (
+                <Badge variant={'success'}>Telah Dikembalikan</Badge>
+            )
     }
 }
 

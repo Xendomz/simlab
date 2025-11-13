@@ -12,6 +12,7 @@ import { toast, Toaster } from "sonner";
 import { Combobox } from "../components/custom/combobox";
 import { ApiResponse } from "@/shared/Types";
 import { RegisterCredentials } from "@/domain/Auth/Auth";
+import ItkLogo from '../assets/itk_logo.png'
 
 const studyProgramRepository = new StudyProgramRepository()
 
@@ -80,7 +81,7 @@ export const RegisterPage: React.FC = () => {
         <>
             <div className="grid min-h-screen bg-white md:grid-cols-2 xl:grid-cols-9">
                 <div className="flex flex-col items-center w-full px-5 py-10 space-y-8 sm:px-10 md:px-10 xl:px-16 h-fit xl:col-span-4">
-                    <img src="https://labterpadu.itk.ac.id/gambar_pendukung/logo_depan.jpg" className="w-56" alt="" />
+                    <img src={ItkLogo} className="w-36" alt="" />
                     <div className="w-full text-left">
                         <h3 className="text-3xl font-medium">Pendaftaran Akun</h3>
                         <h4 className="text-base">Daftar akun untuk mengakases SIMLAB!</h4>

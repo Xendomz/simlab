@@ -9,6 +9,10 @@ import BookingBadgeStatus from "../components/BookingBadgeStatus";
 
 export const BookingColumn = (): ColumnDef<BookingView>[] => [
     {
+        header: 'Tahun Akademik',
+        accessorKey: 'academicYear'
+    },
+    {
         header: 'Kebutuhan Peminjaman',
         accessorKey: 'purpose',
     },

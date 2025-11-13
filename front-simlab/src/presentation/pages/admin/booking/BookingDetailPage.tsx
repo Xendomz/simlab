@@ -17,6 +17,7 @@ import BookingMaterialDialog from './components/BookingMaterialDialog';
 import { userRole } from '@/domain/User/UserRole';
 import BookingBadgeStatus from './components/BookingBadgeStatus';
 import { Badge } from '@/presentation/components/ui/badge';
+import { BookingType } from '@/domain/booking/BookingType';
 
 export const BookingDetailPage: React.FC = () => {
   useGSAP(() => {
@@ -78,9 +79,9 @@ export const BookingDetailPage: React.FC = () => {
     </>
   );
 
-  const equipments = Array.isArray((booking as any).bookingEquipment) ? (booking as any).bookingEquipment : [];
-  const materials = Array.isArray((booking as any).bookingMaterial) ? (booking as any).bookingMaterial : [];
-  const hasRoom = !!booking.laboratoryRoom;
+  const equipments = Array.isArray((booking as any).bookingEquipments) ? (booking as any).bookingEquipments : [];
+  const materials = Array.isArray((booking as any).bookingMaterials) ? (booking as any).bookingMaterials : [];
+  const hasRoom = !!booking.laboratoryRoomName;
   const hasEquipment = equipments.length > 0;
   const hasMaterial = materials.length > 0;
 
@@ -95,7 +96,7 @@ export const BookingDetailPage: React.FC = () => {
             Kembali
           </Button>
         </div>
-        <div className='grid grid-cols-1 gap-4'>
+        <div className='flex flex-col gap-4'>
           {/* Informasi Umum */}
           <Card>
             <CardHeader>
@@ -103,11 +104,19 @@ export const BookingDetailPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 text-sm gap-4">
-                  {booking.user && (
+                <div className="grid grid-cols-1 md:grid-cols-2 text-sm gap-4">
+                  {booking.requestor && (
                     <>
-                      <Item title='Nama Pemohon' value={booking.user.email} />
-                      <Item title='Email Pemohon' value={booking.user.name} />
+                      <Item title='Nama Pemohon' value={booking.requestor.email} />
+                      <Item title='Email Pemohon' value={booking.requestor.name} />
+                    </>
+                  )}
+                  <Item title='Dosen Pembimbing' value={booking.supervisor} />
+                  <Item title='Email Dosen Pembimbing' value={booking.supervisorEmail} />
+                  {booking.laboran && (
+                    <>
+                      <Item title='Laboran Penanggung Jawab' value={booking.laboran.name} />
+                      <Item title='Email Laboran' value={booking.laboran.email} />
                     </>
                   )}
                   <Item title='Jenis Peminjaman' value={booking.getFormattedBookingType?.() ?? booking.bookingType} />
@@ -115,17 +124,15 @@ export const BookingDetailPage: React.FC = () => {
                   <Item title='Keperluan' value={booking.purpose} />
                   <div className="flex flex-col">
                     <span className='font-semibold'>Waktu Peminjaman</span>
-                    <Badge variant={'secondary'}>{`${booking.startTime.formatForInformation()} - ${booking.endTime.formatForInformation()}`}</Badge>
+                    <Badge variant={'secondary'} className='whitespace-normal'>{`${booking.startTime.formatForInformation()} - ${booking.endTime.formatForInformation()}`}</Badge>
                   </div>
                   <div className="flex flex-col">
                     <span className='font-semibold'>Status Pengajuan</span>
                     <BookingBadgeStatus status={booking.status} />
                   </div>
-                  <Item title='Dosen Pembimbing' value={booking.supervisor} />
-                  <Item title='Email Dosen Pembimbing' value={booking.supervisorEmail} />
                   <Item title='Tanggal Diajukan' value={booking.createdAt.formatForInformation()} />
                   {hasEquipment && (
-                    <BookingEquipmentDialog data={equipments} />
+                    <BookingEquipmentDialog data={equipments} is_allowed_offsite={booking.bookingType === BookingType.Equipment ? booking.isAllowedOffsite : undefined} />
                   )}
                   {hasMaterial && (
                     <BookingMaterialDialog data={materials} />
@@ -147,7 +154,7 @@ export const BookingDetailPage: React.FC = () => {
                     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 text-sm">
                       <div className='flex flex-col'>
                         <span className="font-semibold">Ruangan </span>
-                        <div className='text-muted-foreground'>{booking.laboratoryRoom?.name}</div>
+                        <div className='text-muted-foreground'>{booking.laboratoryRoomName}</div>
                       </div>
                       <div className='flex flex-col'>
                         <span className="font-semibold">Peserta</span>
@@ -158,7 +165,7 @@ export const BookingDetailPage: React.FC = () => {
                       </div>
                     </div>
                   ) : (
-                    <span>Ruangan Belum Ditentukan</span>
+                    <span className='text-sm'>Ruangan Belum Ditentukan</span>
                   )}
                 </div>
               </CardContent>

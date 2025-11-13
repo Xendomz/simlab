@@ -92,19 +92,25 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
     // booking (peminjaman)
-    Route::group(['prefix' => 'bookings', 'as' => 'bookings'], function () {
+    Route::group(['prefix' => 'bookings', 'as' => 'bookings', 'role:kepala_lab_terpadu|laboran|dosen|mahasiswa|pihak_luar'], function () {
+        Route::get('/{id}/detail', [BookingController::class, 'getBookingData']);
+        Route::get('/{id}/approvals', [BookingController::class, 'getBookingApprovals']);
+
         Route::group(['middleware' => 'role:mahasiswa|dosen|pihak_luar'], function () {
             Route::get('/', [BookingController::class, 'index']);
             Route::post('/', [BookingController::class, 'store']);
             Route::get('/have-draft', [BookingController::class, 'isStillHaveDraftBooking']);
+            Route::post('/{id}/equipment-material', [BookingController::class, 'storeBookingEquipmentMaterial']);
+            Route::post('/{id}/equipment', [BookingController::class, 'storeBookingEquipment']);
         });
-        Route::get('/{id}/detail', [BookingController::class, 'getBookingData']);
-        Route::get('/{id}/steps', [BookingController::class, 'getBookingSteps']);
-        Route::post('/{id}/room-n-equipment', [BookingController::class, 'storeBookingRoomNEquipment']);
-        Route::post('/{id}/equipment', [BookingController::class, 'storeBookingEquipment']);
+
         Route::group(['middleware' => 'role:laboran|kepala_lab_terpadu'], function () {
             Route::get('/verification', [BookingController::class, 'getBookingsForVerification']);
             Route::post('/{id}/verify', [BookingController::class, 'verify']);
+        });
+
+        Route::group(['middleware' => 'role:laboran'], function () {
+            Route::post('/{id}/verify-return', [BookingController::class, 'bookingReturnVerification']);
         });
     });
 
@@ -128,7 +134,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::group(['middleware' => 'role:kepala_lab_jurusan'], function () {
             Route::get('/', [PracticumSchedulingController::class, 'index']);
             Route::post('/', [PracticumSchedulingController::class, 'store']);
-            Route::post('/{id}/equipment-n-material', [PracticumSchedulingController::class, 'storePracticumEquipmentNMaterial']);
+            Route::post('/{id}/equipment-material', [PracticumSchedulingController::class, 'storePracticumEquipmentMaterial']);
             Route::get('/have-draft', [PracticumSchedulingController::class, 'isStillHaveDraftPracticum']);
         });
 

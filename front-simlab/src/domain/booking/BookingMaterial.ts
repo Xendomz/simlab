@@ -1,14 +1,24 @@
-import { LaboratoryMaterial } from "../laboratory-material/LaboratoryMaterial";
-import { Time } from "../time/Time";
-
 export class BookingMaterial {
+    private materialName?: string
+    private unit?: string
     constructor(
         readonly id: number,
-        readonly bookingId: number,
-        readonly laboratoryMaterialId: number,
         readonly quantity: number,
-        readonly createdAt: Time,
-        readonly updatedAt: Time,
-        readonly laboratoryMaterial?: LaboratoryMaterial
     ){}
+
+    setUnit(unit: string) {
+        this.unit = unit
+    }
+
+    getUnit(): string | undefined {
+        return this.unit
+    }
+
+    setMaterialName(name: string) {
+        this.materialName = name
+    }
+
+    getMaterialName(): string | undefined {
+        return this.materialName
+    }
 }

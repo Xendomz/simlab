@@ -1,7 +1,7 @@
 import { ApiResponse, PaginatedResponse } from "@/shared/Types";
 import { Booking } from "./Booking";
 import { BookingType } from "./BookingType";
-import { BookingStepper } from "./BookingStepper";
+import { BookingApproval } from "./BookingApproval";
 
 export interface IBookingRepository {
     getAll(params: {
@@ -40,9 +40,9 @@ export interface IBookingRepository {
     isStillHaveDraftBooking(): Promise<ApiResponse<boolean>>
 
     getBookingData(id: number): Promise<ApiResponse<Booking>>
-    getBookingSteps(id: number): Promise<ApiResponse<BookingStepper[]>>
+    getBookingApprovals(id: number): Promise<ApiResponse<BookingApproval[]>>
 
-    storeBookingRoomNEquipment(id: number, data: {
+    storeBookingEquipmentMaterial(id: number, data: {
         laboratoryEquipments: { id: number, quantity: number }[],
         laboratoryMaterials: { id: number, quantity: number }[],
     }): Promise<ApiResponse>
@@ -57,8 +57,13 @@ export interface IBookingRepository {
             action: 'approve' | 'reject' | 'revision',
             laboran_id?: number,
             information?: string,
-            laboratory_room_id?: number,
-            is_allowed_offsite?: boolean | null
+            laboratory_room_id?: number | null,
+            is_allowed_offsite?: boolean
         }
     ): Promise<ApiResponse>;
+
+    verifyBookingReturn(
+        booking_id: number,
+        information: string
+    ): Promise<ApiResponse>
 }

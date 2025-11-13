@@ -283,7 +283,7 @@ const PracticumScheduleEquipmentNMaterialForm: React.FC<PracticumScheduleEquipme
                             type='button'
                             disabled={isSubmitting || !practicumScheduling?.id}
                             onClick={handleSubmit}
-                        >{isSubmitting ? 'Submitting...' : 'Submit'}</Button>
+                        >{isSubmitting ? 'Menyimpan...' : 'Simpan'}</Button>
                     </div>
                 </div>
             </div >

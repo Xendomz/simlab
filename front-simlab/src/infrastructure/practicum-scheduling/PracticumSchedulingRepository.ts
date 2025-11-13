@@ -11,7 +11,6 @@ import { generateQueryStringFromObject } from "../Helper";
 export class PracticumSchedulingRepository implements IPracticumSchedulingRepository {
     async getAll(params: { page: number; per_page: number; search: string; }): Promise<PaginatedResponse<PracticumScheduling>> {
         const queryString = generateQueryStringFromObject(params);
-
         const response = await fetchApi(`/practicum-schedule?${queryString}`, { method: 'GET' })
         const json = await response.json()
         if (response.ok) {
@@ -93,7 +92,7 @@ export class PracticumSchedulingRepository implements IPracticumSchedulingReposi
     }
 
     async storePracticumSchedulingEquipmentMaterial(id: number, data: { practicumSchedulingEquipments: { id: number; quantity: number | null; }[]; proposedEquipments: { name: string; quantity: number | null; }[]; practicumSchedulingMaterials: { id: number; quantity: number | null; }[]; }): Promise<ApiResponse> {
-        const response = await fetchApi(`/practicum-schedule/${id}/equipment-n-material`, {
+        const response = await fetchApi(`/practicum-schedule/${id}/equipment-material`, {
             method: 'POST',
             body: JSON.stringify(data)
         })

@@ -55,7 +55,7 @@ const KepalaLabBookingApproval = () => {
         totalItems,
         totalPages,
         currentPage,
-        setCurrentPage
+        setCurrentPage,
       } = useBookingVerificationDataTable({filter_status: selectedStatus})
 
     const [selectedBookingId, setSelectedBookingId] = useState<number>(0);
@@ -96,18 +96,6 @@ const KepalaLabBookingApproval = () => {
             refresh()
         }
     }
-
-    // const handleVerification = async (action: 'approve' | 'reject' | 'revision', information: string, laboran_id?: number): Promise<void> => {
-    //     if (!selectedBookingId) return
-    //     const res = await bookingService.verifyBooking(selectedBookingId, {
-    //         action: action,
-    //         information: information,
-    //         laboran_id: laboran_id
-    //     })
-    //     toast.success(res.message)
-    //     setOpenRejectionDialog(false)
-    //     refresh()
-    // }
 
     return (
         <>
@@ -152,7 +140,8 @@ const KepalaLabBookingApproval = () => {
                             totalPages={totalPages}
                             totalItems={totalItems}
                             currentPage={currentPage}
-                            handlePageChange={handlePageChange} />
+                            handlePageChange={handlePageChange} 
+                            handleRefresh={refresh}/>
                     </CardContent>
                 </Card>
                 <RejectionDialog open={openRejectionDialog} onOpenChange={setOpenRejectionDialog} handleRejection={handleRejection} />

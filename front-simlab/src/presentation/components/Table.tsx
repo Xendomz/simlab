@@ -3,6 +3,8 @@ import { DataTable } from './custom/Datatable';
 import { ColumnDef } from '@tanstack/react-table';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './ui/select';
+import { Button } from './ui/button';
+import { RefreshCwIcon } from 'lucide-react';
 
 interface TableProps<T> {
     data: T[];
@@ -21,6 +23,7 @@ interface TableProps<T> {
     totalItems: number;
     currentPage: number;
     handlePageChange: (page: number) => void;
+    handleRefresh?: () => void
 }
 
 const Table = <T,>({
@@ -34,7 +37,8 @@ const Table = <T,>({
     totalItems,
     currentPage,
     handlePageChange,
-    loading
+    loading,
+    handleRefresh
 }: TableProps<T>) => {
 
 
@@ -100,7 +104,7 @@ const Table = <T,>({
 
     return (
         <>
-            <div className="flex flex-wrap items-center justify-between mb-5 p-1">
+            <div className="flex flex-wrap items-center justify-between mb-5">
                 <div className="w-full md:w-1/3">
                     <div className="relative">
                         <Input
@@ -120,7 +124,7 @@ const Table = <T,>({
                         </svg>
                     </div>
                 </div>
-
+                
                 <div className="flex items-center mt-4 space-x-2 md:mt-0">
                     <span className="text-sm text-gray-600">Show:</span>
                     <Select name='show_data' value={perPage !== null ? String(perPage) : ''} onValueChange={(value) =>
@@ -143,6 +147,10 @@ const Table = <T,>({
                             </SelectGroup>
                         </SelectContent>
                     </Select>
+                    
+                    {handleRefresh && (
+                        <Button variant={'outline'} onClick={handleRefresh}><RefreshCwIcon/></Button>
+                    )}
                 </div>
             </div>
             <div className="overflow-x-auto">

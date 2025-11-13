@@ -1,6 +1,4 @@
-import { gsap } from 'gsap'
-import { useGSAP } from '@gsap/react'
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { useValidationErrors } from '@/presentation/hooks/useValidationError'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { Skeleton } from '@/presentation/components/ui/skeleton'
@@ -16,19 +14,15 @@ import { useBookingEquipmentMaterialForm } from '../hooks/useBookingEquipmentMat
 import { useLaboratoryEquipmentDataTable } from '../../laboratory-equipment/hooks/useLaboratoryEquipmentDataTable'
 import { useLaboratoryMaterialDataTable } from '../../laboratory-material/hooks/useLaboratoryMaterialDataTable'
 import { useDepedencies } from '@/presentation/contexts/useDepedencies'
+import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
 // import { useLaboratoryMaterial } from '@/application/laboratory-material/hooks/useLaboratoryMaterial'
 
 const BookingRoomNEquipmentForm: React.FC = () => {
-    const sectionRef = useRef<HTMLDivElement | null>(null)
-    useGSAP(() => {
-        if (!sectionRef.current) return
-        gsap.fromTo(sectionRef.current, { opacity: 0, y: 100 }, { opacity: 1, y: 0, duration: 1 })
-    }, [])
-
     const [isSubmitting, setIsSubmitting] = useState(false)
     const { id } = useParams()
     const navigate = useNavigate();
     const bookingId = id ? Number(id) : undefined
+    const { bookingService } = useDepedencies()
 
     const {
         formData,
@@ -51,12 +45,12 @@ const BookingRoomNEquipmentForm: React.FC = () => {
         ...materialTable
     } = useLaboratoryMaterialDataTable({ filter_laboratory_room: 0 })
 
-    const {bookingService} = useDepedencies()
+    const [isConfirmationOpen, setIsConfirmationOpen] = useState<boolean>(false)
     const handleSubmit = async () => {
         if (!bookingId) return
         setIsSubmitting(true)
         try {
-            const res = await bookingService.storeBookingRoomNEquipment(bookingId, formData)
+            const res = await bookingService.storeBookingEquipmentMaterial(bookingId, formData)
             toast.success(res.message)
             navigate('/panel/peminjaman')
         } catch (e: any) {
@@ -72,7 +66,7 @@ const BookingRoomNEquipmentForm: React.FC = () => {
     const hasMaterialErrors = Object.keys(errors).some(k => k.startsWith('laboratoryMaterials'))
 
     return (
-        <div ref={sectionRef} className='flex flex-col gap-6'>
+        <div className='flex flex-col gap-6'>
             {/* Equipment Section */}
             <Card>
                 <CardHeader><CardTitle>Ajukan Peminjaman Alat Laboratorium</CardTitle></CardHeader>
@@ -80,25 +74,19 @@ const BookingRoomNEquipmentForm: React.FC = () => {
                     <div className='grid lg:grid-cols-2 xl:grid-cols-3 gap-5'>
                         <div className='xl:col-span-2 overflow-x-auto'>
                             <div className='font-semibold text-sm mb-2'>List Alat Laboratorium</div>
-                            {isEquipmentLoading ? (
-                                <div className='flex flex-col gap-3'>
-                                    {[...Array(5)].map((_, i) => <Skeleton key={i} className='w-full h-9 rounded-md' />)}
-                                </div>
-                            ) : (
-                                <Table
-                                    data={laboratoryEquipments}
-                                    columns={LaboratoryEquipmentColumn({ handleSelectItem, selectedIds: formData.laboratoryEquipments.map(e => e.id) })}
-                                    loading={false}
-                                    searchTerm={equipmentTable.searchTerm}
-                                    handleSearch={equipmentTable.handleSearch}
-                                    perPage={equipmentTable.perPage}
-                                    handlePerPageChange={equipmentTable.handlePerPageChange}
-                                    totalPages={equipmentTable.totalPages}
-                                    totalItems={equipmentTable.totalItems}
-                                    currentPage={equipmentTable.currentPage}
-                                    handlePageChange={equipmentTable.handlePageChange}
-                                />
-                            )}
+                            <Table
+                                data={laboratoryEquipments}
+                                columns={LaboratoryEquipmentColumn({ handleSelectItem, selectedIds: formData.laboratoryEquipments.map(e => e.id) })}
+                                loading={isEquipmentLoading}
+                                searchTerm={equipmentTable.searchTerm}
+                                handleSearch={equipmentTable.handleSearch}
+                                perPage={equipmentTable.perPage}
+                                handlePerPageChange={equipmentTable.handlePerPageChange}
+                                totalPages={equipmentTable.totalPages}
+                                totalItems={equipmentTable.totalItems}
+                                currentPage={equipmentTable.currentPage}
+                                handlePageChange={equipmentTable.handlePageChange}
+                            />
                         </div>
                         <div>
                             <div className='font-semibold text-sm mb-2'>Daftar Alat yang dibutuhkan <span className='text-red-500'>*</span></div>
@@ -140,25 +128,19 @@ const BookingRoomNEquipmentForm: React.FC = () => {
                     <div className='grid lg:grid-cols-2 xl:grid-cols-3 gap-5'>
                         <div className='xl:col-span-2 w-full overflow-x-auto'>
                             <div className='font-semibold text-sm mb-2'>List Bahan Laboratorium</div>
-                            {isMaterialLoading ? (
-                                <div className='flex flex-col gap-3'>
-                                    {[...Array(5)].map((_, i) => <Skeleton key={i} className='w-full h-9 rounded-md' />)}
-                                </div>
-                            ) : (
-                                <Table
-                                    data={laboratoryMaterials}
-                                    columns={LaboratoryMaterialColumn({ handleSelectItem, selectedIds: formData.laboratoryMaterials.map(m => m.id) })}
-                                    loading={false}
-                                    searchTerm={materialTable.searchTerm}
-                                    handleSearch={materialTable.handleSearch}
-                                    perPage={materialTable.perPage}
-                                    handlePerPageChange={materialTable.handlePerPageChange}
-                                    totalPages={materialTable.totalPages}
-                                    totalItems={materialTable.totalItems}
-                                    currentPage={materialTable.currentPage}
-                                    handlePageChange={materialTable.handlePageChange}
-                                />
-                            )}
+                            <Table
+                                data={laboratoryMaterials}
+                                columns={LaboratoryMaterialColumn({ handleSelectItem, selectedIds: formData.laboratoryMaterials.map(m => m.id) })}
+                                loading={isMaterialLoading}
+                                searchTerm={materialTable.searchTerm}
+                                handleSearch={materialTable.handleSearch}
+                                perPage={materialTable.perPage}
+                                handlePerPageChange={materialTable.handlePerPageChange}
+                                totalPages={materialTable.totalPages}
+                                totalItems={materialTable.totalItems}
+                                currentPage={materialTable.currentPage}
+                                handlePageChange={materialTable.handlePageChange}
+                            />
                         </div>
                         <div>
                             <div className='font-semibold text-sm mb-2'>Daftar Bahan yang dibutuhkan <span className='text-red-500'>*</span></div>
@@ -196,9 +178,9 @@ const BookingRoomNEquipmentForm: React.FC = () => {
             <div className='flex justify-end'>
                 <Button
                     type='button'
-                    disabled={isSubmitting || !bookingId}
-                    onClick={handleSubmit}
-                >{isSubmitting ? 'Submitting...' : 'Submit'}</Button>
+                    onClick={() => setIsConfirmationOpen(true)}
+                >Simpan</Button>
+                <ConfirmationDialog open={isConfirmationOpen} onOpenChange={setIsConfirmationOpen} onConfirm={handleSubmit} />
             </div>
         </div>
     )

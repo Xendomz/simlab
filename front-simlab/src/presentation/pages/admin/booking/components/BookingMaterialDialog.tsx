@@ -27,9 +27,7 @@ const BookingMaterialDialog: React.FC<BookingMaterialDialogProps> = ({
                     <DialogDescription>Berikut merupakan daftar bahan yang diajukan.</DialogDescription>
                 </DialogHeader>
                 <ScrollArea className='h-full max-h-[70vh]'>
-                    <div className='p-1'>
-                        <DataTable columns={BookingMaterialColumn()} data={data} loading={false} />
-                    </div>
+                    <DataTable columns={BookingMaterialColumn()} data={data} loading={false} />
                 </ScrollArea>
                 <DialogFooter>
                     <DialogClose asChild>

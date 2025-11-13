@@ -14,6 +14,7 @@
   }
 
   .flipping-img {
+    /* @apply h-[60vh]; */
     -webkit-animation: flip 1s linear infinite;
             animation: flip 1s linear infinite;
     transform-style: preserve-3d;

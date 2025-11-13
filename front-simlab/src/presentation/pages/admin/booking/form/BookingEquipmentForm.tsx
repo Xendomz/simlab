@@ -1,6 +1,4 @@
-import { useState, useRef } from 'react'
-import { useGSAP } from '@gsap/react'
-import { gsap } from 'gsap'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 // import { useLaboratoryEquipment } from '@/application/laboratory-equipment/hooks/useLaboratoryEquipment'
 import Table from '@/presentation/components/Table'
@@ -9,26 +7,21 @@ import { Input } from '@/presentation/components/ui/input'
 import { Button } from '@/presentation/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/presentation/components/ui/card'
 import { toast } from 'sonner'
-import { useBooking } from '@/application/booking/hooks/useBooking'
 import { useValidationErrors } from '@/presentation/hooks/useValidationError'
-import { Skeleton } from '@/presentation/components/ui/skeleton'
 import { useLaboratoryEquipmentDataTable } from '../../laboratory-equipment/hooks/useLaboratoryEquipmentDataTable'
 import { useBookingEquipmentMaterialForm } from '../hooks/useBookingEquipmentMaterialForm'
+import ConfirmationDialog from '@/presentation/components/custom/ConfirmationDialog'
+import { useBooking } from '../context/BookingContext'
+import { useDepedencies } from '@/presentation/contexts/useDepedencies'
 
 const BookingEquipmentForm = () => {
-    const sectionRef = useRef<HTMLDivElement | null>(null)
-    useGSAP(() => {
-        if (!sectionRef.current) return
-        gsap.fromTo(sectionRef.current, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.6 })
-    }, [])
-
     const { id } = useParams()
     const navigate = useNavigate();
     const bookingId = id ? Number(id) : undefined
-    const { storeBookingEquipment } = useBooking({})
-    const { errors, processErrors } = useValidationErrors()
+    const { bookingService } = useDepedencies()
+    const { refreshIsHasDraftBooking } = useBooking()
 
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const { errors, processErrors } = useValidationErrors()
 
     const {
         formData,
@@ -43,22 +36,24 @@ const BookingEquipmentForm = () => {
         ...equipmentTable
     } = useLaboratoryEquipmentDataTable({ filter_laboratory_room: 0 })
 
+    const [isConfirmationOpen, setIsConfirmationOpen] = useState<boolean>(false)
     const handleSubmit = async () => {
         if (!bookingId) return
         if (formData.laboratoryEquipments.length === 0) {
-            toast.error('Minimal satu alat dipilih')
+            toast.error('Minimal pilih satu alat')
+            setIsConfirmationOpen(false)
             return
         }
-        setIsSubmitting(true)
         try {
-            await storeBookingEquipment(bookingId, formData.laboratoryEquipments.map(e => ({ id: e.id, quantity: e.quantity })))
+            await bookingService.storeBookingEquipment(bookingId, formData.laboratoryEquipments.map(e => ({ id: e.id, quantity: e.quantity })))
             toast.success('Alat berhasil diajukan')
             navigate('/panel/peminjaman')
+            refreshIsHasDraftBooking()
         } catch (e: any) {
             toast.error(e?.message || 'Gagal submit')
             processErrors(e.errors)
         } finally {
-            setIsSubmitting(false)
+            setIsConfirmationOpen(false)
         }
     }
 
@@ -69,36 +64,26 @@ const BookingEquipmentForm = () => {
     }
 
     return (
-        <div ref={sectionRef} className='flex flex-col gap-6'>
+        <div className='flex flex-col gap-6'>
             <Card>
                 <CardHeader><CardTitle>Ajukan Peminjaman Alat Laboratorium</CardTitle></CardHeader>
                 <CardContent>
                     <div className='grid lg:grid-cols-2 xl:grid-cols-3 gap-5'>
                         <div className='xl:col-span-2 overflow-x-auto'>
                             <div className='font-semibold text-sm mb-5'>List Alat Laboratorium</div>
-                            {isEquipmentLoading ? (
-                                <div className='flex flex-col gap-3'>
-                                    <Skeleton className='w-full h-9 rounded-md' />
-                                    <Skeleton className='w-full h-9 rounded-md' />
-                                    <Skeleton className='w-full h-9 rounded-md' />
-                                    <Skeleton className='w-full h-9 rounded-md' />
-                                    <Skeleton className='w-full h-9 rounded-md' />
-                                </div>
-                            ) : (
-                                <Table
-                                    data={laboratoryEquipments}
-                                    columns={LaboratoryEquipmentColumn({ handleSelectItem, selectedIds: formData.laboratoryEquipments.map(e => e.id) })}
-                                    loading={isEquipmentLoading}
-                                    searchTerm={equipmentTable.searchTerm}
-                                    handleSearch={equipmentTable.handleSearch}
-                                    perPage={equipmentTable.perPage}
-                                    handlePerPageChange={equipmentTable.handlePerPageChange}
-                                    totalPages={equipmentTable.totalPages}
-                                    totalItems={equipmentTable.totalItems}
-                                    currentPage={equipmentTable.currentPage}
-                                    handlePageChange={equipmentTable.handlePageChange}
-                                />
-                            )}
+                            <Table
+                                data={laboratoryEquipments}
+                                columns={LaboratoryEquipmentColumn({ handleSelectItem, selectedIds: formData.laboratoryEquipments.map(e => e.id) })}
+                                loading={isEquipmentLoading}
+                                searchTerm={equipmentTable.searchTerm}
+                                handleSearch={equipmentTable.handleSearch}
+                                perPage={equipmentTable.perPage}
+                                handlePerPageChange={equipmentTable.handlePerPageChange}
+                                totalPages={equipmentTable.totalPages}
+                                totalItems={equipmentTable.totalItems}
+                                currentPage={equipmentTable.currentPage}
+                                handlePageChange={equipmentTable.handlePageChange}
+                            />
                         </div>
                         <div>
                             <div className='font-semibold text-sm mb-2'>Daftar Alat Dipilih <span className='text-red-500'>*</span></div>
@@ -118,7 +103,7 @@ const BookingEquipmentForm = () => {
                                                     <Input
                                                         type='number'
                                                         min={0}
-                                                        value={eq.quantity  || ''}
+                                                        value={eq.quantity || ''}
                                                         placeholder='Jumlah'
                                                         onChange={(e) => handleChangeItem('laboratory_equipment', eq.id, Number(e.target.value))}
                                                         className={rowError ? 'border-red-500 focus-visible:ring-red-500' : ''}
@@ -135,9 +120,10 @@ const BookingEquipmentForm = () => {
                         </div>
                     </div>
                     <div className='flex justify-end mt-6'>
-                        <Button type='button' disabled={isSubmitting || !bookingId} onClick={handleSubmit}>
-                            {isSubmitting ? 'Submitting...' : 'Submit'}
+                        <Button type='button' onClick={() => setIsConfirmationOpen(true)}>
+                            Simpan
                         </Button>
+                        <ConfirmationDialog open={isConfirmationOpen} onOpenChange={setIsConfirmationOpen} onConfirm={handleSubmit} />
                     </div>
                 </CardContent>
             </Card>

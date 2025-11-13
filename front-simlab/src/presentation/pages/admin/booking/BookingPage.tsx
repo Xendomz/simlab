@@ -56,7 +56,8 @@ const BookingPage = () => {
         totalItems,
         totalPages,
         currentPage,
-        setCurrentPage
+        setCurrentPage,
+        refresh
     } = useBookingDataTable({ status: selectedStatus })
 
     return (
@@ -130,7 +131,8 @@ const BookingPage = () => {
                             totalPages={totalPages}
                             totalItems={totalItems}
                             currentPage={currentPage}
-                            handlePageChange={handlePageChange} />
+                            handlePageChange={handlePageChange}
+                            handleRefresh={refresh} />
                     </CardContent>
                 </Card>
             </div>

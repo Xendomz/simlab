@@ -2,18 +2,12 @@ import { Booking } from "@/domain/booking/Booking";
 import { BookingStatus } from "@/domain/booking/BookingStatus";
 import { BookingType } from "@/domain/booking/BookingType";
 import { Time } from "@/domain/time/Time";
-import { UserApi, toDomain as toUser } from "../user/UserApi";
 import { BookingEquipmentAPI, toDomain as toBookingEquipment } from "./BookingEquipmentAPI";
 import { BookingMaterialAPI, toDomain as toBookingMaterial } from "./BookingMaterialAPI";
-import { AcademicYearAPI, toDomain as toAcademicYear } from "../academic-year/AcademicYearAPI";
-import { LaboratoryRoomAPI, toDomain as toLaboratoryRoom } from "../laboratory-room/LaboratoryRoomAPI";
 import { BookingApprovalAPI, toDomain as toBookingApproval } from "./BookingApprovalAPI";
 
 export type BookingAPI = {
     id: number;
-    academic_year_id: number;
-    user_id: number;
-    ruangan_laboratorium_id: number | null;
     phone_number: string;
     purpose: string;
     supporting_file: string | null;
@@ -26,23 +20,27 @@ export type BookingAPI = {
     booking_type: string;
     total_participant: number;
     participant_list: string;
+    is_allowed_offsite: number
     created_at: string;
     updated_at: string;
-    kepala_lab_approval?: BookingApprovalAPI
-    laboran_approval?: BookingApprovalAPI
-    laboratory_room?: LaboratoryRoomAPI;
-    user?: UserApi,
-    academic_year?: AcademicYearAPI,
-    equipments?: BookingEquipmentAPI[],
-    materials?: BookingMaterialAPI[]
+    academic_year: string,
+    requestor: {
+        name: string,
+        email: string
+    };
+    laboran: {
+        name: string,
+        email: string
+    };
+    laboratory_room_name: string
+    booking_equipments: BookingEquipmentAPI[];
+    booking_materials: BookingMaterialAPI[];
+    approvals: BookingApprovalAPI[];
 }
 
 export function toDomain(api: BookingAPI): Booking {
-    return new Booking(
+    const booking = new Booking(
         api.id,
-        api.academic_year_id,
-        api.user_id,
-        api.ruangan_laboratorium_id,
         api.phone_number,
         api.purpose,
         api.supporting_file,
@@ -55,14 +53,47 @@ export function toDomain(api: BookingAPI): Booking {
         api.booking_type as BookingType,
         api.total_participant,
         api.participant_list,
+        Boolean(api.is_allowed_offsite),
         new Time(api.created_at),
-        new Time(api.updated_at),
-        api.kepala_lab_approval ? toBookingApproval(api.kepala_lab_approval) : undefined,
-        api.laboran_approval ? toBookingApproval(api.laboran_approval) : undefined,
-        api.laboratory_room ? toLaboratoryRoom(api.laboratory_room) : undefined,
-        api.user ? toUser(api.user) : undefined,
-        api.academic_year ? toAcademicYear(api.academic_year) : undefined,
-        api.equipments ? api.equipments.map(toBookingEquipment) : undefined,
-        api.materials ? api.materials.map(toBookingMaterial) : undefined
-    )
+        new Time(api.updated_at)
+    );
+
+    if (api.laboratory_room_name) {
+        booking.setLaboratoryRoomName(api.laboratory_room_name);
+    }
+
+    if (api.requestor) {
+        booking.setRequestor(api.requestor);
+    }
+
+    if (api.laboran) {
+        booking.setLaboran(api.laboran);
+    }
+
+    if (api.academic_year) {
+        booking.setAcademicYearLabel(api.academic_year);
+    }
+
+    if (api.booking_equipments?.length) {
+        const equipments = api.booking_equipments.map(
+            (equipment) => toBookingEquipment(equipment)
+        );
+        booking.setBookingEquipments(equipments);
+    }
+
+    if (api.booking_materials?.length) {
+        const materials = api.booking_materials.map(
+            (material) => toBookingMaterial(material)
+        );
+        booking.setBookingMaterial(materials);
+    }
+
+    if (api.approvals?.length) {
+        const approvals = api.approvals.map(
+            (approval) => toBookingApproval(approval)
+        )
+        booking.setBookingApproval(approvals)
+    }
+
+    return booking;
 }

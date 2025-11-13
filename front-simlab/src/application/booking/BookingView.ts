@@ -2,19 +2,13 @@ import { BookingStatus } from "@/domain/booking/BookingStatus";
 import { TimeView } from "../time/TimeView";
 import { BookingType } from "@/domain/booking/BookingType";
 import { Booking } from "@/domain/booking/Booking";
-import { UserView } from "../user/UserView";
 import { BookingEquipmentView } from "./BookingEquipmentView";
 import { BookingMaterialtView } from "./BookingMaterialView";
-import { AcademicYearView } from "../academic-year/AcademicYearView";
-import { LaboratoryRoomView } from "../laboratory-room/LaboratoryRoomView";
 import { BookingApprovalView } from "./BookingApprovalView";
 
 export class BookingView {
     constructor(
         readonly id: number,
-        readonly academicYearId: number,
-        readonly userId: number,
-        readonly laboratoryRoomId: number | null,
         readonly phoneNumber: string,
         readonly purpose: string,
         readonly supportingFile: string | null,
@@ -27,23 +21,27 @@ export class BookingView {
         readonly bookingType: BookingType,
         readonly totalParticipant: number,
         readonly participantList: string,
+        readonly isAllowedOffsite: boolean,
         readonly createdAt: TimeView,
         readonly updatedAt: TimeView,
-        readonly kepalaLabApproval?: BookingApprovalView,
-        readonly laboranApproval?: BookingApprovalView,
-        readonly laboratoryRoom?: LaboratoryRoomView,
-        readonly user?: UserView,
-        readonly academicYear?: AcademicYearView,
-        readonly bookingEquipment?: BookingEquipmentView[],
-        readonly bookingMaterial?: BookingMaterialtView[],
+        readonly bookingEquipments: BookingEquipmentView[],
+        readonly bookingMaterials: BookingMaterialtView[],
+        readonly bookingApproval: BookingApprovalView[],
+        readonly academicYear?: string,
+        readonly requestor?: {
+            name: string,
+            email: string
+        },
+        readonly laboran?: {
+            name: string,
+            email: string
+        },
+        readonly laboratoryRoomName?: string,
     ) { }
 
     static fromDomain(entity: Booking): BookingView {
         return new BookingView(
             entity.id,
-            entity.academicYearId,
-            entity.userId,
-            entity.laboratoryRoomId,
             entity.phoneNumber,
             entity.purpose,
             entity.supportingFile,
@@ -56,15 +54,16 @@ export class BookingView {
             entity.bookingType,
             entity.totalParticipant,
             entity.participantList,
+            entity.isAllowedOffsite,
             TimeView.fromDomain(entity.createdAt),
             TimeView.fromDomain(entity.updatedAt),
-            entity.kepalaLabApproval ? BookingApprovalView.fromDomain(entity.kepalaLabApproval) : undefined,
-            entity.laboranApproval ? BookingApprovalView.fromDomain(entity.laboranApproval) : undefined,
-            entity.laboratoryRoom ? LaboratoryRoomView.fromDomain(entity.laboratoryRoom) : undefined,
-            entity.user ? UserView.fromDomain(entity.user) : undefined,
-            entity.academicYear ? AcademicYearView.fromDomain(entity.academicYear) : undefined,
-            entity.bookingEquipment ? entity.bookingEquipment.map(BookingEquipmentView.fromDomain) : undefined,
-            entity.bookingMaterial ? entity.bookingMaterial.map(BookingMaterialtView.fromDomain) : undefined,
+            entity.getEquipments().map((eq) => BookingEquipmentView.fromDomain(eq)),
+            entity.getMaterials().map((m) => BookingMaterialtView.fromDomain(m)),
+            entity.getApprovals().map((ap) => BookingApprovalView.fromDomain(ap)),
+            entity.getAcademicYear(),
+            entity.getRequestor(),
+            entity.getLaboran(),
+            entity.getLaboratoryRoomName(),
         )
     }
 

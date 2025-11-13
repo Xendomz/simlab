@@ -9,13 +9,15 @@ import { Eye } from 'lucide-react';
 
 interface BookingEquipmentDialogProps {
     data: BookingEquipmentView[]
+    is_allowed_offsite?: boolean
 }
 
 const BookingEquipmentDialog: React.FC<BookingEquipmentDialogProps> = ({
-    data
+    data,
+    is_allowed_offsite
 }) => {
-  return (
-    <Dialog>
+    return (
+        <Dialog>
             <DialogTrigger asChild>
                 <Button>Lihat Daftar Alat <Eye /></Button>
             </DialogTrigger>
@@ -25,19 +27,10 @@ const BookingEquipmentDialog: React.FC<BookingEquipmentDialogProps> = ({
                     <DialogDescription>Berikut merupakan daftar alat yang telah diajukan.</DialogDescription>
                 </DialogHeader>
                 <ScrollArea className='h-full max-h-[70vh]'>
-                    <div className="p-1 flex flex-col gap-5">
-                        {data.length > 0 ? (
-                            <div>
-                                <span className='font-semibold'>Alat Laboratorium </span>
-                                <DataTable columns={BookingEquipmentColumn()} data={data} loading={false} />
-                            </div>
-                        ) : (
-                            <div>
-                                <span className='font-semibold'>Alat Laboratorium </span>
-                                <p className='mb-2 text-sm text-muted-foreground'>Tidak ada alat dari daftar inventaris.</p>
-                            </div>
-                        )}
-                    </div>
+                    <DataTable columns={BookingEquipmentColumn()} data={data} loading={false} />
+                    {is_allowed_offsite !== undefined && (
+                        <span className='text-sm text-muted-foreground'><span className='font-bold'>Keterangan:</span> {is_allowed_offsite ? 'Alat dapat dibawa di luar ruangan' : 'Alat tidak dapat dibawa di luar ruangan'}</span>
+                    )}
                 </ScrollArea>
                 <DialogFooter>
                     <DialogClose asChild>
@@ -48,7 +41,7 @@ const BookingEquipmentDialog: React.FC<BookingEquipmentDialogProps> = ({
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-  )
+    )
 }
 
 export default BookingEquipmentDialog

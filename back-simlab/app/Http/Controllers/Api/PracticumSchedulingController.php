@@ -361,59 +361,32 @@ class PracticumSchedulingController extends BaseController
         }
     }
 
-    public function storePracticumEquipmentNMaterial(PracticumEquipmenMaterialRequest $request, $id)
+    public function storePracticumEquipmentMaterial(PracticumEquipmenMaterialRequest $request, $id)
     {
         DB::beginTransaction();
         try {
             $practicumScheduling = PracticumScheduling::with(['practicumSchedulingEquipments', 'practicumSchedulingMaterials'])->findOrFail($id);
             $user = auth()->user();
 
-            // If current user is laboran, allow adding materials only when they are the assigned laboran.
-            $isLaboranAddingMaterials = false;
-            if ($user->role === 'laboran') {
-                // laboran can only add materials for scheduling assigned to them
-                if ($practicumScheduling->laboran_id !== $user->id) {
-                    DB::rollBack();
-                    return $this->sendError('Anda tidak diizinkan menambah data untuk penjadwalan ini.', [], 403);
-                }
-
-                // Laboran may add materials even if status is not draft
-                $isLaboranAddingMaterials = true;
-            } else {
-                // Non-laboran (applicant) can only add when scheduling is draft
-                if (!in_array($practicumScheduling->status, ['draft'])) {
-                    DB::rollBack();
-                    return $this->sendError('Status penjadwalan tidak mengizinkan penambahan data.', [], 400);
-                }
-            }
-
             $data = $request->validated();
 
-            // Prevent duplicate additions depending on actor
-            if ($isLaboranAddingMaterials) {
-                // Laboran: only check for existing materials duplication
-                if ($practicumScheduling->practicumSchedulingMaterials && $practicumScheduling->practicumSchedulingMaterials->isNotEmpty()) {
-                    DB::rollBack();
-                    return $this->sendError('Bahan sudah pernah ditambahkan untuk penjadwalan ini.', [], 400);
-                }
-
-                // Only insert materials for laboran
-                $this->storeMaterials($practicumScheduling, $data['practicumSchedulingMaterials'] ?? []);
-            } else {
-                // Applicant (non-laboran): full flow (equipments + proposed + materials)
-                // Prevent Duplicated
-                if ($this->hasExistingEquipmentOrMaterial($practicumScheduling)) {
-                    DB::rollBack();
-                    return $this->sendError('Alat atau bahan sudah pernah ditambahkan.', [], 400);
-                }
-
-                // Insert equipments (existing laboratory equipments)
-                $this->storeEquipments($practicumScheduling, $data['practicumSchedulingEquipments'] ?? []);
-                // Insert proposed equipments (temporary equipments stored separately)
-                $this->storeProposedEquipments($practicumScheduling, $data['proposedEquipments'] ?? []);
-                // Insert materials
-                $this->storeMaterials($practicumScheduling, $data['practicumSchedulingMaterials'] ?? []);
+            if (!in_array($practicumScheduling->status, ['draft'])) {
+                DB::rollBack();
+                return $this->sendError('Status booking tidak mengizinkan penambahan data.', [], 400);
             }
+
+            // Prevent Duplicated
+            if ($this->hasExistingEquipmentOrMaterial($practicumScheduling)) {
+                DB::rollBack();
+                return $this->sendError('Alat atau bahan sudah pernah ditambahkan.', [], 400);
+            }
+
+            // Insert equipments (existing laboratory equipments)
+            $this->storeEquipments($practicumScheduling, $data['practicumSchedulingEquipments'] ?? []);
+            // Insert proposed equipments (temporary equipments stored separately)
+            $this->storeProposedEquipments($practicumScheduling, $data['proposedEquipments'] ?? []);
+            // Insert materials
+            $this->storeMaterials($practicumScheduling, $data['practicumSchedulingMaterials'] ?? []);
 
             // Update status jika draft
             if ($practicumScheduling->status === 'draft') {
@@ -546,7 +519,6 @@ class PracticumSchedulingController extends BaseController
             }
 
             $this->isConductedSession($id, $session->id);
-
 
             // Update status
             $session->is_class_conducted = $request->status;

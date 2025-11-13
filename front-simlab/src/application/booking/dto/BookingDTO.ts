@@ -48,6 +48,6 @@ export interface BookingVerifyDTO {
     action: 'approve' | 'reject' | 'revision',
     laboran_id?: number,
     information?: string,
-    laboratory_room_id?: number,
-    is_allowed_offsite?: boolean | null
+    laboratory_room_id?: number | null,
+    is_allowed_offsite?: boolean
 }

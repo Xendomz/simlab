@@ -8,6 +8,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { useValidationErrors } from "../hooks/useValidationError";
 import { toast, Toaster } from "sonner";
+import ItkLogo from '../assets/itk_logo.png'
 
 export const Login: React.FC = () => {
     // hooks
@@ -59,10 +60,10 @@ export const Login: React.FC = () => {
         <>
             <div className="grid min-h-screen bg-white md:grid-cols-2 lg:grid-cols-9">
                 <div className="flex flex-col items-center w-full px-5 py-32 gap-5 sm:px-10 md:px-16 lg:px-10 xl:px-16 h-fit lg:col-span-4">
-                    <img src="https://labterpadu.itk.ac.id/gambar_pendukung/logo_depan.jpg" className="w-56" alt="" />
+                    <img src={ItkLogo} className="w-36" alt="" />
                     <div className="w-full text-left">
                         <h3 className="text-3xl font-medium">Selamat Datang</h3>
-                        <h4 className="text-base">Silakan masuk ke akun Anda.</h4>
+                        <h4 className=" text-muted-foreground">Silakan masuk ke akun Anda.</h4>
                     </div>
                     <form className="flex flex-col w-full gap-5" onSubmit={handleSubmit}>
                         <div className="flex flex-col gap-2">

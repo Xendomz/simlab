@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('supervisor_email')->nullable();
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->enum('status', ['draft', 'pending', 'approved', 'rejected', 'revision']);
+            $table->enum('status', ['draft', 'pending', 'approved', 'rejected', 'revision', 'returned']);
             $table->enum('booking_type', ['room', 'room_n_equipment', 'equipment']);
             $table->integer('total_participant');
             $table->text('participant_list')->nullable();

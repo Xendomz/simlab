@@ -279,9 +279,7 @@ export const router = createBrowserRouter([
                         path: 'verif',
                         element: (
                             <ProtectedRoute allowedRoles={[userRole.KepalaLabTerpadu, userRole.Laboran]}>
-                                <BookingProvider>
-                                    <BookingVerification />
-                                </BookingProvider>
+                                <BookingVerification />
                             </ProtectedRoute>
                         )
                     },
