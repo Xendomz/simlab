@@ -36,6 +36,7 @@ export type BookingAPI = {
     booking_equipments: BookingEquipmentAPI[];
     booking_materials: BookingMaterialAPI[];
     approvals: BookingApprovalAPI[];
+    is_requestor_can_return: number;
 }
 
 export function toDomain(api: BookingAPI): Booking {
@@ -57,6 +58,10 @@ export function toDomain(api: BookingAPI): Booking {
         new Time(api.created_at),
         new Time(api.updated_at)
     );
+
+    if (api.is_requestor_can_return) {
+        booking.setIsRequestorCanReturn(Boolean(api.is_requestor_can_return))
+    }
 
     if (api.laboratory_room_name) {
         booking.setLaboratoryRoomName(api.laboratory_room_name);

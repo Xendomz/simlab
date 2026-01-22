@@ -19,6 +19,7 @@ export class Booking {
     private bookingEquipments: BookingEquipment[] = []
     private bookingMaterial: BookingMaterial[] = []
     private bookingApprovals : BookingApproval[] = []
+    private isRequestorCanReturn: boolean = false
 
     constructor(
         readonly id: number,
@@ -39,8 +40,7 @@ export class Booking {
         readonly updatedAt: Time,
     ) { }
 
-    // === Setter Methods
-
+    // Setter Methods
     setLaboratoryRoomName(name: string) {
         this.laboratoryRoomName = name;
     }
@@ -69,7 +69,11 @@ export class Booking {
         this.bookingApprovals = approvals
     }
 
-    // === Getter Methods
+    setIsRequestorCanReturn(can_return: boolean) {
+        this.isRequestorCanReturn = can_return
+    }
+
+    // Getter Methods
 
     getLaboratoryRoomName(): string | undefined {
         return this.laboratoryRoomName;
@@ -97,5 +101,9 @@ export class Booking {
 
     getApprovals(): BookingApproval[] {
         return this.bookingApprovals
+    }
+
+    getIsRequestorCanReturn(): boolean {
+        return this.isRequestorCanReturn
     }
 }

@@ -178,4 +178,18 @@ export class BookingRepository implements IBookingRepository {
         }
         throw json;
     }
+
+    async confirmBookingReturn(booking_id: number, information: string): Promise<ApiResponse> {
+        const response = await fetchApi(`/bookings/${booking_id}/confirm-return`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({information: information})
+        });
+        
+        const json = await response.json();
+        if (response.ok) {
+            return json
+        }
+        throw json;
+    }
 }

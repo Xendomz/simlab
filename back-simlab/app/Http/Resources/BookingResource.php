@@ -8,10 +8,17 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class BookingResource extends JsonResource
 {
     protected static $approvals = false;
+    protected static $isRequestor = false;
 
     public static function collectionWithApprovals($resource)
     {
         static::$approvals = true;
+        return parent::collection($resource);
+    }
+
+    public static function collectionRequestor($resource)
+    {
+        static::$isRequestor = true;
         return parent::collection($resource);
     }
 
@@ -59,6 +66,10 @@ class BookingResource extends JsonResource
             'updated_at' => $this->updated_at,
             $this->mergeWhen(static::$approvals, function () {
                 return ['approvals' => $this->approval_steps];
+            }),
+
+            $this->mergeWhen(static::$isRequestor && $this->booking_type === 'equipment', function () {
+                return ['is_requestor_can_return' => $this->is_requestor_can_return];
             }),
 
             // relasi nested

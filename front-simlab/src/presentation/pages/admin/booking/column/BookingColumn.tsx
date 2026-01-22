@@ -1,11 +1,9 @@
 import { BookingView } from "@/application/booking/BookingView";
-import { BookingStatus } from "@/domain/booking/BookingStatus";
 import { BookingType } from "@/domain/booking/BookingType";
 import { Badge } from "@/presentation/components/ui/badge";
-import { Button } from "@/presentation/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { NavLink } from "react-router-dom";
 import BookingBadgeStatus from "../components/BookingBadgeStatus";
+import BookingReturnAction from "../components/BookingReturnAction";
 
 export const BookingColumn = (): ColumnDef<BookingView>[] => [
     {
@@ -66,18 +64,7 @@ export const BookingColumn = (): ColumnDef<BookingView>[] => [
         header: "Action",
         accessorKey: 'id',
         cell: ({ row }) => {
-            if (row.original.status === BookingStatus.Draft) {
-                return (
-                    <NavLink to={`/panel/peminjaman/${row.original.id}/manage`}>
-                        <Button size="sm">Lanjutkan</Button>
-                    </NavLink>
-                );
-            }
-            return (
-                <NavLink to={`/panel/peminjaman/${row.original.id}/detail`}>
-                    <Button variant="secondary" size="sm">Detail</Button>
-                </NavLink>
-            );
+            return <BookingReturnAction booking={row.original}/>
         }
     }
 ];

@@ -66,4 +66,9 @@ export interface IBookingRepository {
         booking_id: number,
         information: string
     ): Promise<ApiResponse>
+    
+    confirmBookingReturn(
+        booking_id: number,
+        information: string
+    ): Promise<ApiResponse>
 }

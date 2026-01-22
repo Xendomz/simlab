@@ -27,6 +27,7 @@ export class BookingView {
         readonly bookingEquipments: BookingEquipmentView[],
         readonly bookingMaterials: BookingMaterialtView[],
         readonly bookingApproval: BookingApprovalView[],
+        readonly isRequestorCanReturn: boolean,
         readonly academicYear?: string,
         readonly requestor?: {
             name: string,
@@ -60,6 +61,7 @@ export class BookingView {
             entity.getEquipments().map((eq) => BookingEquipmentView.fromDomain(eq)),
             entity.getMaterials().map((m) => BookingMaterialtView.fromDomain(m)),
             entity.getApprovals().map((ap) => BookingApprovalView.fromDomain(ap)),
+            entity.getIsRequestorCanReturn(),
             entity.getAcademicYear(),
             entity.getRequestor(),
             entity.getLaboran(),

@@ -112,6 +112,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::group(['middleware' => 'role:laboran'], function () {
             Route::post('/{id}/verify-return', [BookingController::class, 'bookingReturnVerification']);
         });
+
+        Route::group(['middleware' => 'role:dosen|mahasiswa|pihak_luar'], function() {
+            Route::post('/{id}/confirm-return', [BookingController::class, 'bookingReturnConfirmation']);
+        });
     });
 
     // Practical Schedule

@@ -87,6 +87,21 @@ class Booking extends Model
         return $approval ?: null;
     }
 
+    public function getIsRequestorCanReturnAttribute(): bool
+    {
+        if ($this->status !== 'approved') {
+            return false;
+        }
+
+        // Return true only if there is NO approved 'return_by_requestor' record
+        $hasApprovedReturn = $this->approvals()
+            ->where('action', 'return_by_requestor')
+            ->where('is_approved', true)
+            ->exists();
+
+        return !$hasApprovedReturn;
+    }
+
     public function getLaboranOffsiteApprovedAttribute()
     {
         return $this->approvals()
