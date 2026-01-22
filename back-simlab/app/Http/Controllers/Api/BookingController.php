@@ -41,6 +41,9 @@ class BookingController extends BaseController
     public function index(Request $request)
     {
         try {
+
+            dd("test");
+
             $query = Booking::query();
 
             $query->with([
